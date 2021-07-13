@@ -81,7 +81,7 @@ void DXCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
     {
       auto it = m_lazy_vertex.Find(x.Key());
       if (it != end(m_lazy_vertex))
-        IASetVertexBufferImpl(x.Key(), it.Value(), x.Key());
+        IASetVertexBufferImpl(x.Key(), it.Value(), x.Value());
       else
         IASetVertexBufferImpl(x.Key(), {}, 0);
     }
