@@ -264,12 +264,12 @@ VKDevice::VKDevice(VKAdapter& adapter)
   }
 }
 
-std::shared_ptr<Memory> VKDevice::AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
+std::shared_ptr<Memory> VKDevice::AllocateMemoryPlatform(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
 {
   return std::make_shared<VKMemory>(*this, size, memory_type, memory_type_bits, nullptr);
 }
 
-std::shared_ptr<CommandQueue> VKDevice::GetCommandQueue(CommandListType type)
+std::shared_ptr<CommandQueue> VKDevice::GetCommandQueuePlatform(CommandListType type)
 {
   return m_command_queues[GetAvailableCommandListType(type)];
 }
@@ -279,22 +279,22 @@ uint32_t VKDevice::GetTextureDataPitchAlignment() const
   return 1;
 }
 
-std::shared_ptr<Swapchain> VKDevice::CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
+std::shared_ptr<Swapchain> VKDevice::CreateSwapchainPlatform(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
 {
   return std::make_shared<VKSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
 }
 
-std::shared_ptr<CommandList> VKDevice::CreateCommandList(CommandListType type)
+std::shared_ptr<CommandList> VKDevice::CreateCommandListPlatform(CommandListType type)
 {
   return std::make_shared<VKCommandList>(*this, type);
 }
 
-std::shared_ptr<Fence> VKDevice::CreateFence(uint64_t initial_value)
+std::shared_ptr<Fence> VKDevice::CreateFencePlatform(uint64_t initial_value)
 {
   return std::make_shared<VKTimelineSemaphore>(*this, initial_value);
 }
 
-std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> VKDevice::CreateTexturePlatform(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
   res->format = format;
@@ -364,7 +364,7 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, uint32_t bin
   return res;
 }
 
-std::shared_ptr<Resource> VKDevice::CreateBuffer(uint32_t bind_flag, uint32_t buffer_size)
+std::shared_ptr<Resource> VKDevice::CreateBufferPlatform(uint32_t bind_flag, uint32_t buffer_size)
 {
   if (buffer_size == 0)
     return {};
@@ -410,7 +410,7 @@ std::shared_ptr<Resource> VKDevice::CreateBuffer(uint32_t bind_flag, uint32_t bu
   return res;
 }
 
-std::shared_ptr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
+std::shared_ptr<Resource> VKDevice::CreateSamplerPlatform(const SamplerDesc& desc)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
 
@@ -479,52 +479,52 @@ std::shared_ptr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> VKDevice::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
+std::shared_ptr<View> VKDevice::CreateViewPlatform(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
 {
   return std::make_shared<VKView>(*this, std::static_pointer_cast<VKResource>(resource), view_desc);
 }
 
-std::shared_ptr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+std::shared_ptr<BindingSetLayout> VKDevice::CreateBindingSetLayoutPlatform(const std::vector<BindKey>& descs)
 {
   return std::make_shared<VKBindingSetLayout>(*this, descs);
 }
 
-std::shared_ptr<BindingSet> VKDevice::CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout)
+std::shared_ptr<BindingSet> VKDevice::CreateBindingSetPlatform(const std::shared_ptr<BindingSetLayout>& layout)
 {
   return std::make_shared<VKBindingSet>(*this, std::static_pointer_cast<VKBindingSetLayout>(layout));
 }
 
-std::shared_ptr<RenderPass> VKDevice::CreateRenderPass(const RenderPassDesc& desc)
+std::shared_ptr<RenderPass> VKDevice::CreateRenderPassPlatform(const RenderPassDesc& desc)
 {
   return std::make_shared<VKRenderPass>(*this, desc);
 }
 
-std::shared_ptr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& desc)
+std::shared_ptr<Framebuffer> VKDevice::CreateFramebufferPlatform(const FramebufferDesc& desc)
 {
   return std::make_shared<VKFramebuffer>(*this, desc);
 }
 
-std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> VKDevice::CreateShaderPlatform(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kSPIRV);
 }
 
-std::shared_ptr<Program> VKDevice::CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders)
+std::shared_ptr<Program> VKDevice::CreateProgramPlatform(const std::vector<std::shared_ptr<Shader>>& shaders)
 {
   return std::make_shared<VKProgram>(*this, shaders);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
+std::shared_ptr<Pipeline> VKDevice::CreateGraphicsPipelinePlatform(const GraphicsPipelineDesc& desc)
 {
   return std::make_shared<VKGraphicsPipeline>(*this, desc);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
+std::shared_ptr<Pipeline> VKDevice::CreateComputePipelinePlatform(const ComputePipelineDesc& desc)
 {
   return std::make_shared<VKComputePipeline>(*this, desc);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
+std::shared_ptr<Pipeline> VKDevice::CreateRayTracingPipelinePlatform(const RayTracingPipelineDesc& desc)
 {
   return std::make_shared<VKRayTracingPipeline>(*this, desc);
 }
@@ -605,7 +605,7 @@ vk::AccelerationStructureTypeKHR Convert(AccelerationStructureType type)
   return {};
 }
 
-std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
+std::shared_ptr<Resource> VKDevice::CreateAccelerationStructurePlatform(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
   res->resource_type = ResourceType::kAccelerationStructure;
@@ -621,7 +621,7 @@ std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStru
   return res;
 }
 
-std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, uint32_t count)
+std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeapPlatform(QueryHeapType type, uint32_t count)
 {
   return std::make_shared<VKQueryHeap>(*this, type, count);
 }

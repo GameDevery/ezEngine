@@ -175,6 +175,31 @@ void ezRHISampleApp::BeforeHighLevelSystemsShutdown()
 void ezRHISampleApp::OnResize(ezUInt32 width, ezUInt32 height)
 {
   device->Resize(width, height);
+  RenderFrame();
+}
+
+void ezRHISampleApp::RenderFrame()
+{
+  auto frame_index = device->GetFrameIndex();
+  RenderPassBeginDesc render_pass_desc = {};
+  render_pass_desc.colors[m_program->ps.om.rtv0].texture = device->GetBackBuffer(frame_index);
+  render_pass_desc.colors[m_program->ps.om.rtv0].clear_color = {0.0f, 0.2f, 0.4f, 1.0f};
+
+  decltype(auto) command_list = device->CreateRenderCommandList();
+  command_list->UseProgram(*m_program);
+  command_list->Attach(m_program->ps.cbv.Settings, m_program->ps.cbuffer.Settings);
+  command_list->SetViewport(0, 0, (float)m_pWindow->GetClientAreaSize().width, (float)m_pWindow->GetClientAreaSize().height);
+  command_list->IASetIndexBuffer(index, ezRHIResourceFormat::R32_UINT);
+  command_list->IASetVertexBuffer(m_program->vs.ia.POSITION, pos);
+  command_list->BeginRenderPass(render_pass_desc);
+  command_list->DrawIndexed(3, 1, 0, 0, 0);
+  command_list->EndRenderPass();
+  command_list->Close();
+
+
+  device->ExecuteCommandLists({command_list});
+  device->Present();
+  device->WaitForIdle();
 }
 
 ezApplication::Execution ezRHISampleApp::Run()
@@ -193,26 +218,7 @@ ezApplication::Execution ezRHISampleApp::Run()
 
   // do the rendering
   {
-    auto frame_index = device->GetFrameIndex();
-    RenderPassBeginDesc render_pass_desc = {};
-    render_pass_desc.colors[m_program->ps.om.rtv0].texture = device->GetBackBuffer(frame_index);
-    render_pass_desc.colors[m_program->ps.om.rtv0].clear_color = {0.0f, 0.2f, 0.4f, 1.0f};
-
-    decltype(auto) command_list = device->CreateRenderCommandList();
-    command_list->UseProgram(*m_program);
-    command_list->Attach(m_program->ps.cbv.Settings, m_program->ps.cbuffer.Settings);
-    command_list->SetViewport(0, 0, (float)m_pWindow->GetClientAreaSize().width, (float)m_pWindow->GetClientAreaSize().height);
-    command_list->IASetIndexBuffer(index, ezRHIResourceFormat::R32_UINT);
-    command_list->IASetVertexBuffer(m_program->vs.ia.POSITION, pos);
-    command_list->BeginRenderPass(render_pass_desc);
-    command_list->DrawIndexed(3, 1, 0, 0, 0);
-    command_list->EndRenderPass();
-    command_list->Close();
-
-
-    device->ExecuteCommandLists({command_list});
-    device->Present();
-    device->WaitForIdle();
+    RenderFrame();
   }
 
   // needs to be called once per frame

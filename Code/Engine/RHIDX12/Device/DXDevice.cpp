@@ -154,12 +154,12 @@ DXDevice::DXDevice(DXAdapter& adapter)
   }
 }
 
-std::shared_ptr<Memory> DXDevice::AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
+std::shared_ptr<Memory> DXDevice::AllocateMemoryPlatform(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
 {
   return std::make_shared<DXMemory>(*this, size, memory_type, memory_type_bits);
 }
 
-std::shared_ptr<CommandQueue> DXDevice::GetCommandQueue(CommandListType type)
+std::shared_ptr<CommandQueue> DXDevice::GetCommandQueuePlatform(CommandListType type)
 {
   return m_command_queues[type];
 }
@@ -169,22 +169,22 @@ uint32_t DXDevice::GetTextureDataPitchAlignment() const
   return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 }
 
-std::shared_ptr<Swapchain> DXDevice::CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
+std::shared_ptr<Swapchain> DXDevice::CreateSwapchainPlatform(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
 {
   return std::make_shared<DXSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
 }
 
-std::shared_ptr<CommandList> DXDevice::CreateCommandList(CommandListType type)
+std::shared_ptr<CommandList> DXDevice::CreateCommandListPlatform(CommandListType type)
 {
   return std::make_shared<DXCommandList>(*this, type);
 }
 
-std::shared_ptr<Fence> DXDevice::CreateFence(uint64_t initial_value)
+std::shared_ptr<Fence> DXDevice::CreateFencePlatform(uint64_t initial_value)
 {
   return std::make_shared<DXFence>(*this, initial_value);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> DXDevice::CreateTexturePlatform(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
 {
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
   if (bind_flag & BindFlag::kShaderResource)
@@ -234,7 +234,7 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, uint32_t bin
   return res;
 }
 
-std::shared_ptr<Resource> DXDevice::CreateBuffer(uint32_t bind_flag, uint32_t buffer_size)
+std::shared_ptr<Resource> DXDevice::CreateBufferPlatform(uint32_t bind_flag, uint32_t buffer_size)
 {
   if (buffer_size == 0)
     return {};
@@ -272,7 +272,7 @@ std::shared_ptr<Resource> DXDevice::CreateBuffer(uint32_t bind_flag, uint32_t bu
   return res;
 }
 
-std::shared_ptr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
+std::shared_ptr<Resource> DXDevice::CreateSamplerPlatform(const SamplerDesc& desc)
 {
   std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
   D3D12_SAMPLER_DESC& sampler_desc = res->sampler_desc;
@@ -324,57 +324,57 @@ std::shared_ptr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> DXDevice::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
+std::shared_ptr<View> DXDevice::CreateViewPlatform(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
 {
   return std::make_shared<DXView>(*this, std::static_pointer_cast<DXResource>(resource), view_desc);
 }
 
-std::shared_ptr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+std::shared_ptr<BindingSetLayout> DXDevice::CreateBindingSetLayoutPlatform(const std::vector<BindKey>& descs)
 {
   return std::make_shared<DXBindingSetLayout>(*this, descs);
 }
 
-std::shared_ptr<BindingSet> DXDevice::CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout)
+std::shared_ptr<BindingSet> DXDevice::CreateBindingSetPlatform(const std::shared_ptr<BindingSetLayout>& layout)
 {
   return std::make_shared<DXBindingSet>(*this, std::static_pointer_cast<DXBindingSetLayout>(layout));
 }
 
-std::shared_ptr<RenderPass> DXDevice::CreateRenderPass(const RenderPassDesc& desc)
+std::shared_ptr<RenderPass> DXDevice::CreateRenderPassPlatform(const RenderPassDesc& desc)
 {
   return std::make_shared<DXRenderPass>(*this, desc);
 }
 
-std::shared_ptr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& desc)
+std::shared_ptr<Framebuffer> DXDevice::CreateFramebufferPlatform(const FramebufferDesc& desc)
 {
   return std::make_shared<DXFramebuffer>(desc);
 }
 
-std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> DXDevice::CreateShaderPlatform(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kDXIL);
 }
 
-std::shared_ptr<Program> DXDevice::CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders)
+std::shared_ptr<Program> DXDevice::CreateProgramPlatform(const std::vector<std::shared_ptr<Shader>>& shaders)
 {
   return std::make_shared<DXProgram>(*this, shaders);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
+std::shared_ptr<Pipeline> DXDevice::CreateGraphicsPipelinePlatform(const GraphicsPipelineDesc& desc)
 {
   return std::make_shared<DXGraphicsPipeline>(*this, desc);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
+std::shared_ptr<Pipeline> DXDevice::CreateComputePipelinePlatform(const ComputePipelineDesc& desc)
 {
   return std::make_shared<DXComputePipeline>(*this, desc);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
+std::shared_ptr<Pipeline> DXDevice::CreateRayTracingPipelinePlatform(const RayTracingPipelineDesc& desc)
 {
   return std::make_shared<DXRayTracingPipeline>(*this, desc);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
+std::shared_ptr<Resource> DXDevice::CreateAccelerationStructurePlatform(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
 {
   std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
   res->resource_type = ResourceType::kAccelerationStructure;
@@ -383,7 +383,7 @@ std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStru
   return res;
 }
 
-std::shared_ptr<QueryHeap> DXDevice::CreateQueryHeap(QueryHeapType type, uint32_t count)
+std::shared_ptr<QueryHeap> DXDevice::CreateQueryHeapPlatform(QueryHeapType type, uint32_t count)
 {
   if (type == QueryHeapType::kAccelerationStructureCompactedSize)
   {

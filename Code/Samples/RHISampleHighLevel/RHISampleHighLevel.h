@@ -140,6 +140,7 @@ public:
   virtual void BeforeHighLevelSystemsShutdown() override;
 
   void OnResize(ezUInt32 width, ezUInt32 height);
+  void RenderFrame();
 
 private:
   ezRHISampleWindow* m_pWindow = nullptr;
