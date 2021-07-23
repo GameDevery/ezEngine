@@ -274,11 +274,6 @@ std::shared_ptr<CommandQueue> VKDevice::GetCommandQueue(CommandListType type)
   return m_command_queues[GetAvailableCommandListType(type)];
 }
 
-uint32_t VKDevice::GetTextureDataPitchAlignment() const
-{
-  return 1;
-}
-
 std::shared_ptr<Swapchain> VKDevice::CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
 {
   return std::make_shared<VKSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
@@ -624,6 +619,11 @@ std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStru
 std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, uint32_t count)
 {
   return std::make_shared<VKQueryHeap>(*this, type, count);
+}
+
+uint32_t VKDevice::GetTextureDataPitchAlignment() const
+{
+  return 1;
 }
 
 bool VKDevice::IsDxrSupported() const

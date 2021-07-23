@@ -30,7 +30,6 @@ public:
   virtual ~Device() = default;
   virtual std::shared_ptr<Memory> AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits) = 0;
   virtual std::shared_ptr<CommandQueue> GetCommandQueue(CommandListType type) = 0;
-  virtual uint32_t GetTextureDataPitchAlignment() const = 0;
   virtual std::shared_ptr<Swapchain> CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync) = 0;
   virtual std::shared_ptr<CommandList> CreateCommandList(CommandListType type) = 0;
   virtual std::shared_ptr<Fence> CreateFence(uint64_t initial_value) = 0;
@@ -49,6 +48,7 @@ public:
   virtual std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) = 0;
   virtual std::shared_ptr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset) = 0;
   virtual std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, uint32_t count) = 0;
+  virtual uint32_t GetTextureDataPitchAlignment() const = 0;
   virtual bool IsDxrSupported() const = 0;
   virtual bool IsRayQuerySupported() const = 0;
   virtual bool IsVariableRateShadingSupported() const = 0;
