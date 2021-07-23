@@ -426,7 +426,8 @@ void ezGALCommandEncoderImplVulkan::ReadbackTexturePlatform(const ezGALTexture* 
 }
 
 void ezGALCommandEncoderImplVulkan::CopyTextureReadbackResultPlatform(const ezGALTexture* pTexture,
-  const ezArrayPtr<ezGALSystemMemoryDescription>* pData)
+  ezArrayPtr<ezGALTextureSubresource> SourceSubResource,
+  ezArrayPtr<ezGALSystemMemoryDescription> TargetData)
 {
   auto pVulkanTexture = static_cast<const ezGALTextureVulkan*>(pTexture);
 
@@ -440,7 +441,7 @@ void ezGALCommandEncoderImplVulkan::CopyTextureReadbackResultPlatform(const ezGA
   if (pSrcData)
   {
     // TODO size of the buffer could missmatch the texture data size necessary
-    ezMemoryUtils::RawByteCopy(pData->GetPtr()->m_pData, pSrcData, pStagingBuffer->GetSize());
+    ezMemoryUtils::RawByteCopy(TargetData.GetPtr()->m_pData, pSrcData, pStagingBuffer->GetSize());
 
     m_vkDevice.unmapMemory(pStagingBuffer->GetMemory());
   }
