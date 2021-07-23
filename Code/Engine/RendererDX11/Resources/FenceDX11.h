@@ -1,9 +1,11 @@
-﻿
+
 #pragma once
 
 #include <RendererFoundation/Resources/Fence.h>
 
 struct ID3D11Query;
+struct ID3D11Fence;
+struct ID3D11DeviceContext4;
 
 class EZ_RENDERERDX11_DLL ezGALFenceDX11 : public ezGALFence
 {
@@ -18,9 +20,18 @@ protected:
 
   virtual ~ezGALFenceDX11();
 
-  virtual ezResult InitPlatform(ezGALDevice* pDevice) override;
+  virtual ezResult InitPlatform(ezGALDevice* pDevice, ezUInt64 initialValue) override;
 
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) override;
 
+  virtual ezUInt64 GetCompletedValuePlatform() override;
+
+  virtual void WaitPlatform(ezUInt64 value) override;
+
+  virtual void SignalPlatform(ezUInt64 value) override;
+
   ID3D11Query* m_pDXFence;
+  ID3D11Fence* m_pDXFence2;
+  ID3D11DeviceContext4* m_pDXDeviceContext;
+  HANDLE m_FenceEvent = nullptr;
 };

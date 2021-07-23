@@ -5,6 +5,11 @@
 
 class EZ_RENDERERFOUNDATION_DLL ezGALFence : public ezRefCounted
 {
+public:
+  ezUInt64 GetCompletedValue();
+  void Wait(ezUInt64 value);
+  void Signal(ezUInt64 value);
+
 protected:
   friend class ezGALDevice;
 
@@ -12,7 +17,11 @@ protected:
 
   virtual ~ezGALFence();
 
-  virtual ezResult InitPlatform(ezGALDevice* pDevice) = 0;
+  virtual ezResult InitPlatform(ezGALDevice* pDevice, ezUInt64 initialValue) = 0;
 
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) = 0;
+
+  virtual ezUInt64 GetCompletedValuePlatform() = 0;
+  virtual void WaitPlatform(ezUInt64 value) = 0;
+  virtual void SignalPlatform(ezUInt64 value) = 0;
 };

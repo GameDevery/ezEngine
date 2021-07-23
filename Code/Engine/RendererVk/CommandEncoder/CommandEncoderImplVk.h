@@ -120,4 +120,6 @@ private:
 
   ezGALDeviceVk& m_GALDeviceVk;
   ezGALCommandEncoder* m_pOwner = nullptr;
+
+  vk::UniqueCommandBuffer m_CommandBuffer;
 };

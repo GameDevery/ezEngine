@@ -220,13 +220,11 @@ void ezGALCommandEncoderImplVk::SetVertexDeclarationPlatform(const ezGALVertexDe
 {
 }
 
-/*
-static const D3D11_PRIMITIVE_TOPOLOGY GALTopologyToVk[ezGALPrimitiveTopology::ENUM_COUNT] = {
-  D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-  D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-  D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+static vk::PrimitiveTopology GALTopologyToVk[ezGALPrimitiveTopology::ENUM_COUNT] = {
+  vk::PrimitiveTopology::ePointList,
+  vk::PrimitiveTopology::eLineList,
+  vk::PrimitiveTopology::eTriangleList,
 };
-*/
 
 void ezGALCommandEncoderImplVk::SetPrimitiveTopologyPlatform(ezGALPrimitiveTopology::Enum Topology)
 {
