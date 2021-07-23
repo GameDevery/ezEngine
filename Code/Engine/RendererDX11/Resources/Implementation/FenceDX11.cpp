@@ -27,6 +27,9 @@ ezResult ezGALFenceDX11::InitPlatform(ezGALDevice* pDevice, ezUInt64 initialValu
   {
     if (SUCCEEDED(pD3d11Device5->CreateFence(initialValue, D3D11_FENCE_FLAG_NONE, __uuidof(ID3D11Fence), (void**)&m_pDXFence2)))
     {
+      m_FenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
+      EZ_GAL_DX11_RELEASE(pD3d11Device5);
       return EZ_SUCCESS;
     }
     else
@@ -58,6 +61,7 @@ ezResult ezGALFenceDX11::DeInitPlatform(ezGALDevice* pDevice)
 {
   //EZ_GAL_DX11_RELEASE(m_pDXFence);
   EZ_GAL_DX11_RELEASE(m_pDXFence2);
+  EZ_GAL_DX11_RELEASE(m_pDXDeviceContext);
 
   return EZ_SUCCESS;
 }
