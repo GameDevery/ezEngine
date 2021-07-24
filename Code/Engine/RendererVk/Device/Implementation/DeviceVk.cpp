@@ -19,9 +19,16 @@
 #include <RendererVk/Shader/ShaderVk.h>
 #include <RendererVk/Shader/VertexDeclarationVk.h>
 #include <RendererVk/State/StateVk.h>
-#include <RendererVk/Device/Pipeline.h>
+
+#include <RendererVk/Implementation/Instance.h>
+#include <RendererVk/Implementation/Adapter.h>
+#include <RendererVk/Implementation/CommandQueue.h>
+#include "..\DeviceVk.h"
 
 using namespace ezInternal::Vk;
+
+
+
 
 ezInternal::NewInstance<ezGALDevice> CreateVkDevice(ezAllocatorBase* pAllocator, const ezGALDeviceCreationDescription& Description)
 {
@@ -46,218 +53,10 @@ EZ_END_SUBSYSTEM_DECLARATION;
 
 ezGALDeviceVk::ezGALDeviceVk(const ezGALDeviceCreationDescription& Description)
   : ezGALDevice(Description)
-  , m_VkDevice{VK_NULL_HANDLE}
-  , m_VkInstance{VK_NULL_HANDLE}
-  , m_VkPhysicalDevice{VK_NULL_HANDLE}
-  , m_VkDebugMessenger{VK_NULL_HANDLE}
-  , m_VkPresentQueueFamilyIndex{-1}
-  , m_VkPresentQueue{VK_NULL_HANDLE}
 {
-  for (ezUInt32 i = 0; i < m_VkQueues.GetCount(); i++)
-  {
-    m_VkQueues[i] = VK_NULL_HANDLE;
-  }
 }
 
 ezGALDeviceVk::~ezGALDeviceVk() = default;
-
-// vk setup
-ezResult ezGALDeviceVk::CreateInstance()
-{
-  if (!SupportsRequiredExtensions(m_Description.m_bDebugDevice))
-  {
-    ezLog::Error("Not all required extensions are supported.");
-    return EZ_FAILURE;
-  }
-
-  if (m_Description.m_bDebugDevice)
-  {
-    if (!CheckValidationLayerSupport())
-    {
-      ezLog::Error("Validation layers requested but not available.");
-      return EZ_FAILURE;
-    }
-  }
-
-  ezUInt32 versionMajor = 1; //  reinterpret_cast<ezUInt32>(*(&BUILDSYSTEM_VERSION_MAJOR));
-  ezUInt32 versionMinor = 0; //  reinterpret_cast<ezUInt32>(*(&BUILDSYSTEM_VERSION_MINOR));
-  ezUInt32 versionPatch = 0; //  reinterpret_cast<ezUInt32>(*(&BUILDSYSTEM_VERSION_PATCH));
-
-  VkApplicationInfo appInfo{};
-  appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName = "ezEngine";
-  appInfo.applicationVersion = VK_MAKE_VERSION(versionMajor, versionMinor, versionPatch);
-  appInfo.pEngineName = "ezEngine";
-  appInfo.engineVersion = VK_MAKE_VERSION(versionMajor, versionMinor, versionPatch);
-  appInfo.apiVersion = VK_API_VERSION_1_2;
-
-  VkInstanceCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  createInfo.pApplicationInfo = &appInfo;
-
-  const ezDynamicArray<const char*> requiredExtensions = GetRequiredExtensions(m_Description.m_bDebugDevice);
-  createInfo.enabledExtensionCount = requiredExtensions.GetCount();
-  createInfo.ppEnabledExtensionNames = requiredExtensions.GetData();
-
-  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-  const ezDynamicArray<const char*> validationLayers = GetValidationLayers();
-  if (m_Description.m_bDebugDevice)
-  {
-    PopulateDebugMessengerCreateInfo(debugCreateInfo);
-    createInfo.enabledLayerCount = validationLayers.GetCount();
-    createInfo.ppEnabledLayerNames = validationLayers.GetData();
-    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-  }
-  else
-  {
-    createInfo.enabledLayerCount = 0;
-    createInfo.pNext = nullptr;
-  }
-
-  if (vkCreateInstance(&createInfo, nullptr, &m_VkInstance) != VK_SUCCESS)
-  {
-    ezLog::Error("Failed to create Vulkan instance.");
-    return EZ_FAILURE;
-  }
-  return EZ_SUCCESS;
-}
-ezResult ezGALDeviceVk::SetupDebugMessenger()
-{
-  if (!m_Description.m_bDebugDevice)
-  {
-    return EZ_SUCCESS;
-  }
-
-  VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-  PopulateDebugMessengerCreateInfo(createInfo);
-
-  if (CreateDebugUtilsMessengerEXT(m_VkInstance, &createInfo, nullptr, &m_VkDebugMessenger) != VK_SUCCESS)
-  {
-    ezLog::Error("Failed to setup debug messenger.");
-    return EZ_FAILURE;
-  }
-  return EZ_SUCCESS;
-}
-
-ezResult ezGALDeviceVk::SetupPhysicalDevice()
-{
-  ezUInt32 deviceCount = 0;
-  vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
-
-  if (deviceCount == 0)
-  {
-    ezLog::Error("No device supporting Vulkan was found.");
-    return EZ_FAILURE;
-  }
-
-  ezDynamicArray<VkPhysicalDevice> devices;
-  devices.SetCountUninitialized(deviceCount);
-  vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, devices.GetData());
-
-  for (const VkPhysicalDevice& device : devices)
-  {
-    if (CheckPhysicalDevice(device))
-    {
-      m_VkPhysicalDevice = device;
-      break;
-    }
-  }
-
-  if (m_VkPhysicalDevice == VK_NULL_HANDLE)
-  {
-    ezLog::Error("No suitable device was found.");
-    return EZ_FAILURE;
-  }
-
-  return EZ_SUCCESS;
-}
-
-ezResult ezGALDeviceVk::CreateLogicalDevice()
-{
-  m_QueueFamilyIndices = FindQueueFamilyIndices(m_VkPhysicalDevice);
-
-  m_VkPresentQueueFamilyIndex = FindPresentQueueFamilyIndex(m_VkPhysicalDevice);
-
-  if (m_VkPresentQueueFamilyIndex < 0)
-  {
-    ezLog::Error("Could not find a queue family that supports present.");
-    return EZ_FAILURE;
-  }
-
-  ezDynamicArray<ezInt32> allQueueFamilyIndices(m_QueueFamilyIndices);
-  if (allQueueFamilyIndices.IndexOf(m_VkPresentQueueFamilyIndex) == ezInvalidIndex)
-  {
-    allQueueFamilyIndices.PushBack(m_VkPresentQueueFamilyIndex);
-  }
-
-  ezDynamicArray<VkDeviceQueueCreateInfo> queueCreateInfos;
-  float queuePriority = 1.0f;
-
-  ezDynamicArray<ezInt32> uniqueQueueFamilyIndices;
-  for (const auto& familyIndex : allQueueFamilyIndices)
-  {
-    if (uniqueQueueFamilyIndices.IndexOf(familyIndex) == ezInvalidIndex)
-    {
-      uniqueQueueFamilyIndices.PushBack(familyIndex);
-    }
-  }
-
-  for (ezUInt32 i = 0; i < uniqueQueueFamilyIndices.GetCount(); i++)
-  {
-    if (uniqueQueueFamilyIndices[i] == -1)
-      continue;
-
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = uniqueQueueFamilyIndices[i];
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
-    queueCreateInfos.PushBack(queueCreateInfo);
-  }
-
-  VkPhysicalDeviceFeatures deviceFeatures{};
-
-  VkDeviceCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.pQueueCreateInfos = queueCreateInfos.GetData();
-  createInfo.queueCreateInfoCount = queueCreateInfos.GetCount();
-  createInfo.pEnabledFeatures = &deviceFeatures;
-
-  ezDynamicArray<const char*> requiredDeviceExtensions = GetRequiredDeviceExtensions();
-  createInfo.enabledExtensionCount = requiredDeviceExtensions.GetCount();
-  createInfo.ppEnabledExtensionNames = requiredDeviceExtensions.GetData();
-
-  const ezDynamicArray<const char*> validationLayers = GetValidationLayers();
-  if (m_Description.m_bDebugDevice)
-  {
-    createInfo.enabledLayerCount = validationLayers.GetCount();
-    createInfo.ppEnabledLayerNames = validationLayers.GetData();
-  }
-  else
-  {
-    createInfo.enabledLayerCount = 0;
-  }
-
-  if (vkCreateDevice(m_VkPhysicalDevice, &createInfo, nullptr, &m_VkDevice) != VK_SUCCESS)
-  {
-    ezLog::Error("Failed to create logical device.");
-    return EZ_FAILURE;
-  }
-
-  m_VkQueues.SetCount(QueueType::Count);
-
-  for (ezUInt32 i = 0; i < QueueType::Count; i++)
-  {
-    if (m_QueueFamilyIndices[i] == -1)
-      continue;
-
-    vkGetDeviceQueue(m_VkDevice, m_QueueFamilyIndices[i], 0, &m_VkQueues[i]);
-  }
-
-  vkGetDeviceQueue(m_VkDevice, m_VkPresentQueueFamilyIndex, 0, &m_VkPresentQueue);
-
-  return EZ_SUCCESS;
-}
 
 // Init & shutdown functions
 
@@ -265,10 +64,206 @@ ezResult ezGALDeviceVk::InitPlatform(ezUInt32 dwFlags, void* pUsedAdapter)
 {
   EZ_LOG_BLOCK("ezGALDeviceVk::InitPlatform");
 
-  EZ_SUCCEED_OR_RETURN(CreateInstance());
-  EZ_SUCCEED_OR_RETURN(SetupDebugMessenger());
-  EZ_SUCCEED_OR_RETURN(SetupPhysicalDevice());
-  EZ_SUCCEED_OR_RETURN(CreateLogicalDevice());
+  m_pInstance = EZ_DEFAULT_NEW(Instance);
+
+  m_pAdapter = m_pInstance->EnumerateAdapters()[0];
+
+  vk::PhysicalDevice& physicalDevice = m_pAdapter->GetPhysicalDevice();
+
+  auto queueFamilies = physicalDevice.getQueueFamilyProperties();
+  auto hasAllBits = [](auto flags, auto bits) {
+    return (flags & bits) == bits;
+  };
+  auto hasAnyBits = [](auto flags, auto bits) {
+    return flags & bits;
+  };
+  for (ezUInt32 i = 0; i < (ezUInt32)queueFamilies.size(); ++i)
+  {
+    const auto& queue = queueFamilies[i];
+    if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer))
+    {
+      m_QueuesInfo[CommandListType::Graphics].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::Graphics].QueueCount = queue.queueCount;
+    }
+    else if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer) && !hasAnyBits(queue.queueFlags, vk::QueueFlagBits::eGraphics))
+    {
+      m_QueuesInfo[CommandListType::Compute].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::Compute].QueueCount = queue.queueCount;
+    }
+    else if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eTransfer) && !hasAnyBits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute))
+    {
+      m_QueuesInfo[CommandListType::Copy].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::Copy].QueueCount = queue.queueCount;
+    }
+  }
+
+  auto extensions = physicalDevice.enumerateDeviceExtensionProperties();
+  ezSet<ezString> requiredExtensions;
+
+  requiredExtensions.Insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_NV_MESH_SHADER_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+
+  ezDynamicArray<const char*> foundExtensions;
+  for (const auto& extension : extensions)
+  {
+    if (requiredExtensions.Contains(extension.extensionName.data()))
+      foundExtensions.PushBack(extension.extensionName);
+
+    if (ezStringUtils::IsEqual(extension.extensionName.data(), VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME))
+      m_IsVariableRateShadingSupported = true;
+    if (ezStringUtils::IsEqual(extension.extensionName.data(), VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME))
+      m_IsDxrSupported = true;
+    if (ezStringUtils::IsEqual(extension.extensionName.data(), VK_NV_MESH_SHADER_EXTENSION_NAME))
+      m_IsMeshShadingSupported = true;
+    if (ezStringUtils::IsEqual(extension.extensionName.data(), VK_KHR_RAY_QUERY_EXTENSION_NAME))
+      m_IsRayQuerySupported = true;
+  }
+
+  void* deviceCreateInfoNext = nullptr;
+  auto addExtension = [&](auto& extension) {
+    extension.pNext = deviceCreateInfoNext;
+    deviceCreateInfoNext = &extension;
+  };
+
+  if (m_IsVariableRateShadingSupported)
+  {
+    ezMap<ezGALShadingRate, vk::Extent2D> shadingRatePalette;
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate1x1, vk::Extent2D{1, 1});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate1x2, vk::Extent2D{1, 2});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate2x1, vk::Extent2D{2, 1});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate2x2, vk::Extent2D{2, 2});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate2x4, vk::Extent2D{2, 4});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate4x2, vk::Extent2D{4, 2});
+    shadingRatePalette.Insert(ezGALShadingRate::ShadingRate4x4, vk::Extent2D{4, 4});
+
+    decltype(auto) fragmentShadingRates = physicalDevice.getFragmentShadingRatesKHR();
+    for (const auto& fragment_shading_rate : fragmentShadingRates)
+    {
+      vk::Extent2D size = fragment_shading_rate.fragmentSize;
+      uint8_t shadingRate = ((size.width >> 1) << 2) | (size.height >> 1);
+      EZ_ASSERT_ALWAYS((1 << ((shadingRate >> 2) & 3)) == size.width, "");
+      EZ_ASSERT_ALWAYS((1 << (shadingRate & 3)) == size.height, "");
+      EZ_ASSERT_ALWAYS(shadingRatePalette[(ezGALShadingRate)shadingRate] == size, "");
+      shadingRatePalette.Remove((ezGALShadingRate)shadingRate);
+    }
+    EZ_ASSERT_ALWAYS(shadingRatePalette.IsEmpty(), "");
+
+    vk::PhysicalDeviceFragmentShadingRatePropertiesKHR shadingRateImageProperties = {};
+    vk::PhysicalDeviceProperties2 deviceProps2 = {};
+    deviceProps2.pNext = &shadingRateImageProperties;
+    physicalDevice.getProperties2(&deviceProps2);
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize == shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize, "");
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize.width == shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize.height, "");
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.width == shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.height, "");
+    m_ShadingRateImageTileSize = shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.width;
+
+    vk::PhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeatures = {};
+    fragmentShadingRateFeatures.attachmentFragmentShadingRate = true;
+    addExtension(fragmentShadingRateFeatures);
+  }
+
+  if (m_IsDxrSupported)
+  {
+    vk::PhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingProperties = {};
+    vk::PhysicalDeviceProperties2 deviceProps2 = {};
+    deviceProps2.pNext = &rayTracingProperties;
+    physicalDevice.getProperties2(&deviceProps2);
+    m_ShaderGroupHandleSize = rayTracingProperties.shaderGroupHandleSize;
+    m_ShaderRecordAlignment = rayTracingProperties.shaderGroupHandleSize;
+    m_ShaderTableAlignment = rayTracingProperties.shaderGroupBaseAlignment;
+  }
+
+  const float queuePriority = 1.0f;
+  ezDynamicArray<vk::DeviceQueueCreateInfo> queuesCreateInfo;
+  for (const auto& queueInfo : m_QueuesInfo)
+  {
+    vk::DeviceQueueCreateInfo& queueCreateInfo = queuesCreateInfo.ExpandAndGetRef();
+    queueCreateInfo.queueFamilyIndex = queueInfo.Value().QueueFamilyIndex;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+  }
+
+  vk::PhysicalDeviceFeatures deviceFeatures = {};
+  deviceFeatures.textureCompressionBC = true;
+  deviceFeatures.vertexPipelineStoresAndAtomics = true;
+  deviceFeatures.samplerAnisotropy = true;
+  deviceFeatures.fragmentStoresAndAtomics = true;
+  deviceFeatures.sampleRateShading = true;
+  deviceFeatures.geometryShader = true;
+  deviceFeatures.imageCubeArray = true;
+  deviceFeatures.shaderImageGatherExtended = true;
+
+  vk::PhysicalDeviceVulkan12Features deviceVulkan12Features = {};
+  deviceVulkan12Features.drawIndirectCount = true;
+  deviceVulkan12Features.bufferDeviceAddress = true;
+  deviceVulkan12Features.timelineSemaphore = true;
+  deviceVulkan12Features.runtimeDescriptorArray = true;
+  deviceVulkan12Features.descriptorBindingVariableDescriptorCount = true;
+  addExtension(deviceVulkan12Features);
+
+  vk::PhysicalDeviceMeshShaderFeaturesNV meshShaderFeature = {};
+  meshShaderFeature.taskShader = true;
+  meshShaderFeature.meshShader = true;
+  if (m_IsMeshShadingSupported)
+  {
+    addExtension(meshShaderFeature);
+  }
+
+  vk::PhysicalDeviceRayTracingPipelineFeaturesKHR raytracingPipelineFeature = {};
+  raytracingPipelineFeature.rayTracingPipeline = true;
+
+  vk::PhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeature = {};
+  accelerationStructureFeature.accelerationStructure = true;
+
+  vk::PhysicalDeviceRayQueryFeaturesKHR rayqueryPipelineFeature = {};
+  rayqueryPipelineFeature.rayQuery = true;
+
+  if (m_IsDxrSupported)
+  {
+    addExtension(raytracingPipelineFeature);
+    addExtension(accelerationStructureFeature);
+
+    if (m_IsRayQuerySupported)
+    {
+      raytracingPipelineFeature.rayTraversalPrimitiveCulling = true;
+      addExtension(rayqueryPipelineFeature);
+    }
+  }
+
+  vk::DeviceCreateInfo device_create_info = {};
+  device_create_info.pNext = deviceCreateInfoNext;
+  device_create_info.queueCreateInfoCount = queuesCreateInfo.GetCount();
+  device_create_info.pQueueCreateInfos = queuesCreateInfo.GetData();
+  device_create_info.pEnabledFeatures = &deviceFeatures;
+  device_create_info.enabledExtensionCount = foundExtensions.GetCount();
+  device_create_info.ppEnabledExtensionNames = foundExtensions.GetData();
+
+  m_VkDevice = physicalDevice.createDeviceUnique(device_create_info);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(m_VkDevice.get());
+
+  for (auto& queueInfo : m_QueuesInfo)
+  {
+    vk::CommandPoolCreateInfo cmdPoolCreateInfo = {};
+    cmdPoolCreateInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    cmdPoolCreateInfo.queueFamilyIndex = queueInfo.Value().QueueFamilyIndex;
+    m_CmdPools.Insert(queueInfo.Key(), m_VkDevice->createCommandPoolUnique(cmdPoolCreateInfo));
+    m_CommandQueues[queueInfo.Key()] = EZ_DEFAULT_NEW(CommandQueue, *this, queueInfo.Key(), queueInfo.Value().QueueFamilyIndex);
+  }
+
 
   return EZ_SUCCESS;
 }
@@ -284,11 +279,6 @@ void ezGALDeviceVk::ReportLiveGpuObjects()
 
 ezResult ezGALDeviceVk::ShutdownPlatform()
 {
-  vkDestroyDevice(m_VkDevice, nullptr);
-
-  DestroyDebugUtilsMessengerEXT(m_VkInstance, m_VkDebugMessenger, nullptr);
-
-  vkDestroyInstance(m_VkInstance, nullptr);
 
   ReportLiveGpuObjects();
 
@@ -557,11 +547,11 @@ void ezGALDeviceVk::DestroySwapChainPlatform(ezGALSwapChain* pSwapChain)
   EZ_DELETE(&m_Allocator, pSwapChainVk);
 }
 
-ezGALFence* ezGALDeviceVk::CreateFencePlatform()
+ezGALFence* ezGALDeviceVk::CreateFencePlatform(ezUInt64 initialValue)
 {
   ezGALFenceVk* pFence = EZ_NEW(&m_Allocator, ezGALFenceVk);
 
-  if (!pFence->InitPlatform(this).Succeeded())
+  if (!pFence->InitPlatform(this, initialValue).Succeeded())
   {
     EZ_DELETE(&m_Allocator, pFence);
     return nullptr;
@@ -654,25 +644,18 @@ void ezGALDeviceVk::FillCapabilitiesPlatform()
 {
 }
 
-Pipeline* ezGALDeviceVk::CreatePipeline(const PipelineStateDesc& desc)
+ezInternal::Vk::CommandListType ezGALDeviceVk::GetAvailableCommandListType(ezInternal::Vk::CommandListType type) const
 {
-  Pipeline* pPipeline = EZ_NEW(&m_Allocator, Pipeline, desc);
-
-  if (pPipeline->Init(this).Succeeded())
+  if (m_QueuesInfo.Contains(type))
   {
-    return pPipeline;
+    return type;
   }
-  else
-  {
-    EZ_DELETE(&m_Allocator, pPipeline);
-    return nullptr;
-  }
+  return ezInternal::Vk::CommandListType::Graphics;
 }
 
-void ezGALDeviceVk::DestroyPipeline(Pipeline* pPipeline)
+vk::CommandPool ezGALDeviceVk::GetCmdPool(ezInternal::Vk::CommandListType type) const
 {
-  pPipeline->Destroy(this).IgnoreResult();
-  EZ_DELETE(&m_Allocator, pPipeline);
+  return (*m_CmdPools.GetValue(GetAvailableCommandListType(type))).get();
 }
 
 EZ_STATICLINK_FILE(RendererVk, RendererVk_Device_Implementation_DeviceVk);

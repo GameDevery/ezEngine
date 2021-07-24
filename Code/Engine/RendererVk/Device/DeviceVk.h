@@ -5,6 +5,8 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererVk/RendererVkDLL.h>
 
+#include <vulkan/vulkan.hpp>
+
 class ezGALPassVk;
 
 /// \brief The Vk device implementation of the graphics abstraction layer.
@@ -82,7 +84,7 @@ protected:
   virtual ezGALSwapChain* CreateSwapChainPlatform(const ezGALSwapChainCreationDescription& Description) override;
   virtual void DestroySwapChainPlatform(ezGALSwapChain* pSwapChain) override;
 
-  virtual ezGALFence* CreateFencePlatform() override;
+  virtual ezGALFence* CreateFencePlatform(ezUInt64 initialValue) override;
   virtual void DestroyFencePlatform(ezGALFence* pFence) override;
 
   virtual ezGALQuery* CreateQueryPlatform(const ezGALQueryCreationDescription& Description) override;
@@ -114,36 +116,43 @@ protected:
 
   // Internal
 public:
-  EZ_ALWAYS_INLINE VkDevice GetVkDevice() const;
-  EZ_ALWAYS_INLINE VkInstance GetVkInstance() const;
-  EZ_ALWAYS_INLINE VkPhysicalDevice GetVkPhysicalDevice() const;
-  EZ_ALWAYS_INLINE const ezStaticArray<ezInt32, ezInternal::Vk::QueueType::Count>& GetVkQueueFamilyIndices() const;
-  EZ_ALWAYS_INLINE ezInt32 GetVkPresentQueueFamilyIndex() const;
+  EZ_ALWAYS_INLINE ezInternal::Vk::Instance* GetVkInstance() const {
+    return m_pInstance;
+  }
 
-  ezInternal::Vk::Pipeline* CreatePipeline(const ezInternal::Vk::PipelineStateDesc& desc);
-  void DestroyPipeline(ezInternal::Vk::Pipeline* pPipeline);
+  EZ_ALWAYS_INLINE vk::Device GetVkDevice() const {
+    return m_VkDevice.get();
+  }
 
-  static PFN_vkDebugUtilsMessengerCallbackEXT s_VkDebugCallback;
-
-private:
-  ezResult CreateInstance();
-  ezResult SetupDebugMessenger();
-  ezResult SetupPhysicalDevice();
-  ezResult CreateLogicalDevice();
+  ezInternal::Vk::CommandListType GetAvailableCommandListType(ezInternal::Vk::CommandListType type) const;
+  vk::CommandPool GetCmdPool(ezInternal::Vk::CommandListType type) const;
 
 private:
   friend class ezGALCommandEncoderImplVk;
 
-  VkInstance m_VkInstance;
-  VkPhysicalDevice m_VkPhysicalDevice;
-  VkDevice m_VkDevice;
+  struct QueueInfo
+  {
+    ezUInt32 QueueFamilyIndex;
+    ezUInt32 QueueCount;
+  };
+  ezMap<ezInternal::Vk::CommandListType, QueueInfo> m_QueuesInfo;
 
-  VkDebugUtilsMessengerEXT m_VkDebugMessenger;
+  ezInternal::Vk::Instance* m_pInstance;
+  ezSharedPtr<ezInternal::Vk::Adapter> m_pAdapter;
+  vk::UniqueDevice m_VkDevice;
+  ezMap<ezInternal::Vk::CommandListType, vk::UniqueCommandPool> m_CmdPools;
+  ezMap<ezInternal::Vk::CommandListType, ezInternal::Vk::CommandQueue*> m_CommandQueues;
 
-  ezStaticArray<VkQueue, ezInternal::Vk::QueueType::Count> m_VkQueues;
-  ezStaticArray<ezInt32, ezInternal::Vk::QueueType::Count> m_QueueFamilyIndices;
-  ezInt32 m_VkPresentQueueFamilyIndex;
-  VkQueue m_VkPresentQueue;
+  ezUInt32 m_TextureDataPitchAlignment;
+  bool m_IsDxrSupported;
+  bool m_IsRayQuerySupported;
+  bool m_IsVariableRateShadingSupported;
+  bool m_IsMeshShadingSupported;
+  ezUInt32 m_ShadingRateImageTileSize;
+  //ezGALMemoryBudget m_MemoryBudget;
+  ezUInt32 m_ShaderGroupHandleSize;
+  ezUInt32 m_ShaderRecordAlignment;
+  ezUInt32 m_ShaderTableAlignment;
 
   ezUniquePtr<ezGALPassVk> m_pDefaultPass;
 };

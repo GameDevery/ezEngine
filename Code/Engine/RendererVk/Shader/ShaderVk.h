@@ -10,8 +10,8 @@ class EZ_RENDERERVK_DLL ezGALShaderVk : public ezGALShader
 public:
   void SetDebugName(const char* szName) const override;
 
-  EZ_ALWAYS_INLINE VkShaderModule GetVkShaderModule() const;
-  EZ_ALWAYS_INLINE VkShaderStageFlagBits GetVkShaderStage() const;
+  //EZ_ALWAYS_INLINE VkShaderModule GetVkShaderModule() const;
+  //EZ_ALWAYS_INLINE VkShaderStageFlagBits GetVkShaderStage() const;
 
 protected:
   friend class ezGALDeviceVk;
@@ -26,8 +26,8 @@ protected:
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) override;
 
 private:
-  VkShaderModule m_pVkShaderModule;
-  VkShaderStageFlagBits m_VkShaderStage;
+  //VkShaderModule m_pVkShaderModule;
+  //VkShaderStageFlagBits m_VkShaderStage;
   ezGALDeviceVk* m_pDeviceVk;
 };
 

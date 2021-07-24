@@ -8,7 +8,7 @@
 class ezGALSwapChainVk : public ezGALSwapChain
 {
 public:
-  const VkExtent2D& GetVkSwapChainExtent() const;
+  //const VkExtent2D& GetVkSwapChainExtent() const;
 
 protected:
   friend class ezGALDeviceVk;
@@ -23,17 +23,17 @@ protected:
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) override;
 
 private:
-  VkQueue m_VkPresentQueue;
-  VkSurfaceKHR m_VkSurface;
-  VkSurfaceCapabilitiesKHR m_VkSurfaceCapabilities;
-  ezDynamicArray<VkSurfaceFormatKHR> m_VkSurfaceFormats;
-  ezDynamicArray<VkPresentModeKHR> m_VkPresentationModes;
-  VkSwapchainKHR m_VkSwapChain;
+  //VkQueue m_VkPresentQueue;
+  //VkSurfaceKHR m_VkSurface;
+  //VkSurfaceCapabilitiesKHR m_VkSurfaceCapabilities;
+  //ezDynamicArray<VkSurfaceFormatKHR> m_VkSurfaceFormats;
+  //ezDynamicArray<VkPresentModeKHR> m_VkPresentationModes;
+  //VkSwapchainKHR m_VkSwapChain;
 
-  ezDynamicArray<VkImage> m_VkSwapChainImages;
-  VkFormat m_VkSwapChainImageFormat;
-  VkExtent2D m_VkSwapChainExtent;
-  ezDynamicArray<VkImageView> m_VkSwapChainImageViews;
+  //ezDynamicArray<VkImage> m_VkSwapChainImages;
+  //VkFormat m_VkSwapChainImageFormat;
+  //VkExtent2D m_VkSwapChainExtent;
+  //ezDynamicArray<VkImageView> m_VkSwapChainImageViews;
 
   ezGALDeviceVk* m_pDeviceVk;
 };

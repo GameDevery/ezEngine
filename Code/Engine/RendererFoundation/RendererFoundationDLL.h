@@ -95,6 +95,16 @@ private:
   static const ezUInt8 Size[ezGALIndexType::ENUM_COUNT];
 };
 
+enum class ezGALShadingRate : ezUInt8
+{
+  ShadingRate1x1 = 0,
+  ShadingRate1x2 = 0x1,
+  ShadingRate2x1 = 0x4,
+  ShadingRate2x2 = 0x5,
+  ShadingRate2x4 = 0x6,
+  ShadingRate4x2 = 0x9,
+  ShadingRate4x4 = 0xa,
+};
 
 struct EZ_RENDERERFOUNDATION_DLL ezGALShaderStage
 {
