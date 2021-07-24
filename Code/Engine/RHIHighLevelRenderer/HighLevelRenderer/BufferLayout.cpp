@@ -1,6 +1,6 @@
 #include <RHIHighLevelRenderer/HighLevelRenderer/BufferLayout.h>
 
-ViewProvider::ViewProvider(RenderDevice& device, const uint8_t* src_data, BufferLayout& layout)
+ViewProvider::ViewProvider(RenderDevice& device, const ezUInt8* src_data, BufferLayout& layout)
     : m_device(device)
     , m_src_data(src_data)
     , m_layout(layout)
@@ -20,7 +20,7 @@ std::shared_ptr<ResourceLazyViewDesc> ViewProvider::GetView(RenderCommandList& c
         }
         else
         {
-            resource = m_device.CreateBuffer(BindFlag::kConstantBuffer, static_cast<uint32_t>(m_layout.dst_buffer_size), MemoryType::kUpload);
+            resource = m_device.CreateBuffer(BindFlag::kConstantBuffer, static_cast<ezUInt32>(m_layout.dst_buffer_size), MemoryType::kUpload);
         }
         resource->UpdateUploadBuffer(0, m_dst_data.data(), m_dst_data.size());
         m_last_view = std::make_shared<ResourceLazyViewDesc>(*this, resource);
@@ -38,8 +38,8 @@ bool ViewProvider::SyncData()
     bool dirty = false;
     for (size_t i = 0; i < m_layout.data_size.size(); ++i)
     {
-        const uint8_t* ptr_src = m_src_data + m_layout.src_offset[i];
-        uint8_t* ptr_dst = m_dst_data.data() + m_layout.dst_offset[i];
+        const ezUInt8* ptr_src = m_src_data + m_layout.src_offset[i];
+        ezUInt8* ptr_dst = m_dst_data.data() + m_layout.dst_offset[i];
         if (std::memcmp(ptr_dst, ptr_src, m_layout.data_size[i]) != 0)
         {
             std::memcpy(ptr_dst, ptr_src, m_layout.data_size[i]);

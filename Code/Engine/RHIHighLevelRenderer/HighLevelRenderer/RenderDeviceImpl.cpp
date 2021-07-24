@@ -7,7 +7,7 @@
 RenderDeviceImpl::RenderDeviceImpl(const RenderDeviceDesc& settings, ezWindowBase* window)
   : m_window(window)
   , m_vsync(settings.vsync)
-  , m_frame_count(settings.frame_count)
+  , m_FrameCount(settings.frame_count)
 {
   m_instance = InstanceFactory::CreateInstance(settings.api_type);
   m_adapter = std::move(m_instance->EnumerateAdapters()[settings.required_gpu_index]);
@@ -18,9 +18,9 @@ RenderDeviceImpl::RenderDeviceImpl(const RenderDeviceDesc& settings, ezWindowBas
   m_width = m_window->GetClientAreaSize().width;
   m_height = m_window->GetClientAreaSize().height;
 
-  m_swapchain = m_device->CreateSwapchain(m_window->GetNativeWindowHandle(), m_width, m_height, m_frame_count, settings.vsync);
+  m_Swapchain = m_device->CreateSwapchain(m_window->GetNativeWindowHandle(), m_width, m_height, m_FrameCount, settings.vsync);
   m_fence = m_device->CreateFence(m_fence_value);
-  for (uint32_t i = 0; i < m_frame_count; ++i)
+  for (ezUInt32 i = 0; i < m_FrameCount; ++i)
   {
     m_barrier_command_lists.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
     m_frame_fence_values.emplace_back(0);
@@ -35,12 +35,12 @@ RenderDeviceImpl::~RenderDeviceImpl()
 
 ezRHIResourceFormat::Enum RenderDeviceImpl::GetFormat() const
 {
-  return m_swapchain->GetFormat();
+  return m_Swapchain->GetFormat();
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::GetBackBuffer(uint32_t buffer)
+std::shared_ptr<Resource> RenderDeviceImpl::GetBackBuffer(ezUInt32 buffer)
 {
-  return m_swapchain->GetBackBuffer(buffer);
+  return m_Swapchain->GetBackBuffer(buffer);
 }
 
 std::shared_ptr<RenderCommandList> RenderDeviceImpl::CreateRenderCommandList(CommandListType type)
@@ -48,14 +48,14 @@ std::shared_ptr<RenderCommandList> RenderDeviceImpl::CreateRenderCommandList(Com
   return std::make_shared<RenderCommandListImpl>(*m_device, *m_object_cache, CommandListType::kGraphics);
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateTexture(uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> RenderDeviceImpl::CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
 {
   auto res = m_device->CreateTexture(TextureType::k2D, bind_flag, format, sample_count, width, height, depth, mip_levels);
   res->CommitMemory(MemoryType::kDefault);
   return res;
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateBuffer(uint32_t bind_flag, uint32_t buffer_size, MemoryType memory_type)
+std::shared_ptr<Resource> RenderDeviceImpl::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type)
 {
   auto res = m_device->CreateBuffer(bind_flag, buffer_size);
   if (res)
@@ -76,7 +76,7 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateBottomLevelAS(const std::vecto
   return m_device->CreateAccelerationStructure(AccelerationStructureType::kBottomLevel, memory, 0);
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateTopLevelAS(uint32_t instance_count, BuildAccelerationStructureFlags flags)
+std::shared_ptr<Resource> RenderDeviceImpl::CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags)
 {
   auto prebuild_info = m_device->GetTLASPrebuildInfo(instance_count, flags);
   std::shared_ptr<Resource> memory = m_device->CreateBuffer(BindFlag::kAccelerationStructure, (ezUInt32)prebuild_info.acceleration_structure_size);
@@ -89,7 +89,7 @@ std::shared_ptr<View> RenderDeviceImpl::CreateView(const std::shared_ptr<Resourc
   return m_device->CreateView(resource, view_desc);
 }
 
-std::shared_ptr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return m_device->CreateShader(desc, byteCode, reflection);
 }
@@ -119,7 +119,7 @@ bool RenderDeviceImpl::IsMeshShadingSupported() const
   return m_device->IsMeshShadingSupported();
 }
 
-uint32_t RenderDeviceImpl::GetShadingRateImageTileSize() const
+ezUInt32 RenderDeviceImpl::GetShadingRateImageTileSize() const
 {
   return m_device->GetShadingRateImageTileSize();
 }
@@ -163,9 +163,9 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
       }
       else
       {
-        for (uint32_t i = 0; i < barrier.level_count; ++i)
+        for (ezUInt32 i = 0; i < barrier.level_count; ++i)
         {
-          for (uint32_t j = 0; j < barrier.layer_count; ++j)
+          for (ezUInt32 j = 0; j < barrier.layer_count; ++j)
           {
             barrier.state_before = global_state_tracker.GetSubresourceState(barrier.baseMipLevel + i, barrier.base_array_layer + j);
             if (barrier.state_before != barrier.state_after)
@@ -246,12 +246,12 @@ void RenderDeviceImpl::WaitForIdle()
   m_fence->Wait(m_fence_value);
 }
 
-void RenderDeviceImpl::Resize(uint32_t width, uint32_t height)
+void RenderDeviceImpl::Resize(ezUInt32 width, ezUInt32 height)
 {
   m_width = width;
   m_height = height;
-  m_swapchain.reset();
-  m_swapchain = m_device->CreateSwapchain(m_window->GetNativeWindowHandle(), m_width, m_height, m_frame_count, m_vsync);
+  m_Swapchain.Clear();
+  m_Swapchain = m_device->CreateSwapchain(m_window->GetNativeWindowHandle(), m_width, m_height, m_FrameCount, m_vsync);
   m_frame_index = 0;
 }
 
@@ -277,20 +277,20 @@ void RenderDeviceImpl::InsertPresentBarrier()
 void RenderDeviceImpl::Present()
 {
   InsertPresentBarrier();
-  m_swapchain->NextImage(m_fence, ++m_fence_value);
+  m_Swapchain->NextImage(m_fence, ++m_fence_value);
   m_command_queue->Wait(m_fence, m_fence_value);
   m_command_queue->Signal(m_fence, m_frame_fence_values[m_frame_index] = ++m_fence_value);
-  m_swapchain->Present(m_fence, m_fence_value);
-  m_frame_index = (m_frame_index + 1) % m_frame_count;
+  m_Swapchain->Present(m_fence, m_fence_value);
+  m_frame_index = (m_frame_index + 1) % m_FrameCount;
   m_fence->Wait(m_frame_fence_values[m_frame_index]);
 }
 
-void RenderDeviceImpl::Wait(uint64_t fence_value)
+void RenderDeviceImpl::Wait(ezUInt64 fence_value)
 {
   m_fence->Wait(fence_value);
 }
 
-uint32_t RenderDeviceImpl::GetFrameIndex() const
+ezUInt32 RenderDeviceImpl::GetFrameIndex() const
 {
   return m_frame_index;
 }

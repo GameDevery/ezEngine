@@ -7,12 +7,12 @@
 
 using Window = void*;
 
-class EZ_RHI_DLL Swapchain : public QueryInterface
+class EZ_RHI_DLL Swapchain : public ezRefCounted
 {
 public:
   virtual ~Swapchain() = default;
   virtual ezRHIResourceFormat::Enum GetFormat() const = 0;
   virtual std::shared_ptr<Resource> GetBackBuffer(ezUInt32 buffer) = 0;
-  virtual ezUInt32 NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signal_value) = 0;
-  virtual void Present(const std::shared_ptr<Fence>& fence, ezUInt64 wait_value) = 0;
+  virtual ezUInt32 NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signalValue) = 0;
+  virtual void Present(const std::shared_ptr<Fence>& fence, ezUInt64 waitValue) = 0;
 };

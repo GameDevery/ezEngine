@@ -53,7 +53,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginDepthStencilDesc
   RenderPassLoadOp stencil_load_op = RenderPassLoadOp::kClear;
   RenderPassStoreOp stencil_store_op = RenderPassStoreOp::kStore;
   float clear_depth = 1.0f;
-  uint8_t clear_stencil = 0;
+  ezUInt8 clear_stencil = 0;
 };
 
 struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginDesc

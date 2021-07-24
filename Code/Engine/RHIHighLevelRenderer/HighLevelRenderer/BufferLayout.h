@@ -13,7 +13,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL BufferLayout
 class EZ_RHIHIGHLEVELRENDERER_DLL ViewProvider : public DeferredView
 {
 public:
-    ViewProvider(RenderDevice& device, const uint8_t* src_data, BufferLayout& layout);
+    ViewProvider(RenderDevice& device, const ezUInt8* src_data, BufferLayout& layout);
     std::shared_ptr<ResourceLazyViewDesc> GetView(RenderCommandList& command_list) override;
     void OnDestroy(ResourceLazyViewDesc& view_desc) override;
 
@@ -21,9 +21,9 @@ private:
     bool SyncData();
 
     RenderDevice& m_device;
-    const uint8_t* m_src_data;
+    const ezUInt8* m_src_data;
     BufferLayout& m_layout;
-    std::vector<uint8_t> m_dst_data;
+    std::vector<ezUInt8> m_dst_data;
     std::vector<std::shared_ptr<Resource>> m_free_resources;
     std::shared_ptr<ResourceLazyViewDesc> m_last_view;
 };
@@ -35,7 +35,7 @@ public:
     ConstantBuffer(RenderDevice& device, BufferLayout& layout)
     {
         T& data = static_cast<T&>(*this);
-        m_view_provider = std::make_shared<ViewProvider>(device, reinterpret_cast<const uint8_t*>(&data), layout);
+        m_view_provider = std::make_shared<ViewProvider>(device, reinterpret_cast<const ezUInt8*>(&data), layout);
     }
 
     operator std::shared_ptr<DeferredView>& ()

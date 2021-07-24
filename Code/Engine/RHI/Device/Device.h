@@ -31,7 +31,7 @@ public:
   virtual ezSharedPtr<Memory> AllocateMemory(ezUInt64 size, MemoryType memoryType, ezUInt32 memoryTypeBits) = 0;
   virtual ezSharedPtr<CommandQueue> GetCommandQueue(CommandListType type) = 0;
 
-  virtual std::shared_ptr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync) = 0;
+  virtual ezSharedPtr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync) = 0;
   virtual void DestroySwapchain(Swapchain* pSwapChain) = 0;
 
   virtual std::shared_ptr<CommandList> CreateCommandList(CommandListType type) = 0;
@@ -40,7 +40,7 @@ public:
   virtual std::shared_ptr<Fence> CreateFence(ezUInt64 initialValue) = 0;
   virtual void DestroyFence(Fence* pFence) = 0;
 
-  virtual std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlag, ezRHIResourceFormat::Enum format, ezUInt32 sampleCount, int width, int height, int depth, int mipLevels) = 0;
+  virtual std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sampleCount, int width, int height, int depth, int mipLevels) = 0;
   virtual void DestroyTexture(Resource* pTexture) = 0;
 
   virtual std::shared_ptr<Resource> CreateBuffer(ezUInt32 bindFlag, ezUInt32 bufferSize) = 0;

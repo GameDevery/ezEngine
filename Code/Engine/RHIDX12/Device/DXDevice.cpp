@@ -164,9 +164,9 @@ ezSharedPtr<CommandQueue> DXDevice::GetCommandQueue(CommandListType type)
   return m_command_queues[type];
 }
 
-std::shared_ptr<Swapchain> DXDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync)
+ezSharedPtr<Swapchain> DXDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync)
 {
-  return std::make_shared<DXSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
+  return EZ_DEFAULT_NEW(DXSwapchain, *m_command_queues[CommandListType::kGraphics], window, width, height, frameCount, vsync);
 }
 
 std::shared_ptr<CommandList> DXDevice::CreateCommandList(CommandListType type)
@@ -174,15 +174,15 @@ std::shared_ptr<CommandList> DXDevice::CreateCommandList(CommandListType type)
   return std::make_shared<DXCommandList>(*this, type);
 }
 
-std::shared_ptr<Fence> DXDevice::CreateFence(ezUInt64 initial_value)
+std::shared_ptr<Fence> DXDevice::CreateFence(ezUInt64 initialValue)
 {
-  return std::make_shared<DXFence>(*this, initial_value);
+  return std::make_shared<DXFence>(*this, initialValue);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
 {
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
-  if (bind_flag & BindFlag::kShaderResource)
+  if (bindFlags & BindFlag::kShaderResource)
   {
     dx_format = DXUtils::MakeTypelessDepthStencil(dx_format);
   }
@@ -207,7 +207,7 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bin
   desc.Width = width;
   desc.Height = height;
   desc.DepthOrArraySize = (ezUInt16)depth;
-  desc.MipLevels = (ezUInt16)mip_levels;
+  desc.MipLevels = (ezUInt16)mipLevels;
   desc.Format = dx_format;
 
   D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS ms_check_desc = {};
@@ -217,11 +217,11 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bin
   desc.SampleDesc.Count = sample_count;
   desc.SampleDesc.Quality = ms_check_desc.NumQualityLevels - 1;
 
-  if (bind_flag & BindFlag::kRenderTarget)
+  if (bindFlags & BindFlag::kRenderTarget)
     desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-  if (bind_flag & BindFlag::kDepthStencil)
+  if (bindFlags & BindFlag::kDepthStencil)
     desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-  if (bind_flag & BindFlag::kUnorderedAccess)
+  if (bindFlags & BindFlag::kUnorderedAccess)
     desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
   res->desc = desc;

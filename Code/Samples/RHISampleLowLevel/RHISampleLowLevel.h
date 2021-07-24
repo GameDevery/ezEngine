@@ -11,7 +11,7 @@
 
 class ezRHISampleWindow;
 
-constexpr uint32_t frame_count = 3;
+constexpr ezUInt32 FRAME_COUNT = 3;
 
 class ezRHISampleApp : public ezApplication
 {
@@ -29,28 +29,28 @@ public:
   void OnResize(ezUInt32 width, ezUInt32 height);
 
 private:
-  std::shared_ptr<Instance> instance;
-  std::shared_ptr<Adapter> adapter;
-  std::shared_ptr<Device> device;
+  std::shared_ptr<Instance> m_pInstance;
+  std::shared_ptr<Adapter> m_pAdapter;
+  std::shared_ptr<Device> m_pDevice;
   ezRHISampleWindow* m_pWindow = nullptr;
-  std::shared_ptr<Swapchain> swapchain = nullptr;
-  std::shared_ptr<Fence> fence = nullptr;
-  uint64_t fence_value = 0;
-  ezSharedPtr<CommandQueue> command_queue = nullptr;
-  std::array<uint64_t, frame_count> fence_values = {};
+  ezSharedPtr<Swapchain> m_pSwapchain = nullptr;
+  std::shared_ptr<Fence> m_pFence = nullptr;
+  ezUInt64 m_FenceValue = 0;
+  ezSharedPtr<CommandQueue> m_pCommandQueue = nullptr;
+  std::array<ezUInt64, FRAME_COUNT> m_FenceValues = {};
   //std::vector<std::shared_ptr<CommandList>> command_lists;
   //std::vector<std::shared_ptr<Framebuffer>> framebuffers;
-  std::shared_ptr<Pipeline> pipeline;
-  std::shared_ptr<RenderPass> render_pass;
-  std::shared_ptr<Program> program;
-  std::shared_ptr<View> constant_view;
-  std::shared_ptr<Resource> constant_buffer;
-  std::shared_ptr<Resource> index_buffer;
-  std::shared_ptr<Resource> vertex_buffer;
-  std::shared_ptr<Shader> vertex_shader;
-  std::shared_ptr<Shader> pixel_shader;
-  std::shared_ptr<BindingSetLayout> layout;
-  std::shared_ptr<BindingSet> binding_set;
-  ezUInt32 frame_index = 0;
+  std::shared_ptr<Pipeline> m_pPipeline;
+  std::shared_ptr<RenderPass> m_pRenderPass;
+  std::shared_ptr<Program> m_pProgram;
+  std::shared_ptr<View> m_pConstantBufferView;
+  std::shared_ptr<Resource> m_pConstantBuffer;
+  std::shared_ptr<Resource> m_pIndexBuffer;
+  std::shared_ptr<Resource> m_pVertexBuffer;
+  std::shared_ptr<Shader> m_pVertexShader;
+  std::shared_ptr<Shader> m_pPixelShader;
+  std::shared_ptr<BindingSetLayout> m_pLayout;
+  std::shared_ptr<BindingSet> m_pBindingSet;
+  ezUInt32 m_FrameIndex = 0;
   RenderDeviceDesc renderDeviceDesc;
 };

@@ -17,7 +17,7 @@ public:
     ezSharedPtr<Memory> AllocateMemory(ezUInt64 size, MemoryType memory_type, ezUInt32 memory_type_bits) override;
     ezSharedPtr<CommandQueue> GetCommandQueue(CommandListType type) override;
 
-    std::shared_ptr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync) override;
+    ezSharedPtr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync) override;
     void DestroySwapchain(Swapchain* pSwapChain) override {}
 
     std::shared_ptr<CommandList> CreateCommandList(CommandListType type) override;
@@ -26,7 +26,7 @@ public:
     std::shared_ptr<Fence> CreateFence(ezUInt64 initial_value) override;
     void DestroyFence(Fence* pFence) override {}
 
-    std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
+    std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
     void DestroyTexture(Resource* pTexture) override {}
 
     std::shared_ptr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size) override;

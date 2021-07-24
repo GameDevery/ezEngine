@@ -118,7 +118,7 @@ std::shared_ptr<Framebuffer> ObjectCache::GetFramebuffer(const FramebufferDesc& 
   return it->second;
 }
 
-uint32_t GetPlaneSlice(const std::shared_ptr<Resource>& resource, ViewType view_type, ReturnType return_type)
+ezUInt32 GetPlaneSlice(const std::shared_ptr<Resource>& resource, ViewType view_type, ReturnType return_type)
 {
   if (!resource)
   {

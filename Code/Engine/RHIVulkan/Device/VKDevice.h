@@ -15,7 +15,7 @@ public:
   ezSharedPtr<Memory> AllocateMemory(ezUInt64 size, MemoryType memoryType, ezUInt32 memoryTypeBits) override;
   ezSharedPtr<CommandQueue> GetCommandQueue(CommandListType type) override;
 
-  std::shared_ptr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync) override;
+  ezSharedPtr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync) override;
   void DestroySwapchain(Swapchain* pSwapChain) override {}
 
   std::shared_ptr<CommandList> CreateCommandList(CommandListType type) override;
@@ -24,7 +24,7 @@ public:
   std::shared_ptr<Fence> CreateFence(ezUInt64 initial_value) override;
   void DestroyFence(Fence* pFence) override {}
 
-  std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
+  std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels) override;
   void DestroyTexture(Resource* pTexture) override {}
 
   std::shared_ptr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size) override;
@@ -95,19 +95,19 @@ public:
 private:
   RaytracingASPrebuildInfo GetAccelerationStructurePrebuildInfo(const vk::AccelerationStructureBuildGeometryInfoKHR& acceleration_structure_info, const std::vector<ezUInt32>& max_primitive_counts) const;
 
-  VKAdapter& m_adapter;
-  const vk::PhysicalDevice& m_physical_device;
-  vk::UniqueDevice m_device;
+  VKAdapter& m_Adapter;
+  const vk::PhysicalDevice& m_PhysicalDevice;
+  vk::UniqueDevice m_Device;
   struct QueueInfo
   {
-    ezUInt32 queue_family_index;
-    ezUInt32 queue_count;
+    ezUInt32 QueueFamilyIndex;
+    ezUInt32 QueueCount;
   };
-  ezMap<CommandListType, QueueInfo> m_queues_info;
-  ezMap<CommandListType, vk::UniqueCommandPool> m_cmd_pools;
-  ezMap<CommandListType, ezSharedPtr<VKCommandQueue>> m_command_queues;
-  ezMap<vk::DescriptorType, ezUniquePtr<VKGPUBindlessDescriptorPoolTyped>> m_gpu_bindless_descriptor_pool;
-  VKGPUDescriptorPool m_gpu_descriptor_pool;
+  ezMap<CommandListType, QueueInfo> m_QueuesInfo;
+  ezMap<CommandListType, vk::UniqueCommandPool> m_CmdPools;
+  ezMap<CommandListType, ezSharedPtr<VKCommandQueue>> m_CommandQueues;
+  ezMap<vk::DescriptorType, ezUniquePtr<VKGPUBindlessDescriptorPoolTyped>> m_GPUBindlessDescriptorPool;
+  VKGPUDescriptorPool m_GPUDescriptorPool;
   bool m_is_variable_rate_shading_supported = false;
   ezUInt32 m_shading_rate_image_tile_size = 0;
   bool m_is_dxr_supported = false;

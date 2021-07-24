@@ -21,32 +21,32 @@ public:
     virtual void EndRenderPass() = 0;
     virtual void BeginEvent(const ezString& name) = 0;
     virtual void EndEvent() = 0;
-    virtual void Draw(uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) = 0;
-    virtual void DrawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) = 0;
-    virtual void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
-    virtual void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
+    virtual void Draw(ezUInt32 vertex_count, ezUInt32 instance_count, ezUInt32 first_vertex, ezUInt32 first_instance) = 0;
+    virtual void DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, ezUInt32 first_index, int32_t vertex_offset, ezUInt32 first_instance) = 0;
+    virtual void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
+    virtual void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
     virtual void DrawIndirectCount(
         const std::shared_ptr<Resource>& argument_buffer,
-        uint64_t argument_buffer_offset,
+        ezUInt64 argument_buffer_offset,
         const std::shared_ptr<Resource>& count_buffer,
-        uint64_t count_buffer_offset,
-        uint32_t max_draw_count,
-        uint32_t stride) = 0;
+        ezUInt64 count_buffer_offset,
+        ezUInt32 max_draw_count,
+        ezUInt32 stride) = 0;
     virtual void DrawIndexedIndirectCount(
         const std::shared_ptr<Resource>& argument_buffer,
-        uint64_t argument_buffer_offset,
+        ezUInt64 argument_buffer_offset,
         const std::shared_ptr<Resource>& count_buffer,
-        uint64_t count_buffer_offset,
-        uint32_t max_draw_count,
-        uint32_t stride) = 0;
-    virtual void Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z) = 0;
-    virtual void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
-    virtual void DispatchMesh(uint32_t thread_group_count_x) = 0;
-    virtual void DispatchRays(uint32_t width, uint32_t height, uint32_t depth) = 0;
+        ezUInt64 count_buffer_offset,
+        ezUInt32 max_draw_count,
+        ezUInt32 stride) = 0;
+    virtual void Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_group_count_y, ezUInt32 thread_group_count_z) = 0;
+    virtual void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
+    virtual void DispatchMesh(ezUInt32 thread_group_count_x) = 0;
+    virtual void DispatchRays(ezUInt32 width, ezUInt32 height, ezUInt32 depth) = 0;
     virtual void SetViewport(float x, float y, float width, float height) = 0;
-    virtual void SetScissorRect(int32_t left, int32_t top, uint32_t right, uint32_t bottom) = 0;
+    virtual void SetScissorRect(int32_t left, int32_t top, ezUInt32 right, ezUInt32 bottom) = 0;
     virtual void IASetIndexBuffer(const std::shared_ptr<Resource>& resource, ezRHIResourceFormat::Enum format) = 0;
-    virtual void IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource) = 0;
+    virtual void IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource) = 0;
     virtual void RSSetShadingRateImage(const std::shared_ptr<View>& view) = 0;
     virtual void BuildBottomLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) = 0;
     virtual void BuildTopLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<std::pair<std::shared_ptr<Resource>, ezMat4>>& geometry, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) = 0;
@@ -57,6 +57,6 @@ public:
                                      const std::vector<BufferToTextureCopyRegion>& regions) = 0;
     virtual void CopyTexture(const std::shared_ptr<Resource>& src_texture, const std::shared_ptr<Resource>& dst_texture,
                              const std::vector<TextureCopyRegion>& regions) = 0;
-    virtual void UpdateSubresource(const std::shared_ptr<Resource>& resource, uint32_t subresource, const void* data, uint32_t row_pitch = 0, uint32_t depth_pitch = 0) = 0;
-    virtual uint64_t& GetFenceValue() = 0;
+    virtual void UpdateSubresource(const std::shared_ptr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch = 0, ezUInt32 depth_pitch = 0) = 0;
+    virtual ezUInt64& GetFenceValue() = 0;
 };

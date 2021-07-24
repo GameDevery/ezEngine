@@ -21,6 +21,10 @@
 #include <RHIVulkan/Utilities/VKUtility.h>
 #include <RHIVulkan/View/VKView.h>
 
+EZ_DEFINE_AS_POD_TYPE(vk::QueueFamilyProperties);
+EZ_DEFINE_AS_POD_TYPE(vk::ExtensionProperties);
+EZ_DEFINE_AS_POD_TYPE(vk::PhysicalDeviceFragmentShadingRateKHR);
+
 static vk::IndexType GetVkIndexType(ezRHIResourceFormat::Enum format)
 {
   vk::Format vk_format = VKUtils::ToVkFormat(format);
@@ -65,62 +69,74 @@ vk::ImageLayout ConvertState(ResourceState state)
 }
 
 VKDevice::VKDevice(VKAdapter& adapter)
-  : m_adapter(adapter)
-  , m_physical_device(adapter.GetPhysicalDevice())
-  , m_gpu_descriptor_pool(*this)
+  : m_Adapter(adapter)
+  , m_PhysicalDevice(adapter.GetPhysicalDevice())
+  , m_GPUDescriptorPool(*this)
 {
-  auto queue_families = m_physical_device.getQueueFamilyProperties();
-  auto has_all_bits = [](auto flags, auto bits) {
+  ezUInt32 queueFamiliesCount = 0;
+  m_PhysicalDevice.getQueueFamilyProperties(&queueFamiliesCount, nullptr);
+
+  ezDynamicArray<vk::QueueFamilyProperties> queueFamilies;
+  queueFamilies.SetCountUninitialized(queueFamiliesCount);
+  m_PhysicalDevice.getQueueFamilyProperties(&queueFamiliesCount, queueFamilies.GetData());
+
+  auto hasAllBits = [](auto flags, auto bits) {
     return (flags & bits) == bits;
   };
-  auto has_any_bits = [](auto flags, auto bits) {
+  auto hasAnyBits = [](auto flags, auto bits) {
     return flags & bits;
   };
-  for (ezUInt32 i = 0; i < (ezUInt32)queue_families.size(); ++i)
+  for (ezUInt32 i = 0; i < queueFamilies.GetCount(); ++i)
   {
-    const auto& queue = queue_families[i];
-    if (queue.queueCount > 0 && has_all_bits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer))
+    const auto& queue = queueFamilies[i];
+    if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer))
     {
-      m_queues_info[CommandListType::kGraphics].queue_family_index = i;
-      m_queues_info[CommandListType::kGraphics].queue_count = queue.queueCount;
+      m_QueuesInfo[CommandListType::kGraphics].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::kGraphics].QueueCount = queue.queueCount;
     }
-    else if (queue.queueCount > 0 && has_all_bits(queue.queueFlags, vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer) && !has_any_bits(queue.queueFlags, vk::QueueFlagBits::eGraphics))
+    else if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer) && !hasAnyBits(queue.queueFlags, vk::QueueFlagBits::eGraphics))
     {
-      m_queues_info[CommandListType::kCompute].queue_family_index = i;
-      m_queues_info[CommandListType::kCompute].queue_count = queue.queueCount;
+      m_QueuesInfo[CommandListType::kCompute].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::kCompute].QueueCount = queue.queueCount;
     }
-    else if (queue.queueCount > 0 && has_all_bits(queue.queueFlags, vk::QueueFlagBits::eTransfer) && !has_any_bits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute))
+    else if (queue.queueCount > 0 && hasAllBits(queue.queueFlags, vk::QueueFlagBits::eTransfer) && !hasAnyBits(queue.queueFlags, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute))
     {
-      m_queues_info[CommandListType::kCopy].queue_family_index = i;
-      m_queues_info[CommandListType::kCopy].queue_count = queue.queueCount;
+      m_QueuesInfo[CommandListType::kCopy].QueueFamilyIndex = i;
+      m_QueuesInfo[CommandListType::kCopy].QueueCount = queue.queueCount;
     }
   }
 
-  auto extensions = m_physical_device.enumerateDeviceExtensionProperties();
-  ezSet<ezString> req_extension;
+  ezUInt32 extensionsCount = 0;
+  vk::Result result = m_PhysicalDevice.enumerateDeviceExtensionProperties(nullptr, &extensionsCount, nullptr);
 
-  req_extension.Insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_RAY_QUERY_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
-  req_extension.Insert(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
-  req_extension.Insert(VK_NV_MESH_SHADER_EXTENSION_NAME);
-  req_extension.Insert(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+  ezDynamicArray<vk::ExtensionProperties> extensions;
+  extensions.SetCountUninitialized(extensionsCount);
+  result = m_PhysicalDevice.enumerateDeviceExtensionProperties(nullptr, &extensionsCount, extensions.GetData());
 
-  ezDynamicArray<const char*> found_extension;
+  ezSet<ezString> requiredExtensions;
+
+  requiredExtensions.Insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_NV_MESH_SHADER_EXTENSION_NAME);
+  requiredExtensions.Insert(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+
+  ezDynamicArray<const char*> foundExtensions;
   for (const auto& extension : extensions)
   {
-    if (req_extension.Contains(extension.extensionName.data()))
-      found_extension.PushBack(extension.extensionName);
+    if (requiredExtensions.Contains(extension.extensionName.data()))
+      foundExtensions.PushBack(extension.extensionName);
 
     if (ezStringUtils::IsEqual(extension.extensionName.data(), VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME))
       m_is_variable_rate_shading_supported = true;
@@ -132,135 +148,141 @@ VKDevice::VKDevice(VKAdapter& adapter)
       m_is_ray_query_supported = true;
   }
 
-  void* device_create_info_next = nullptr;
-  auto add_extension = [&](auto& extension) {
-    extension.pNext = device_create_info_next;
-    device_create_info_next = &extension;
+  void* deviceCreateInfoNext = nullptr;
+  auto addExtension = [&](auto& extension) {
+    extension.pNext = deviceCreateInfoNext;
+    deviceCreateInfoNext = &extension;
   };
 
   if (m_is_variable_rate_shading_supported)
   {
-    ezMap<ShadingRate, vk::Extent2D> shading_rate_palette;
-    shading_rate_palette.Insert(ShadingRate::k1x1, vk::Extent2D{1, 1});
-    shading_rate_palette.Insert(ShadingRate::k1x2, vk::Extent2D{1, 2});
-    shading_rate_palette.Insert(ShadingRate::k2x1, vk::Extent2D{2, 1});
-    shading_rate_palette.Insert(ShadingRate::k2x2, vk::Extent2D{2, 2});
-    shading_rate_palette.Insert(ShadingRate::k2x4, vk::Extent2D{2, 4});
-    shading_rate_palette.Insert(ShadingRate::k4x2, vk::Extent2D{4, 2});
-    shading_rate_palette.Insert(ShadingRate::k4x4, vk::Extent2D{4, 4});
+    ezMap<ShadingRate, vk::Extent2D> shadingRatePalette;
+    shadingRatePalette.Insert(ShadingRate::k1x1, vk::Extent2D{1, 1});
+    shadingRatePalette.Insert(ShadingRate::k1x2, vk::Extent2D{1, 2});
+    shadingRatePalette.Insert(ShadingRate::k2x1, vk::Extent2D{2, 1});
+    shadingRatePalette.Insert(ShadingRate::k2x2, vk::Extent2D{2, 2});
+    shadingRatePalette.Insert(ShadingRate::k2x4, vk::Extent2D{2, 4});
+    shadingRatePalette.Insert(ShadingRate::k4x2, vk::Extent2D{4, 2});
+    shadingRatePalette.Insert(ShadingRate::k4x4, vk::Extent2D{4, 4});
 
-    decltype(auto) fragment_shading_rates = m_adapter.GetPhysicalDevice().getFragmentShadingRatesKHR();
-    for (const auto& fragment_shading_rate : fragment_shading_rates)
+    ezUInt32 fragmentShadingRatesCount = 0;
+    result = m_Adapter.GetPhysicalDevice().getFragmentShadingRatesKHR(&fragmentShadingRatesCount, nullptr);
+
+    ezDynamicArray<vk::PhysicalDeviceFragmentShadingRateKHR> fragmentShadingRates;
+    fragmentShadingRates.SetCountUninitialized(fragmentShadingRatesCount);
+    result = m_Adapter.GetPhysicalDevice().getFragmentShadingRatesKHR(&fragmentShadingRatesCount, fragmentShadingRates.GetData());
+
+    for (const auto& fragmentShadingRate : fragmentShadingRates)
     {
-      vk::Extent2D size = fragment_shading_rate.fragmentSize;
-      ezUInt8 shading_rate = ((size.width >> 1) << 2) | (size.height >> 1);
-      EZ_ASSERT_ALWAYS((1 << ((shading_rate >> 2) & 3)) == size.width, "");
-      EZ_ASSERT_ALWAYS((1 << (shading_rate & 3)) == size.height, "");
-      EZ_ASSERT_ALWAYS(shading_rate_palette[(ShadingRate)shading_rate] == size, "");
-      shading_rate_palette.Remove((ShadingRate)shading_rate);
+      vk::Extent2D size = fragmentShadingRate.fragmentSize;
+      ezUInt8 shadingRate = ((size.width >> 1) << 2) | (size.height >> 1);
+      EZ_ASSERT_ALWAYS((1 << ((shadingRate >> 2) & 3)) == size.width, "");
+      EZ_ASSERT_ALWAYS((1 << (shadingRate & 3)) == size.height, "");
+      EZ_ASSERT_ALWAYS(shadingRatePalette[(ShadingRate)shadingRate] == size, "");
+      shadingRatePalette.Remove((ShadingRate)shadingRate);
     }
-    EZ_ASSERT_ALWAYS(shading_rate_palette.IsEmpty(), "");
+    EZ_ASSERT_ALWAYS(shadingRatePalette.IsEmpty(), "");
 
-    vk::PhysicalDeviceFragmentShadingRatePropertiesKHR shading_rate_image_properties = {};
-    vk::PhysicalDeviceProperties2 device_props2 = {};
-    device_props2.pNext = &shading_rate_image_properties;
-    m_adapter.GetPhysicalDevice().getProperties2(&device_props2);
-    EZ_ASSERT_ALWAYS(shading_rate_image_properties.minFragmentShadingRateAttachmentTexelSize == shading_rate_image_properties.maxFragmentShadingRateAttachmentTexelSize, "");
-    EZ_ASSERT_ALWAYS(shading_rate_image_properties.minFragmentShadingRateAttachmentTexelSize.width == shading_rate_image_properties.minFragmentShadingRateAttachmentTexelSize.height, "");
-    EZ_ASSERT_ALWAYS(shading_rate_image_properties.maxFragmentShadingRateAttachmentTexelSize.width == shading_rate_image_properties.maxFragmentShadingRateAttachmentTexelSize.height, "");
-    m_shading_rate_image_tile_size = shading_rate_image_properties.maxFragmentShadingRateAttachmentTexelSize.width;
+    vk::PhysicalDeviceFragmentShadingRatePropertiesKHR shadingRateImageProperties = {};
+    vk::PhysicalDeviceProperties2 deviceProps2 = {};
+    deviceProps2.pNext = &shadingRateImageProperties;
+    m_Adapter.GetPhysicalDevice().getProperties2(&deviceProps2);
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize == shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize, "");
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize.width == shadingRateImageProperties.minFragmentShadingRateAttachmentTexelSize.height, "");
+    EZ_ASSERT_ALWAYS(shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.width == shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.height, "");
+    m_shading_rate_image_tile_size = shadingRateImageProperties.maxFragmentShadingRateAttachmentTexelSize.width;
 
-    vk::PhysicalDeviceFragmentShadingRateFeaturesKHR fragment_shading_rate_features = {};
-    fragment_shading_rate_features.attachmentFragmentShadingRate = true;
-    add_extension(fragment_shading_rate_features);
+    vk::PhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeatures = {};
+    fragmentShadingRateFeatures.attachmentFragmentShadingRate = true;
+    addExtension(fragmentShadingRateFeatures);
   }
 
   if (m_is_dxr_supported)
   {
-    vk::PhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_properties = {};
-    vk::PhysicalDeviceProperties2 device_props2 = {};
-    device_props2.pNext = &ray_tracing_properties;
-    m_physical_device.getProperties2(&device_props2);
-    m_shader_group_handle_size = ray_tracing_properties.shaderGroupHandleSize;
-    m_shader_record_alignment = ray_tracing_properties.shaderGroupHandleSize;
-    m_shader_table_alignment = ray_tracing_properties.shaderGroupBaseAlignment;
+    vk::PhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingProperties = {};
+    vk::PhysicalDeviceProperties2 deviceProps2 = {};
+    deviceProps2.pNext = &rayTracingProperties;
+    m_PhysicalDevice.getProperties2(&deviceProps2);
+    m_shader_group_handle_size = rayTracingProperties.shaderGroupHandleSize;
+    m_shader_record_alignment = rayTracingProperties.shaderGroupHandleSize;
+    m_shader_table_alignment = rayTracingProperties.shaderGroupBaseAlignment;
   }
 
-  const float queue_priority = 1.0f;
-  ezDynamicArray<vk::DeviceQueueCreateInfo> queues_create_info;
-  for (const auto& queue_info : m_queues_info)
+  const float queuePriority = 1.0f;
+  ezDynamicArray<vk::DeviceQueueCreateInfo> queuesCreateInfo;
+  for (const auto& queueInfo : m_QueuesInfo)
   {
-    vk::DeviceQueueCreateInfo& queue_create_info = queues_create_info.ExpandAndGetRef();
-    queue_create_info.queueFamilyIndex = queue_info.Value().queue_family_index;
-    queue_create_info.queueCount = 1;
-    queue_create_info.pQueuePriorities = &queue_priority;
+    vk::DeviceQueueCreateInfo& queueCreateInfo = queuesCreateInfo.ExpandAndGetRef();
+    queueCreateInfo.queueFamilyIndex = queueInfo.Value().QueueFamilyIndex;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
   }
 
-  vk::PhysicalDeviceFeatures device_features = {};
-  device_features.textureCompressionBC = true;
-  device_features.vertexPipelineStoresAndAtomics = true;
-  device_features.samplerAnisotropy = true;
-  device_features.fragmentStoresAndAtomics = true;
-  device_features.sampleRateShading = true;
-  device_features.geometryShader = true;
-  device_features.imageCubeArray = true;
-  device_features.shaderImageGatherExtended = true;
+  vk::PhysicalDeviceFeatures deviceFeatures = {};
+  deviceFeatures.textureCompressionBC = true;
+  deviceFeatures.vertexPipelineStoresAndAtomics = true;
+  deviceFeatures.samplerAnisotropy = true;
+  deviceFeatures.fragmentStoresAndAtomics = true;
+  deviceFeatures.sampleRateShading = true;
+  deviceFeatures.geometryShader = true;
+  deviceFeatures.imageCubeArray = true;
+  deviceFeatures.shaderImageGatherExtended = true;
 
-  vk::PhysicalDeviceVulkan12Features device_vulkan12_features = {};
-  device_vulkan12_features.drawIndirectCount = true;
-  device_vulkan12_features.bufferDeviceAddress = true;
-  device_vulkan12_features.timelineSemaphore = true;
-  device_vulkan12_features.runtimeDescriptorArray = true;
-  device_vulkan12_features.descriptorBindingVariableDescriptorCount = true;
-  add_extension(device_vulkan12_features);
+  vk::PhysicalDeviceVulkan12Features deviceVulkan12Features = {};
+  deviceVulkan12Features.drawIndirectCount = true;
+  deviceVulkan12Features.bufferDeviceAddress = true;
+  deviceVulkan12Features.timelineSemaphore = true;
+  deviceVulkan12Features.runtimeDescriptorArray = true;
+  deviceVulkan12Features.descriptorBindingVariableDescriptorCount = true;
+  addExtension(deviceVulkan12Features);
 
-  vk::PhysicalDeviceMeshShaderFeaturesNV mesh_shader_feature = {};
-  mesh_shader_feature.taskShader = true;
-  mesh_shader_feature.meshShader = true;
+  vk::PhysicalDeviceMeshShaderFeaturesNV meshShaderFeature = {};
+  meshShaderFeature.taskShader = true;
+  meshShaderFeature.meshShader = true;
   if (m_is_mesh_shading_supported)
   {
-    add_extension(mesh_shader_feature);
+    addExtension(meshShaderFeature);
   }
 
-  vk::PhysicalDeviceRayTracingPipelineFeaturesKHR raytracing_pipeline_feature = {};
-  raytracing_pipeline_feature.rayTracingPipeline = true;
+  vk::PhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeature = {};
+  rayTracingPipelineFeature.rayTracingPipeline = true;
 
-  vk::PhysicalDeviceAccelerationStructureFeaturesKHR acceleration_structure_feature = {};
-  acceleration_structure_feature.accelerationStructure = true;
+  vk::PhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeature = {};
+  accelerationStructureFeature.accelerationStructure = true;
 
-  vk::PhysicalDeviceRayQueryFeaturesKHR rayquery_pipeline_feature = {};
-  rayquery_pipeline_feature.rayQuery = true;
+  vk::PhysicalDeviceRayQueryFeaturesKHR rayQueryPipelineFeature = {};
+  rayQueryPipelineFeature.rayQuery = true;
 
   if (m_is_dxr_supported)
   {
-    add_extension(raytracing_pipeline_feature);
-    add_extension(acceleration_structure_feature);
+    addExtension(rayTracingPipelineFeature);
+    addExtension(accelerationStructureFeature);
 
     if (m_is_ray_query_supported)
     {
-      raytracing_pipeline_feature.rayTraversalPrimitiveCulling = true;
-      add_extension(rayquery_pipeline_feature);
+      rayTracingPipelineFeature.rayTraversalPrimitiveCulling = true;
+      addExtension(rayQueryPipelineFeature);
     }
   }
 
-  vk::DeviceCreateInfo device_create_info = {};
-  device_create_info.pNext = device_create_info_next;
-  device_create_info.queueCreateInfoCount = queues_create_info.GetCount();
-  device_create_info.pQueueCreateInfos = queues_create_info.GetData();
-  device_create_info.pEnabledFeatures = &device_features;
-  device_create_info.enabledExtensionCount = found_extension.GetCount();
-  device_create_info.ppEnabledExtensionNames = found_extension.GetData();
+  vk::DeviceCreateInfo deviceCreateInfo = {};
+  deviceCreateInfo.pNext = deviceCreateInfoNext;
+  deviceCreateInfo.queueCreateInfoCount = queuesCreateInfo.GetCount();
+  deviceCreateInfo.pQueueCreateInfos = queuesCreateInfo.GetData();
+  deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+  deviceCreateInfo.enabledExtensionCount = foundExtensions.GetCount();
+  deviceCreateInfo.ppEnabledExtensionNames = foundExtensions.GetData();
 
-  m_device = m_physical_device.createDeviceUnique(device_create_info);
-  VULKAN_HPP_DEFAULT_DISPATCHER.init(m_device.get());
+  m_Device = m_PhysicalDevice.createDeviceUnique(deviceCreateInfo);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Device.get());
 
-  for (auto& queue_info : m_queues_info)
+  for (auto& queueInfo : m_QueuesInfo)
   {
-    vk::CommandPoolCreateInfo cmd_pool_create_info = {};
-    cmd_pool_create_info.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-    cmd_pool_create_info.queueFamilyIndex = queue_info.Value().queue_family_index;
-    m_cmd_pools.Insert(queue_info.Key(), m_device->createCommandPoolUnique(cmd_pool_create_info));
-    m_command_queues[queue_info.Key()] = EZ_DEFAULT_NEW(VKCommandQueue, *this, queue_info.Key(), queue_info.Value().queue_family_index);
+    vk::CommandPoolCreateInfo cmdPoolCreateInfo = {};
+    cmdPoolCreateInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    cmdPoolCreateInfo.queueFamilyIndex = queueInfo.Value().QueueFamilyIndex;
+    m_CmdPools.Insert(queueInfo.Key(), m_Device->createCommandPoolUnique(cmdPoolCreateInfo));
+    m_CommandQueues[queueInfo.Key()] = EZ_DEFAULT_NEW(VKCommandQueue, *this, queueInfo.Key(), queueInfo.Value().QueueFamilyIndex);
   }
 }
 
@@ -271,12 +293,12 @@ ezSharedPtr<Memory> VKDevice::AllocateMemory(ezUInt64 size, MemoryType memoryTyp
 
 ezSharedPtr<CommandQueue> VKDevice::GetCommandQueue(CommandListType type)
 {
-  return m_command_queues[GetAvailableCommandListType(type)];
+  return m_CommandQueues[GetAvailableCommandListType(type)];
 }
 
-std::shared_ptr<Swapchain> VKDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync)
+ezSharedPtr<Swapchain> VKDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync)
 {
-  return std::make_shared<VKSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
+  return EZ_DEFAULT_NEW(VKSwapchain, *m_CommandQueues[CommandListType::kGraphics], window, width, height, frameCount, vsync);
 }
 
 std::shared_ptr<CommandList> VKDevice::CreateCommandList(CommandListType type)
@@ -289,7 +311,7 @@ std::shared_ptr<Fence> VKDevice::CreateFence(ezUInt64 initial_value)
   return std::make_shared<VKTimelineSemaphore>(*this, initial_value);
 }
 
-std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
   res->format = format;
@@ -297,24 +319,24 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bin
   res->image.size.height = height;
   res->image.size.width = width;
   res->image.format = VKUtils::ToVkFormat(format);
-  res->image.level_count = mip_levels;
+  res->image.level_count = mipLevels;
   res->image.sample_count = sample_count;
   res->image.array_layers = depth;
 
   vk::ImageUsageFlags usage = {};
-  if (bind_flag & BindFlag::kDepthStencil)
+  if (bindFlags & BindFlag::kDepthStencil)
     usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferDst;
-  if (bind_flag & BindFlag::kShaderResource)
+  if (bindFlags & BindFlag::kShaderResource)
     usage |= vk::ImageUsageFlagBits::eSampled;
-  if (bind_flag & BindFlag::kRenderTarget)
+  if (bindFlags & BindFlag::kRenderTarget)
     usage |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst;
-  if (bind_flag & BindFlag::kUnorderedAccess)
+  if (bindFlags & BindFlag::kUnorderedAccess)
     usage |= vk::ImageUsageFlagBits::eStorage;
-  if (bind_flag & BindFlag::kCopyDest)
+  if (bindFlags & BindFlag::kCopyDest)
     usage |= vk::ImageUsageFlagBits::eTransferDst;
-  if (bind_flag & BindFlag::kCopySource)
+  if (bindFlags & BindFlag::kCopySource)
     usage |= vk::ImageUsageFlagBits::eTransferSrc;
-  if (bind_flag & BindFlag::kShadingRateSource)
+  if (bindFlags & BindFlag::kShadingRateSource)
     usage |= vk::ImageUsageFlagBits::eFragmentShadingRateAttachmentKHR;
 
   vk::ImageCreateInfo image_info = {};
@@ -336,7 +358,7 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bin
     image_info.extent.depth = depth;
   else
     image_info.extent.depth = 1;
-  image_info.mipLevels = mip_levels;
+  image_info.mipLevels = mipLevels;
   if (type == TextureType::k3D)
     image_info.arrayLayers = 1;
   else
@@ -351,7 +373,7 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bin
   if (image_info.arrayLayers % 6 == 0)
     image_info.flags = vk::ImageCreateFlagBits::eCubeCompatible;
 
-  res->image.res_owner = m_device->createImageUnique(image_info);
+  res->image.res_owner = m_Device->createImageUnique(image_info);
   res->image.res = res->image.res_owner.get();
 
   res->SetInitialState(ResourceState::kUndefined);
@@ -399,7 +421,7 @@ std::shared_ptr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 bu
   if (bind_flag & BindFlag::kIndirectBuffer)
     buffer_info.usage |= vk::BufferUsageFlagBits::eIndirectBuffer;
 
-  res->buffer.res = m_device->createBufferUnique(buffer_info);
+  res->buffer.res = m_Device->createBufferUnique(buffer_info);
   res->SetInitialState(ResourceState::kCommon);
 
   return res;
@@ -468,7 +490,7 @@ std::shared_ptr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
       break;
   }
 
-  res->sampler.res = m_device->createSamplerUnique(samplerInfo);
+  res->sampler.res = m_Device->createSamplerUnique(samplerInfo);
 
   res->resource_type = ResourceType::kSampler;
   return res;
@@ -542,14 +564,14 @@ vk::AccelerationStructureGeometryKHR VKDevice::FillRaytracingGeometryTriangles(c
   auto vk_index_res = std::static_pointer_cast<VKResource>(index.res);
 
   auto vertex_stride = ezRHIResourceFormat::GetFormatStride(vertex.format);
-  geometry_desc.geometry.triangles.vertexData = m_device->getBufferAddress({vk_vertex_res->buffer.res.get()}) + vertex.offset * vertex_stride;
+  geometry_desc.geometry.triangles.vertexData = m_Device->getBufferAddress({vk_vertex_res->buffer.res.get()}) + vertex.offset * vertex_stride;
   geometry_desc.geometry.triangles.vertexStride = vertex_stride;
   geometry_desc.geometry.triangles.vertexFormat = VKUtils::ToVkFormat(vertex.format);
   geometry_desc.geometry.triangles.maxVertex = vertex.count;
   if (vk_index_res)
   {
     auto index_stride = ezRHIResourceFormat::GetFormatStride(index.format);
-    geometry_desc.geometry.triangles.indexData = m_device->getBufferAddress({vk_index_res->buffer.res.get()}) + index.offset * index_stride;
+    geometry_desc.geometry.triangles.indexData = m_Device->getBufferAddress({vk_index_res->buffer.res.get()}) + index.offset * index_stride;
     geometry_desc.geometry.triangles.indexType = GetVkIndexType(index.format);
   }
   else
@@ -563,7 +585,7 @@ vk::AccelerationStructureGeometryKHR VKDevice::FillRaytracingGeometryTriangles(c
 RaytracingASPrebuildInfo VKDevice::GetAccelerationStructurePrebuildInfo(const vk::AccelerationStructureBuildGeometryInfoKHR& acceleration_structure_info, const std::vector<ezUInt32>& max_primitive_counts) const
 {
   vk::AccelerationStructureBuildSizesInfoKHR size_info = {};
-  m_device->getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR::eDevice, &acceleration_structure_info, max_primitive_counts.data(), &size_info);
+  m_Device->getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR::eDevice, &acceleration_structure_info, max_primitive_counts.data(), &size_info);
   RaytracingASPrebuildInfo prebuild_info = {};
   prebuild_info.acceleration_structure_size = size_info.accelerationStructureSize;
   prebuild_info.build_scratch_data_size = size_info.buildScratchSize;
@@ -606,12 +628,12 @@ std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStru
   res->resource_type = ResourceType::kAccelerationStructure;
   res->acceleration_structures_memory = resource;
 
-  vk::AccelerationStructureCreateInfoKHR acceleration_structure_create_info = {};
-  acceleration_structure_create_info.buffer = resource->As<VKResource>().buffer.res.get();
-  acceleration_structure_create_info.offset = offset;
-  acceleration_structure_create_info.size = 0;
-  acceleration_structure_create_info.type = Convert(type);
-  res->acceleration_structure_handle = m_device->createAccelerationStructureKHRUnique(acceleration_structure_create_info);
+  vk::AccelerationStructureCreateInfoKHR accelerationStructureCreateInfo = {};
+  accelerationStructureCreateInfo.buffer = resource->As<VKResource>().buffer.res.get();
+  accelerationStructureCreateInfo.offset = offset;
+  accelerationStructureCreateInfo.size = 0;
+  accelerationStructureCreateInfo.type = Convert(type);
+  res->acceleration_structure_handle = m_Device->createAccelerationStructureKHRUnique(accelerationStructureCreateInfo);
 
   return res;
 }
@@ -656,7 +678,7 @@ MemoryBudget VKDevice::GetMemoryBudget() const
   vk::PhysicalDeviceMemoryBudgetPropertiesEXT memory_budget = {};
   vk::PhysicalDeviceMemoryProperties2 mem_properties = {};
   mem_properties.pNext = &memory_budget;
-  m_adapter.GetPhysicalDevice().getMemoryProperties2(&mem_properties);
+  m_Adapter.GetPhysicalDevice().getMemoryProperties2(&mem_properties);
   MemoryBudget res = {};
   for (size_t i = 0; i < VK_MAX_MEMORY_HEAPS; ++i)
   {
@@ -717,17 +739,17 @@ RaytracingASPrebuildInfo VKDevice::GetTLASPrebuildInfo(ezUInt32 instance_count, 
 
 VKAdapter& VKDevice::GetAdapter()
 {
-  return m_adapter;
+  return m_Adapter;
 }
 
 vk::Device VKDevice::GetDevice()
 {
-  return m_device.get();
+  return m_Device.get();
 }
 
 CommandListType VKDevice::GetAvailableCommandListType(CommandListType type)
 {
-  if (m_queues_info.Contains(type))
+  if (m_QueuesInfo.Contains(type))
   {
     return type;
   }
@@ -736,7 +758,7 @@ CommandListType VKDevice::GetAvailableCommandListType(CommandListType type)
 
 vk::CommandPool VKDevice::GetCmdPool(CommandListType type)
 {
-  return m_cmd_pools[GetAvailableCommandListType(type)].get();
+  return m_CmdPools[GetAvailableCommandListType(type)].get();
 }
 
 vk::ImageAspectFlags VKDevice::GetAspectFlags(vk::Format format) const
@@ -761,7 +783,7 @@ vk::ImageAspectFlags VKDevice::GetAspectFlags(vk::Format format) const
 ezUInt32 VKDevice::FindMemoryType(ezUInt32 type_filter, vk::MemoryPropertyFlags properties)
 {
   vk::PhysicalDeviceMemoryProperties memProperties;
-  m_physical_device.getMemoryProperties(&memProperties);
+  m_PhysicalDevice.getMemoryProperties(&memProperties);
 
   for (ezUInt32 i = 0; i < memProperties.memoryTypeCount; ++i)
   {
@@ -773,21 +795,21 @@ ezUInt32 VKDevice::FindMemoryType(ezUInt32 type_filter, vk::MemoryPropertyFlags 
 
 ezUniquePtr<VKGPUBindlessDescriptorPoolTyped>& VKDevice::GetGPUBindlessDescriptorPool(vk::DescriptorType type)
 {
-  //auto it = m_gpu_bindless_descriptor_pool.find(type);
-  //if (it == m_gpu_bindless_descriptor_pool.end())
-  //  it = m_gpu_bindless_descriptor_pool.emplace(std::piecewise_construct, std::forward_as_tuple(type), std::forward_as_tuple(*this, type)).first;
+  //auto it = m_GPUBindlessDescriptorPool.find(type);
+  //if (it == m_GPUBindlessDescriptorPool.end())
+  //  it = m_GPUBindlessDescriptorPool.emplace(std::piecewise_construct, std::forward_as_tuple(type), std::forward_as_tuple(*this, type)).first;
   //return it->second;
 
-  auto it = m_gpu_bindless_descriptor_pool.Find(type);
-  if (it == end(m_gpu_bindless_descriptor_pool))
+  auto it = m_GPUBindlessDescriptorPool.Find(type);
+  if (it == end(m_GPUBindlessDescriptorPool))
   {
-    it = m_gpu_bindless_descriptor_pool.Insert(type, EZ_DEFAULT_NEW(VKGPUBindlessDescriptorPoolTyped, *this, type));
-    //it = m_gpu_bindless_descriptor_pool.emplace(std::piecewise_construct, std::forward_as_tuple(type), std::forward_as_tuple(*this, type)).first;
+    it = m_GPUBindlessDescriptorPool.Insert(type, EZ_DEFAULT_NEW(VKGPUBindlessDescriptorPoolTyped, *this, type));
+    //it = m_GPUBindlessDescriptorPool.emplace(std::piecewise_construct, std::forward_as_tuple(type), std::forward_as_tuple(*this, type)).first;
   }
   return it.Value();
 }
 
 VKGPUDescriptorPool& VKDevice::GetGPUDescriptorPool()
 {
-  return m_gpu_descriptor_pool;
+  return m_GPUDescriptorPool;
 }

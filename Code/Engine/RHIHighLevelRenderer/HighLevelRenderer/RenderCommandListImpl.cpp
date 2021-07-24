@@ -69,7 +69,7 @@ void RenderCommandListImpl::CopyTexture(const std::shared_ptr<Resource>& src_tex
   m_command_list->CopyTexture(src_texture, dst_texture, regions);
 }
 
-void RenderCommandListImpl::UpdateSubresource(const std::shared_ptr<Resource>& resource, uint32_t subresource, const void* data, uint32_t row_pitch, uint32_t depth_pitch)
+void RenderCommandListImpl::UpdateSubresource(const std::shared_ptr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
 {
   switch (resource->GetMemoryType())
   {
@@ -80,7 +80,7 @@ void RenderCommandListImpl::UpdateSubresource(const std::shared_ptr<Resource>& r
   }
 }
 
-void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resource>& resource, uint32_t subresource, const void* data, uint32_t row_pitch, uint32_t depth_pitch)
+void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
 {
   std::shared_ptr<Resource>& upload_resource = m_cmd_resources.emplace_back();
 
@@ -109,8 +109,8 @@ void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resou
       auto& region = regions.emplace_back();
       region.texture_mip_level = subresource % resource->GetLevelCount();
       region.texture_array_layer = subresource / resource->GetLevelCount();
-      region.texture_extent.width = std::max<uint32_t>(1, (ezUInt32)resource->GetWidth() >> region.texture_mip_level);
-      region.texture_extent.height = std::max<uint32_t>(1, resource->GetHeight() >> region.texture_mip_level);
+      region.texture_extent.width = std::max<ezUInt32>(1, (ezUInt32)resource->GetWidth() >> region.texture_mip_level);
+      region.texture_extent.height = std::max<ezUInt32>(1, resource->GetHeight() >> region.texture_mip_level);
       region.texture_extent.depth = 1;
 
       ezUInt32 num_bytes = 0, row_bytes = 0, num_rows = 0;
@@ -141,7 +141,7 @@ void RenderCommandListImpl::SetViewport(float x, float y, float width, float hei
   m_command_list->SetScissorRect((ezUInt32)x, (ezUInt32)y, (ezUInt32)width, (ezUInt32)height);
 }
 
-void RenderCommandListImpl::SetScissorRect(int32_t left, int32_t top, uint32_t right, uint32_t bottom)
+void RenderCommandListImpl::SetScissorRect(int32_t left, int32_t top, ezUInt32 right, ezUInt32 bottom)
 {
   m_command_list->SetScissorRect(left, top, right, bottom);
 }
@@ -152,7 +152,7 @@ void RenderCommandListImpl::IASetIndexBuffer(const std::shared_ptr<Resource>& re
   m_command_list->IASetIndexBuffer(resource, format);
 }
 
-void RenderCommandListImpl::IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource)
+void RenderCommandListImpl::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource)
 {
   BufferBarrier(resource, ResourceState::kVertexAndConstantBuffer);
   m_command_list->IASetVertexBuffer(slot, resource);
@@ -174,26 +174,26 @@ void RenderCommandListImpl::EndEvent()
   m_command_list->EndEvent();
 }
 
-void RenderCommandListImpl::Draw(uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance)
+void RenderCommandListImpl::Draw(ezUInt32 vertex_count, ezUInt32 instance_count, ezUInt32 first_vertex, ezUInt32 first_instance)
 {
   Apply();
   m_command_list->Draw(vertex_count, instance_count, first_vertex, first_instance);
 }
 
-void RenderCommandListImpl::DrawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance)
+void RenderCommandListImpl::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, ezUInt32 first_index, int32_t vertex_offset, ezUInt32 first_instance)
 {
   Apply();
   m_command_list->DrawIndexed(index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
-void RenderCommandListImpl::DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void RenderCommandListImpl::DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(argument_buffer, ResourceState::kIndirectArgument);
   m_command_list->DrawIndirect(argument_buffer, argument_buffer_offset);
 }
 
-void RenderCommandListImpl::DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void RenderCommandListImpl::DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(argument_buffer, ResourceState::kIndirectArgument);
@@ -202,11 +202,11 @@ void RenderCommandListImpl::DrawIndexedIndirect(const std::shared_ptr<Resource>&
 
 void RenderCommandListImpl::DrawIndirectCount(
   const std::shared_ptr<Resource>& argument_buffer,
-  uint64_t argument_buffer_offset,
+  ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
-  uint64_t count_buffer_offset,
-  uint32_t max_draw_count,
-  uint32_t stride)
+  ezUInt64 count_buffer_offset,
+  ezUInt32 max_draw_count,
+  ezUInt32 stride)
 {
   Apply();
   BufferBarrier(argument_buffer, ResourceState::kIndirectArgument);
@@ -221,11 +221,11 @@ void RenderCommandListImpl::DrawIndirectCount(
 
 void RenderCommandListImpl::DrawIndexedIndirectCount(
   const std::shared_ptr<Resource>& argument_buffer,
-  uint64_t argument_buffer_offset,
+  ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
-  uint64_t count_buffer_offset,
-  uint32_t max_draw_count,
-  uint32_t stride)
+  ezUInt64 count_buffer_offset,
+  ezUInt32 max_draw_count,
+  ezUInt32 stride)
 {
   Apply();
   BufferBarrier(argument_buffer, ResourceState::kIndirectArgument);
@@ -238,26 +238,26 @@ void RenderCommandListImpl::DrawIndexedIndirectCount(
     stride);
 }
 
-void RenderCommandListImpl::Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z)
+void RenderCommandListImpl::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_group_count_y, ezUInt32 thread_group_count_z)
 {
   Apply();
   m_command_list->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void RenderCommandListImpl::DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void RenderCommandListImpl::DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(argument_buffer, ResourceState::kIndirectArgument);
   m_command_list->DispatchIndirect(argument_buffer, argument_buffer_offset);
 }
 
-void RenderCommandListImpl::DispatchMesh(uint32_t thread_group_count_x)
+void RenderCommandListImpl::DispatchMesh(ezUInt32 thread_group_count_x)
 {
   Apply();
   m_command_list->DispatchMesh(thread_group_count_x);
 }
 
-void RenderCommandListImpl::DispatchRays(uint32_t width, uint32_t height, uint32_t depth)
+void RenderCommandListImpl::DispatchRays(ezUInt32 width, ezUInt32 height, ezUInt32 depth)
 {
   Apply();
   m_command_list->DispatchRays(m_shader_tables, width, height, depth);
@@ -280,7 +280,7 @@ void RenderCommandListImpl::ViewBarrier(const std::shared_ptr<View>& view, Resou
   ImageBarrier(view->GetResource(), view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(), view->GetLayerCount(), state);
 }
 
-void RenderCommandListImpl::ImageBarrier(const std::shared_ptr<Resource>& resource, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count, ResourceState state)
+void RenderCommandListImpl::ImageBarrier(const std::shared_ptr<Resource>& resource, ezUInt32 base_mip_level, ezUInt32 level_count, ezUInt32 base_array_layer, ezUInt32 layer_count, ResourceState state)
 {
   if (!resource)
     return;
@@ -319,7 +319,7 @@ void RenderCommandListImpl::BuildTopLevelAS(const std::shared_ptr<Resource>& src
   {
     RaytracingGeometryInstance& instance = instances.emplace_back();
     memcpy(&instance.transform, &mesh.second, sizeof(instance.transform));
-    instance.instance_id = static_cast<uint32_t>(instances.size() - 1);
+    instance.instance_id = static_cast<ezUInt32>(instances.size() - 1);
     instance.instance_mask = 0xff;
     instance.acceleration_structure_handle = mesh.first->GetAccelerationStructureHandle();
   }
@@ -425,7 +425,7 @@ void RenderCommandListImpl::CreateShaderTable(std::shared_ptr<Pipeline> pipeline
 {
   decltype(auto) shader_handles = pipeline->GetRayTracingShaderGroupHandles(0, (ezUInt32)m_ray_tracing_pipeline_desc.groups.size());
 
-  uint64_t table_size = m_shader_tables.raygen.size + m_shader_tables.miss.size + m_shader_tables.callable.size + m_shader_tables.hit.size;
+  ezUInt64 table_size = m_shader_tables.raygen.size + m_shader_tables.miss.size + m_shader_tables.callable.size + m_shader_tables.hit.size;
   m_shader_table = m_device.CreateBuffer(BindFlag::kShaderTable, (ezUInt32)table_size);
   m_shader_table->CommitMemory(MemoryType::kUpload);
 
@@ -440,10 +440,10 @@ void RenderCommandListImpl::CreateShaderTable(std::shared_ptr<Pipeline> pipeline
   m_shader_tables.hit.offset = m_shader_tables.callable.offset + m_shader_tables.callable.size;
 
   size_t group_id = 0;
-  uint64_t raygen_offset = 0;
-  uint64_t miss_offset = 0;
-  uint64_t callable_offset = 0;
-  uint64_t hit_offset = 0;
+  ezUInt64 raygen_offset = 0;
+  ezUInt64 miss_offset = 0;
+  ezUInt64 callable_offset = 0;
+  ezUInt64 hit_offset = 0;
   for (const auto& shader : m_program->GetShaders())
   {
     for (const auto& entry_point : shader->GetReflection()->GetEntryPoints())
@@ -728,9 +728,9 @@ void RenderCommandListImpl::LazyResourceBarrier(const std::vector<LazyResourceBa
     }
     else
     {
-      for (uint32_t i = 0; i < barrier.level_count; ++i)
+      for (ezUInt32 i = 0; i < barrier.level_count; ++i)
       {
-        for (uint32_t j = 0; j < barrier.layer_count; ++j)
+        for (ezUInt32 j = 0; j < barrier.layer_count; ++j)
         {
           ResourceBarrierDesc manual_barrier = {};
           manual_barrier.resource = barrier.resource;
@@ -753,7 +753,7 @@ void RenderCommandListImpl::LazyResourceBarrier(const std::vector<LazyResourceBa
     m_command_list->ResourceBarrier(manual_barriers);
 }
 
-uint64_t& RenderCommandListImpl::GetFenceValue()
+ezUInt64& RenderCommandListImpl::GetFenceValue()
 {
   return m_fence_value;
 }
