@@ -199,7 +199,7 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   //  ViewDesc backBufferViewDesc = {};
   //  backBufferViewDesc.view_type = ViewType::kRenderTarget;
   //  backBufferViewDesc.dimension = ViewDimension::kTexture2D;
-  //  std::shared_ptr<Resource> backBuffer = m_pSwapchain->GetBackBuffer(i);
+  //  ezSharedPtr<Resource> backBuffer = m_pSwapchain->GetBackBuffer(i);
   //  std::shared_ptr<View> backBufferView = m_pDevice->CreateView(backBuffer, backBufferViewDesc);
   //  FramebufferDesc framebufferDesc = {};
   //  framebufferDesc.m_pRenderPass = m_pRenderPass;
@@ -269,7 +269,7 @@ ezApplication::Execution ezRHISampleApp::Run()
     ViewDesc backBufferViewDesc = {};
     backBufferViewDesc.view_type = ViewType::kRenderTarget;
     backBufferViewDesc.dimension = ViewDimension::kTexture2D;
-    std::shared_ptr<Resource> backBuffer = m_pSwapchain->GetBackBuffer(m_FrameIndex);
+    ezSharedPtr<Resource> backBuffer = m_pSwapchain->GetBackBuffer(m_FrameIndex);
     std::shared_ptr<View> backBufferView = m_pDevice->CreateView(backBuffer, backBufferViewDesc);
     FramebufferDesc framebufferDesc = {};
     framebufferDesc.render_pass = m_pRenderPass;

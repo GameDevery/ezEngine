@@ -15,7 +15,7 @@ struct EZ_RHI_DLL MemoryRequirements
   ezUInt32 memory_type_bits;
 };
 
-class EZ_RHI_DLL Resource : public QueryInterface
+class EZ_RHI_DLL Resource : public ezRefCounted
 {
 public:
   virtual ~Resource() = default;

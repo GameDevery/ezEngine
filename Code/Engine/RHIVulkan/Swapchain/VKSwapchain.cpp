@@ -97,7 +97,7 @@ VKSwapchain::VKSwapchain(VKCommandQueue& commandQueue, Window window, ezUInt32 w
   m_CommandList = m_Device.CreateCommandList(CommandListType::kGraphics);
   for (ezUInt32 i = 0; i < frameCount; ++i)
   {
-    std::shared_ptr<VKResource> res = std::make_shared<VKResource>(m_Device);
+    ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,m_Device);
     res->format = GetFormat();
     res->image.res = images[i];
     res->image.format = m_SwapchainColorFormat;
@@ -128,7 +128,7 @@ ezRHIResourceFormat::Enum VKSwapchain::GetFormat() const
   return VKUtils::ToEngineFormat(m_SwapchainColorFormat);
 }
 
-std::shared_ptr<Resource> VKSwapchain::GetBackBuffer(ezUInt32 buffer)
+ezSharedPtr<Resource> VKSwapchain::GetBackBuffer(ezUInt32 buffer)
 {
   return m_BackBuffers[buffer];
 }

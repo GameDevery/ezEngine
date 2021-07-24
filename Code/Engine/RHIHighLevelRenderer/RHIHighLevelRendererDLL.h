@@ -37,7 +37,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL LazyViewDesc
 
 struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginColorDesc
 {
-  std::shared_ptr<Resource> texture;
+  ezSharedPtr<Resource> texture;
   LazyViewDesc view_desc;
   RenderPassLoadOp load_op = RenderPassLoadOp::kClear;
   RenderPassStoreOp store_op = RenderPassStoreOp::kStore;
@@ -46,7 +46,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginColorDesc
 
 struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginDepthStencilDesc
 {
-  std::shared_ptr<Resource> texture;
+  ezSharedPtr<Resource> texture;
   LazyViewDesc view_desc;
   RenderPassLoadOp depth_load_op = RenderPassLoadOp::kClear;
   RenderPassStoreOp depth_store_op = RenderPassStoreOp::kStore;
@@ -72,7 +72,7 @@ public:
 
 struct EZ_RHIHIGHLEVELRENDERER_DLL ResourceLazyViewDesc
 {
-  ResourceLazyViewDesc(DeferredView& deferred_view, const std::shared_ptr<Resource>& resource)
+  ResourceLazyViewDesc(DeferredView& deferred_view, const ezSharedPtr<Resource>& resource)
     : m_deferred_view(deferred_view)
     , resource(resource)
   {
@@ -83,7 +83,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL ResourceLazyViewDesc
     m_deferred_view.OnDestroy(*this);
   }
 
-  std::shared_ptr<Resource> resource;
+  ezSharedPtr<Resource> resource;
   LazyViewDesc view_desc;
   DeferredView& m_deferred_view;
 };

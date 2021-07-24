@@ -22,8 +22,8 @@ VKFramebuffer::VKFramebuffer(VKDevice& device, const FramebufferDesc& desc)
             return;
         attachment_views.emplace_back(vk_view.GetImageView());
 
-        decltype(auto) vk_resource = resource->As<VKResource>();
-        framebuffer_info.layers = ezMath::Max(framebuffer_info.layers, vk_resource.image.array_layers);
+        decltype(auto) vk_resource = resource.Downcast<VKResource>();
+        framebuffer_info.layers = ezMath::Max(framebuffer_info.layers, vk_resource->image.array_layers);
     };
     for (auto& rtv : desc.colors)
     {

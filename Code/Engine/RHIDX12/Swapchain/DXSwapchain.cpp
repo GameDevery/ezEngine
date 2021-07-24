@@ -28,7 +28,7 @@ DXSwapchain::DXSwapchain(DXCommandQueue& command_queue, Window window, ezUInt32 
 
   for (ezUInt32 i = 0; i < frame_count; ++i)
   {
-    std::shared_ptr<DXResource> res = std::make_shared<DXResource>(command_queue.GetDevice());
+    ezSharedPtr<DXResource> res = EZ_DEFAULT_NEW(DXResource, command_queue.GetDevice());
     ComPtr<ID3D12Resource> back_buffer;
     EZ_ASSERT_ALWAYS(m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&back_buffer)) == S_OK, "");
     res->format = GetFormat();
@@ -45,7 +45,7 @@ ezRHIResourceFormat::Enum DXSwapchain::GetFormat() const
   return ezRHIResourceFormat::R8G8B8A8_UNORM;
 }
 
-std::shared_ptr<Resource> DXSwapchain::GetBackBuffer(ezUInt32 buffer)
+ezSharedPtr<Resource> DXSwapchain::GetBackBuffer(ezUInt32 buffer)
 {
   return m_BackBuffers[buffer];
 }

@@ -37,7 +37,7 @@ void RenderCommandListImpl::Close()
     m_CommandList->Close();
 }
 
-void RenderCommandListImpl::CopyBuffer(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_buffer,
+void RenderCommandListImpl::CopyBuffer(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_buffer,
   const std::vector<BufferCopyRegion>& regions)
 {
   for (const auto& region : regions)
@@ -48,7 +48,7 @@ void RenderCommandListImpl::CopyBuffer(const std::shared_ptr<Resource>& src_buff
   m_CommandList->CopyBuffer(src_buffer, dst_buffer, regions);
 }
 
-void RenderCommandListImpl::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_texture,
+void RenderCommandListImpl::CopyBufferToTexture(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_texture,
   const std::vector<BufferToTextureCopyRegion>& regions)
 {
   for (const auto& region : regions)
@@ -59,7 +59,7 @@ void RenderCommandListImpl::CopyBufferToTexture(const std::shared_ptr<Resource>&
   m_CommandList->CopyBufferToTexture(src_buffer, dst_texture, regions);
 }
 
-void RenderCommandListImpl::CopyTexture(const std::shared_ptr<Resource>& src_texture, const std::shared_ptr<Resource>& dst_texture, const std::vector<TextureCopyRegion>& regions)
+void RenderCommandListImpl::CopyTexture(const ezSharedPtr<Resource>& src_texture, const ezSharedPtr<Resource>& dst_texture, const std::vector<TextureCopyRegion>& regions)
 {
   for (const auto& region : regions)
   {
@@ -69,7 +69,7 @@ void RenderCommandListImpl::CopyTexture(const std::shared_ptr<Resource>& src_tex
   m_CommandList->CopyTexture(src_texture, dst_texture, regions);
 }
 
-void RenderCommandListImpl::UpdateSubresource(const std::shared_ptr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
+void RenderCommandListImpl::UpdateSubresource(const ezSharedPtr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
 {
   switch (resource->GetMemoryType())
   {
@@ -80,9 +80,9 @@ void RenderCommandListImpl::UpdateSubresource(const std::shared_ptr<Resource>& r
   }
 }
 
-void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
+void RenderCommandListImpl::UpdateDefaultSubresource(const ezSharedPtr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch)
 {
-  std::shared_ptr<Resource>& upload_resource = m_cmd_resources.emplace_back();
+  ezSharedPtr<Resource>& upload_resource = m_cmd_resources.emplace_back();
 
   switch (resource->GetResourceType())
   {
@@ -146,13 +146,13 @@ void RenderCommandListImpl::SetScissorRect(int32_t left, int32_t top, ezUInt32 r
   m_CommandList->SetScissorRect(left, top, right, bottom);
 }
 
-void RenderCommandListImpl::IASetIndexBuffer(const std::shared_ptr<Resource>& resource, ezRHIResourceFormat::Enum format)
+void RenderCommandListImpl::IASetIndexBuffer(const ezSharedPtr<Resource>& resource, ezRHIResourceFormat::Enum format)
 {
   BufferBarrier(resource, ResourceState::kIndexBuffer);
   m_CommandList->IASetIndexBuffer(resource, format);
 }
 
-void RenderCommandListImpl::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource)
+void RenderCommandListImpl::IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>& resource)
 {
   BufferBarrier(resource, ResourceState::kVertexAndConstantBuffer);
   m_CommandList->IASetVertexBuffer(slot, resource);
@@ -186,14 +186,14 @@ void RenderCommandListImpl::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_
   m_CommandList->DrawIndexed(index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
-void RenderCommandListImpl::DrawIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void RenderCommandListImpl::DrawIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(pArgumentBuffer, ResourceState::kIndirectArgument);
   m_CommandList->DrawIndirect(pArgumentBuffer, argument_buffer_offset);
 }
 
-void RenderCommandListImpl::DrawIndexedIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void RenderCommandListImpl::DrawIndexedIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(pArgumentBuffer, ResourceState::kIndirectArgument);
@@ -201,9 +201,9 @@ void RenderCommandListImpl::DrawIndexedIndirect(const std::shared_ptr<Resource>&
 }
 
 void RenderCommandListImpl::DrawIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
@@ -220,9 +220,9 @@ void RenderCommandListImpl::DrawIndirectCount(
 }
 
 void RenderCommandListImpl::DrawIndexedIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
@@ -244,7 +244,7 @@ void RenderCommandListImpl::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thr
   m_CommandList->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void RenderCommandListImpl::DispatchIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void RenderCommandListImpl::DispatchIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   Apply();
   BufferBarrier(pArgumentBuffer, ResourceState::kIndirectArgument);
@@ -263,7 +263,7 @@ void RenderCommandListImpl::DispatchRays(ezUInt32 width, ezUInt32 height, ezUInt
   m_CommandList->DispatchRays(m_shader_tables, width, height, depth);
 }
 
-void RenderCommandListImpl::BufferBarrier(const std::shared_ptr<Resource>& resource, ResourceState state)
+void RenderCommandListImpl::BufferBarrier(const ezSharedPtr<Resource>& resource, ResourceState state)
 {
   if (!resource)
     return;
@@ -280,7 +280,7 @@ void RenderCommandListImpl::ViewBarrier(const std::shared_ptr<View>& view, Resou
   ImageBarrier(view->GetResource(), view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(), view->GetLayerCount(), state);
 }
 
-void RenderCommandListImpl::ImageBarrier(const std::shared_ptr<Resource>& resource, ezUInt32 base_mip_level, ezUInt32 level_count, ezUInt32 base_array_layer, ezUInt32 layer_count, ResourceState state)
+void RenderCommandListImpl::ImageBarrier(const ezSharedPtr<Resource>& resource, ezUInt32 base_mip_level, ezUInt32 level_count, ezUInt32 base_array_layer, ezUInt32 layer_count, ResourceState state)
 {
   if (!resource)
     return;
@@ -294,7 +294,7 @@ void RenderCommandListImpl::ImageBarrier(const std::shared_ptr<Resource>& resour
   LazyResourceBarrier({barrier});
 }
 
-void RenderCommandListImpl::BuildBottomLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags)
+void RenderCommandListImpl::BuildBottomLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags)
 {
   for (const auto& desc : descs)
   {
@@ -312,7 +312,7 @@ void RenderCommandListImpl::BuildBottomLevelAS(const std::shared_ptr<Resource>& 
   m_cmd_resources.emplace_back(scratch);
 }
 
-void RenderCommandListImpl::BuildTopLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<std::pair<std::shared_ptr<Resource>, ezMat4>>& geometry, BuildAccelerationStructureFlags flags)
+void RenderCommandListImpl::BuildTopLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<std::pair<ezSharedPtr<Resource>, ezMat4>>& geometry, BuildAccelerationStructureFlags flags)
 {
   std::vector<RaytracingGeometryInstance> instances;
   for (const auto& mesh : geometry)
@@ -339,7 +339,7 @@ void RenderCommandListImpl::BuildTopLevelAS(const std::shared_ptr<Resource>& src
   m_cmd_resources.emplace_back(instance_data);
 }
 
-void RenderCommandListImpl::CopyAccelerationStructure(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, CopyAccelerationStructureMode mode)
+void RenderCommandListImpl::CopyAccelerationStructure(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, CopyAccelerationStructureMode mode)
 {
   m_CommandList->CopyAccelerationStructure(src, dst, mode);
 }
@@ -632,7 +632,7 @@ void RenderCommandListImpl::Attach(const BindKey& bind_key, const std::shared_pt
   m_bound_deferred_view[bind_key] = view;
 }
 
-void RenderCommandListImpl::Attach(const BindKey& bind_key, const std::shared_ptr<Resource>& resource, const LazyViewDesc& view_desc)
+void RenderCommandListImpl::Attach(const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
 {
   Attach(bind_key, m_object_cache.GetView(m_program, bind_key, resource, view_desc));
 }
@@ -687,7 +687,7 @@ void RenderCommandListImpl::OnAttachUAV(const BindKey& bind_key, const std::shar
   ViewBarrier(view, ResourceState::kUnorderedAccess);
 }
 
-ResourceStateTracker& RenderCommandListImpl::GetResourceStateTracker(const std::shared_ptr<Resource>& resource)
+ResourceStateTracker& RenderCommandListImpl::GetResourceStateTracker(const ezSharedPtr<Resource>& resource)
 {
   auto it = m_resource_state_tracker.find(resource);
   if (it == m_resource_state_tracker.end())
@@ -695,7 +695,7 @@ ResourceStateTracker& RenderCommandListImpl::GetResourceStateTracker(const std::
   return it->second;
 }
 
-const std::map<std::shared_ptr<Resource>, ResourceStateTracker>& RenderCommandListImpl::GetResourceStateTrackers() const
+const std::map<ezSharedPtr<Resource>, ResourceStateTracker>& RenderCommandListImpl::GetResourceStateTrackers() const
 {
   return m_resource_state_tracker;
 }

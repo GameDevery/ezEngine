@@ -40,16 +40,16 @@ public:
   virtual ezSharedPtr<Fence> CreateFence(ezUInt64 initialValue) = 0;
   virtual void DestroyFence(Fence* pFence) = 0;
 
-  virtual std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sampleCount, int width, int height, int depth, int mipLevels) = 0;
+  virtual ezSharedPtr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sampleCount, int width, int height, int depth, int mipLevels) = 0;
   virtual void DestroyTexture(Resource* pTexture) = 0;
 
-  virtual std::shared_ptr<Resource> CreateBuffer(ezUInt32 bindFlag, ezUInt32 bufferSize) = 0;
+  virtual ezSharedPtr<Resource> CreateBuffer(ezUInt32 bindFlag, ezUInt32 bufferSize) = 0;
   virtual void DestroyBuffer(Resource* pBuffer) = 0;
 
-  virtual std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) = 0;
+  virtual ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) = 0;
   virtual void DestroySampler(Resource* pSampler) = 0;
 
-  virtual std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& viewDesc) = 0;
+  virtual std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) = 0;
   virtual void DestroyView(View* pView) = 0;
 
   virtual std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) = 0;
@@ -79,7 +79,7 @@ public:
   virtual std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) = 0;
   virtual void DestroyRayTracingPipeline(Pipeline* pPipeline) = 0;
 
-  virtual std::shared_ptr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset) = 0;
+  virtual ezSharedPtr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset) = 0;
   virtual void DestroyAccelerationStructure(Resource* pAccelerationStructure) = 0;
 
   virtual std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) = 0;

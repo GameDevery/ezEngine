@@ -44,9 +44,9 @@ private:
   std::shared_ptr<RenderPass> m_pRenderPass;
   std::shared_ptr<Program> m_pProgram;
   std::shared_ptr<View> m_pConstantBufferView;
-  std::shared_ptr<Resource> m_pConstantBuffer;
-  std::shared_ptr<Resource> m_pIndexBuffer;
-  std::shared_ptr<Resource> m_pVertexBuffer;
+  ezSharedPtr<Resource> m_pConstantBuffer;
+  ezSharedPtr<Resource> m_pIndexBuffer;
+  ezSharedPtr<Resource> m_pVertexBuffer;
   std::shared_ptr<Shader> m_pVertexShader;
   std::shared_ptr<Shader> m_pPixelShader;
   std::shared_ptr<BindingSetLayout> m_pLayout;

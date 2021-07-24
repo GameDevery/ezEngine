@@ -127,8 +127,8 @@ void DXCommandList::BeginRenderPass(const std::shared_ptr<RenderPass>& render_pa
 
   if (shading_rate_image_view)
   {
-    decltype(auto) dx_shading_rate_image = shading_rate_image_view->GetResource()->As<DXResource>();
-    m_command_list5->RSSetShadingRateImage(dx_shading_rate_image.resource.Get());
+    decltype(auto) dx_shading_rate_image = shading_rate_image_view->GetResource().Downcast<DXResource>();
+    m_command_list5->RSSetShadingRateImage(dx_shading_rate_image->resource.Get());
   }
   else
   {
@@ -284,18 +284,18 @@ void DXCommandList::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, e
 
 void DXCommandList::ExecuteIndirect(
   D3D12_INDIRECT_ARGUMENT_TYPE type,
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
 {
-  decltype(auto) dx_argument_buffer = pArgumentBuffer->As<DXResource>();
+  decltype(auto) dx_argument_buffer = pArgumentBuffer.Downcast<DXResource>();
   ID3D12Resource* dx_count_buffer = nullptr;
   if (count_buffer)
   {
-    dx_count_buffer = count_buffer->As<DXResource>().resource.Get();
+    dx_count_buffer = count_buffer.Downcast<DXResource>()->resource.Get();
   }
   else
   {
@@ -304,26 +304,26 @@ void DXCommandList::ExecuteIndirect(
   m_command_list->ExecuteIndirect(
     m_device.GetCommandSignature(type, stride),
     max_draw_count,
-    dx_argument_buffer.resource.Get(),
+    dx_argument_buffer->resource.Get(),
     argument_buffer_offset,
     dx_count_buffer,
     count_buffer_offset);
 }
 
-void DXCommandList::DrawIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DrawIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndirectCommand));
 }
 
-void DXCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DrawIndexedIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndexedIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndexedIndirectCommand));
 }
 
 void DXCommandList::DrawIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
@@ -339,9 +339,9 @@ void DXCommandList::DrawIndirectCount(
 }
 
 void DXCommandList::DrawIndexedIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
@@ -361,7 +361,7 @@ void DXCommandList::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_grou
   m_command_list->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DispatchIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH,
@@ -384,8 +384,8 @@ static D3D12_GPU_VIRTUAL_ADDRESS GetVirtualAddress(const RayTracingShaderTable& 
   {
     return 0;
   }
-  decltype(auto) dx_resource = table.resource->As<DXResource>();
-  return dx_resource.resource->GetGPUVirtualAddress() + table.offset;
+  decltype(auto) dx_resource = table.resource.Downcast<DXResource>();
+  return dx_resource->resource->GetGPUVirtualAddress() + table.offset;
 }
 
 void DXCommandList::DispatchRays(const RayTracingShaderTables& shader_tables, ezUInt32 width, ezUInt32 height, ezUInt32 depth)
@@ -427,19 +427,19 @@ void DXCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
     if (barrier.state_before == ResourceState::kRaytracingAccelerationStructure)
       continue;
 
-    decltype(auto) dx_resource = barrier.resource->As<DXResource>();
+    decltype(auto) dx_resource = barrier.resource.Downcast<DXResource>();
     D3D12_RESOURCE_STATES dx_state_before = ConvertState(barrier.state_before);
     D3D12_RESOURCE_STATES dx_state_after = ConvertState(barrier.state_after);
     if (dx_state_before == dx_state_after)
       continue;
 
-    assert(barrier.baseMipLevel + barrier.level_count <= dx_resource.desc.MipLevels);
-    assert(barrier.base_array_layer + barrier.layer_count <= dx_resource.desc.DepthOrArraySize);
+    assert(barrier.baseMipLevel + barrier.level_count <= dx_resource->desc.MipLevels);
+    assert(barrier.base_array_layer + barrier.layer_count <= dx_resource->desc.DepthOrArraySize);
 
-    if (barrier.baseMipLevel == 0 && barrier.level_count == dx_resource.desc.MipLevels &&
-        barrier.base_array_layer == 0 && barrier.layer_count == dx_resource.desc.DepthOrArraySize)
+    if (barrier.baseMipLevel == 0 && barrier.level_count == dx_resource->desc.MipLevels &&
+        barrier.base_array_layer == 0 && barrier.layer_count == dx_resource->desc.DepthOrArraySize)
     {
-      dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource.resource.Get(), dx_state_before, dx_state_after));
+      dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource->resource.Get(), dx_state_before, dx_state_after));
     }
     else
     {
@@ -447,8 +447,8 @@ void DXCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
       {
         for (ezUInt32 j = barrier.base_array_layer; j < barrier.base_array_layer + barrier.layer_count; ++j)
         {
-          ezUInt32 subresource = i + j * dx_resource.desc.MipLevels;
-          dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource.resource.Get(), dx_state_before, dx_state_after, subresource));
+          ezUInt32 subresource = i + j * dx_resource->desc.MipLevels;
+          dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource->resource.Get(), dx_state_before, dx_state_after, subresource));
         }
       }
     }
@@ -457,14 +457,14 @@ void DXCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
     m_command_list->ResourceBarrier((ezUInt32)dx_barriers.size(), dx_barriers.data());
 }
 
-void DXCommandList::UAVResourceBarrier(const std::shared_ptr<Resource>& resource)
+void DXCommandList::UAVResourceBarrier(const ezSharedPtr<Resource>& resource)
 {
   D3D12_RESOURCE_BARRIER uav_barrier = {};
   uav_barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
   if (resource)
   {
-    decltype(auto) dx_resource = resource->As<DXResource>();
-    uav_barrier.UAV.pResource = dx_resource.resource.Get();
+    decltype(auto) dx_resource = resource.Downcast<DXResource>();
+    uav_barrier.UAV.pResource = dx_resource->resource.Get();
   }
   m_command_list4->ResourceBarrier(1, &uav_barrier);
 }
@@ -487,18 +487,18 @@ void DXCommandList::SetScissorRect(ezInt32 left, ezInt32 top, ezUInt32 right, ez
   m_command_list->RSSetScissorRects(1, &rect);
 }
 
-void DXCommandList::IASetIndexBuffer(const std::shared_ptr<Resource>& resource, ezRHIResourceFormat::Enum format)
+void DXCommandList::IASetIndexBuffer(const ezSharedPtr<Resource>& resource, ezRHIResourceFormat::Enum format)
 {
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
-  decltype(auto) dx_resource = resource->As<DXResource>();
+  decltype(auto) dx_resource = resource.Downcast<DXResource>();
   D3D12_INDEX_BUFFER_VIEW index_buffer_view = {};
   index_buffer_view.Format = dx_format;
-  index_buffer_view.SizeInBytes = (ezUInt32)dx_resource.desc.Width;
-  index_buffer_view.BufferLocation = dx_resource.resource->GetGPUVirtualAddress();
+  index_buffer_view.SizeInBytes = (ezUInt32)dx_resource->desc.Width;
+  index_buffer_view.BufferLocation = dx_resource->resource->GetGPUVirtualAddress();
   m_command_list->IASetIndexBuffer(&index_buffer_view);
 }
 
-void DXCommandList::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource)
+void DXCommandList::IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>& resource)
 {
   if (m_state && m_state->GetPipelineType() == PipelineType::kGraphics)
   {
@@ -513,14 +513,14 @@ void DXCommandList::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resou
   m_lazy_vertex[slot] = resource;
 }
 
-void DXCommandList::IASetVertexBufferImpl(ezUInt32 slot, const std::shared_ptr<Resource>& resource, ezUInt32 stride)
+void DXCommandList::IASetVertexBufferImpl(ezUInt32 slot, const ezSharedPtr<Resource>& resource, ezUInt32 stride)
 {
   D3D12_VERTEX_BUFFER_VIEW vertex_buffer_view = {};
   if (resource)
   {
-    decltype(auto) dx_resource = resource->As<DXResource>();
-    vertex_buffer_view.BufferLocation = dx_resource.resource->GetGPUVirtualAddress();
-    vertex_buffer_view.SizeInBytes = (ezUInt32)dx_resource.desc.Width;
+    decltype(auto) dx_resource = resource.Downcast<DXResource>();
+    vertex_buffer_view.BufferLocation = dx_resource->resource->GetGPUVirtualAddress();
+    vertex_buffer_view.SizeInBytes = (ezUInt32)dx_resource->desc.Width;
     vertex_buffer_view.StrideInBytes = stride;
   }
   m_command_list->IASetVertexBuffers(slot, 1, &vertex_buffer_view);
@@ -531,28 +531,28 @@ void DXCommandList::RSSetShadingRate(ShadingRate shading_rate, const std::array<
   m_command_list5->RSSetShadingRate(static_cast<D3D12_SHADING_RATE>(shading_rate), reinterpret_cast<const D3D12_SHADING_RATE_COMBINER*>(combiners.data()));
 }
 
-void DXCommandList::BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::shared_ptr<Resource>& scratch, ezUInt64 scratch_offset)
+void DXCommandList::BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const ezSharedPtr<Resource>& scratch, ezUInt64 scratch_offset)
 {
-  decltype(auto) dx_dst = dst->As<DXResource>();
-  decltype(auto) dx_scratch = scratch->As<DXResource>();
+  decltype(auto) dx_dst = dst.Downcast<DXResource>();
+  decltype(auto) dx_scratch = scratch.Downcast<DXResource>();
 
   D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC acceleration_structure_desc = {};
   acceleration_structure_desc.Inputs = inputs;
   if (src)
   {
-    decltype(auto) dx_src = src->As<DXResource>();
-    acceleration_structure_desc.SourceAccelerationStructureData = dx_src.acceleration_structure_handle;
+    decltype(auto) dx_src = src.Downcast<DXResource>();
+    acceleration_structure_desc.SourceAccelerationStructureData = dx_src->acceleration_structure_handle;
     acceleration_structure_desc.Inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
   }
-  acceleration_structure_desc.DestAccelerationStructureData = dx_dst.acceleration_structure_handle;
-  acceleration_structure_desc.ScratchAccelerationStructureData = dx_scratch.resource->GetGPUVirtualAddress() + scratch_offset;
+  acceleration_structure_desc.DestAccelerationStructureData = dx_dst->acceleration_structure_handle;
+  acceleration_structure_desc.ScratchAccelerationStructureData = dx_scratch->resource->GetGPUVirtualAddress() + scratch_offset;
   m_command_list4->BuildRaytracingAccelerationStructure(&acceleration_structure_desc, 0, nullptr);
 }
 
 void DXCommandList::BuildBottomLevelAS(
-  const std::shared_ptr<Resource>& src,
-  const std::shared_ptr<Resource>& dst,
-  const std::shared_ptr<Resource>& scratch,
+  const ezSharedPtr<Resource>& src,
+  const ezSharedPtr<Resource>& dst,
+  const ezSharedPtr<Resource>& scratch,
   ezUInt64 scratch_offset,
   const std::vector<RaytracingGeometryDesc>& descs,
   BuildAccelerationStructureFlags flags)
@@ -572,29 +572,29 @@ void DXCommandList::BuildBottomLevelAS(
 }
 
 void DXCommandList::BuildTopLevelAS(
-  const std::shared_ptr<Resource>& src,
-  const std::shared_ptr<Resource>& dst,
-  const std::shared_ptr<Resource>& scratch,
+  const ezSharedPtr<Resource>& src,
+  const ezSharedPtr<Resource>& dst,
+  const ezSharedPtr<Resource>& scratch,
   ezUInt64 scratch_offset,
-  const std::shared_ptr<Resource>& instance_data,
+  const ezSharedPtr<Resource>& instance_data,
   ezUInt64 instance_offset,
   ezUInt32 instance_count,
   BuildAccelerationStructureFlags flags)
 {
-  decltype(auto) dx_instance_data = instance_data->As<DXResource>();
+  decltype(auto) dx_instance_data = instance_data.Downcast<DXResource>();
   D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs = {};
   inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
   inputs.Flags = Convert(flags);
   inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
   inputs.NumDescs = instance_count;
-  inputs.InstanceDescs = dx_instance_data.resource->GetGPUVirtualAddress() + instance_offset;
+  inputs.InstanceDescs = dx_instance_data->resource->GetGPUVirtualAddress() + instance_offset;
   BuildAccelerationStructure(inputs, src, dst, scratch, scratch_offset);
 }
 
-void DXCommandList::CopyAccelerationStructure(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, CopyAccelerationStructureMode mode)
+void DXCommandList::CopyAccelerationStructure(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, CopyAccelerationStructureMode mode)
 {
-  decltype(auto) dx_src = src->As<DXResource>();
-  decltype(auto) dx_dst = dst->As<DXResource>();
+  decltype(auto) dx_src = src.Downcast<DXResource>();
+  decltype(auto) dx_dst = dst.Downcast<DXResource>();
   D3D12_RAYTRACING_ACCELERATION_STRUCTURE_COPY_MODE dx_mode = {};
   switch (mode)
   {
@@ -608,38 +608,38 @@ void DXCommandList::CopyAccelerationStructure(const std::shared_ptr<Resource>& s
       assert(false);
   }
   m_command_list4->CopyRaytracingAccelerationStructure(
-    dx_dst.acceleration_structure_handle,
-    dx_src.acceleration_structure_handle,
+    dx_dst->acceleration_structure_handle,
+    dx_src->acceleration_structure_handle,
     dx_mode);
 }
 
-void DXCommandList::CopyBuffer(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_buffer,
+void DXCommandList::CopyBuffer(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_buffer,
   const std::vector<BufferCopyRegion>& regions)
 {
-  decltype(auto) dx_src_buffer = src_buffer->As<DXResource>();
-  decltype(auto) dx_dst_buffer = dst_buffer->As<DXResource>();
+  decltype(auto) dx_src_buffer = src_buffer.Downcast<DXResource>();
+  decltype(auto) dx_dst_buffer = dst_buffer.Downcast<DXResource>();
   for (const auto& region : regions)
   {
-    m_command_list->CopyBufferRegion(dx_dst_buffer.resource.Get(), region.dst_offset, dx_src_buffer.resource.Get(), region.src_offset, region.num_bytes);
+    m_command_list->CopyBufferRegion(dx_dst_buffer->resource.Get(), region.dst_offset, dx_src_buffer->resource.Get(), region.src_offset, region.num_bytes);
   }
 }
 
-void DXCommandList::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_texture,
+void DXCommandList::CopyBufferToTexture(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_texture,
   const std::vector<BufferToTextureCopyRegion>& regions)
 {
-  decltype(auto) dx_src_buffer = src_buffer->As<DXResource>();
-  decltype(auto) dx_dst_texture = dst_texture->As<DXResource>();
+  decltype(auto) dx_src_buffer = src_buffer.Downcast<DXResource>();
+  decltype(auto) dx_dst_texture = dst_texture.Downcast<DXResource>();
   auto format = dst_texture->GetFormat();
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
   for (const auto& region : regions)
   {
     D3D12_TEXTURE_COPY_LOCATION dst = {};
-    dst.pResource = dx_dst_texture.resource.Get();
+    dst.pResource = dx_dst_texture->resource.Get();
     dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-    dst.SubresourceIndex = region.texture_array_layer * dx_dst_texture.GetLevelCount() + region.texture_mip_level;
+    dst.SubresourceIndex = region.texture_array_layer * dx_dst_texture->GetLevelCount() + region.texture_mip_level;
 
     D3D12_TEXTURE_COPY_LOCATION src = {};
-    src.pResource = dx_src_buffer.resource.Get();
+    src.pResource = dx_src_buffer->resource.Get();
     src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
     src.PlacedFootprint.Offset = region.buffer_offset;
     src.PlacedFootprint.Footprint.Width = region.texture_extent.width;
@@ -659,22 +659,22 @@ void DXCommandList::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buf
   }
 }
 
-void DXCommandList::CopyTexture(const std::shared_ptr<Resource>& src_texture, const std::shared_ptr<Resource>& dst_texture,
+void DXCommandList::CopyTexture(const ezSharedPtr<Resource>& src_texture, const ezSharedPtr<Resource>& dst_texture,
   const std::vector<TextureCopyRegion>& regions)
 {
-  decltype(auto) dx_src_texture = src_texture->As<DXResource>();
-  decltype(auto) dx_dst_texture = dst_texture->As<DXResource>();
+  decltype(auto) dx_src_texture = src_texture.Downcast<DXResource>();
+  decltype(auto) dx_dst_texture = dst_texture.Downcast<DXResource>();
   for (const auto& region : regions)
   {
     D3D12_TEXTURE_COPY_LOCATION dst = {};
-    dst.pResource = dx_dst_texture.resource.Get();
+    dst.pResource = dx_dst_texture->resource.Get();
     dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-    dst.SubresourceIndex = region.dst_array_layer * dx_dst_texture.GetLevelCount() + region.dst_mip_level;
+    dst.SubresourceIndex = region.dst_array_layer * dx_dst_texture->GetLevelCount() + region.dst_mip_level;
 
     D3D12_TEXTURE_COPY_LOCATION src = {};
-    src.pResource = dx_src_texture.resource.Get();
+    src.pResource = dx_src_texture->resource.Get();
     src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-    src.SubresourceIndex = region.src_array_layer * dx_src_texture.GetLevelCount() + region.src_mip_level;
+    src.SubresourceIndex = region.src_array_layer * dx_src_texture->GetLevelCount() + region.src_mip_level;
 
     D3D12_BOX src_box = {};
     src_box.left = region.src_offset.x;
@@ -689,7 +689,7 @@ void DXCommandList::CopyTexture(const std::shared_ptr<Resource>& src_texture, co
 }
 
 void DXCommandList::WriteAccelerationStructuresProperties(
-  const std::vector<std::shared_ptr<Resource>>& acceleration_structures,
+  const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
   const std::shared_ptr<QueryHeap>& query_heap,
   ezUInt32 first_query)
 {
@@ -706,7 +706,7 @@ void DXCommandList::WriteAccelerationStructuresProperties(
   dx_acceleration_structures.reserve(acceleration_structures.size());
   for (const auto& acceleration_structure : acceleration_structures)
   {
-    dx_acceleration_structures.emplace_back(acceleration_structure->As<DXResource>().acceleration_structure_handle);
+    dx_acceleration_structures.emplace_back(acceleration_structure.Downcast<DXResource>()->acceleration_structure_handle);
   }
   m_command_list4->EmitRaytracingAccelerationStructurePostbuildInfo(&desc, (ezUInt32)dx_acceleration_structures.size(), dx_acceleration_structures.data());
 }
@@ -715,7 +715,7 @@ void DXCommandList::ResolveQueryData(
   const std::shared_ptr<QueryHeap>& query_heap,
   ezUInt32 first_query,
   ezUInt32 query_count,
-  const std::shared_ptr<Resource>& dst_buffer,
+  const ezSharedPtr<Resource>& dst_buffer,
   ezUInt64 dst_offset)
 {
   if (query_heap->GetType() != QueryHeapType::kAccelerationStructureCompactedSize)
@@ -725,12 +725,12 @@ void DXCommandList::ResolveQueryData(
   }
 
   decltype(auto) dx_query_heap = query_heap->As<DXRayTracingQueryHeap>();
-  decltype(auto) dx_dst_buffer = dst_buffer->As<DXResource>();
+  decltype(auto) dx_dst_buffer = dst_buffer.Downcast<DXResource>();
 
   auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap.GetResource().Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, 0);
   m_command_list->ResourceBarrier(1, &barrier1);
   m_command_list->CopyBufferRegion(
-    dx_dst_buffer.resource.Get(),
+    dx_dst_buffer->resource.Get(),
     dst_offset,
     dx_query_heap.GetResource().Get(),
     first_query * sizeof(ezUInt64),

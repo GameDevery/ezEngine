@@ -12,7 +12,7 @@ std::shared_ptr<ResourceLazyViewDesc> ViewProvider::GetView(RenderCommandList& c
 {
     if (SyncData() || !m_last_view)
     {
-        std::shared_ptr<Resource> resource;
+        ezSharedPtr<Resource> resource;
         if (!m_free_resources.empty())
         {
             resource = m_free_resources.back();

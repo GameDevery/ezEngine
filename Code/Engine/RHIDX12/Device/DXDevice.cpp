@@ -179,7 +179,7 @@ ezSharedPtr<Fence> DXDevice::CreateFence(ezUInt64 initialValue)
   return EZ_DEFAULT_NEW(DXFence, *this, initialValue);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
+ezSharedPtr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
 {
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
   if (bindFlags & BindFlag::kShaderResource)
@@ -187,7 +187,7 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bin
     dx_format = DXUtils::MakeTypelessDepthStencil(dx_format);
   }
 
-  std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
+  ezSharedPtr<DXResource> res = EZ_DEFAULT_NEW(DXResource, *this);
   res->resource_type = ResourceType::kTexture;
   res->format = format;
 
@@ -229,12 +229,12 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bin
   return res;
 }
 
-std::shared_ptr<Resource> DXDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
+ezSharedPtr<Resource> DXDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
 {
   if (buffer_size == 0)
     return {};
 
-  std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
+  ezSharedPtr<DXResource> res = EZ_DEFAULT_NEW(DXResource, *this);
 
   if (bind_flag & BindFlag::kConstantBuffer)
     buffer_size = (buffer_size + 255) & ~255;
@@ -267,9 +267,9 @@ std::shared_ptr<Resource> DXDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 bu
   return res;
 }
 
-std::shared_ptr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
+ezSharedPtr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
 {
-  std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
+  ezSharedPtr<DXResource> res = EZ_DEFAULT_NEW(DXResource, *this);
   D3D12_SAMPLER_DESC& sampler_desc = res->sampler_desc;
 
   switch (desc.filter)
@@ -319,9 +319,9 @@ std::shared_ptr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> DXDevice::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
+std::shared_ptr<View> DXDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
 {
-  return std::make_shared<DXView>(*this, std::static_pointer_cast<DXResource>(resource), view_desc);
+  return std::make_shared<DXView>(*this, resource.Downcast<DXResource>(), view_desc);
 }
 
 std::shared_ptr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
@@ -369,12 +369,12 @@ std::shared_ptr<Pipeline> DXDevice::CreateRayTracingPipeline(const RayTracingPip
   return std::make_shared<DXRayTracingPipeline>(*this, desc);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset)
+ezSharedPtr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset)
 {
-  std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
+  ezSharedPtr<DXResource> res = EZ_DEFAULT_NEW(DXResource, *this);
   res->resource_type = ResourceType::kAccelerationStructure;
   res->acceleration_structures_memory = resource;
-  res->acceleration_structure_handle = resource->As<DXResource>().resource->GetGPUVirtualAddress() + offset;
+  res->acceleration_structure_handle = resource.Downcast<DXResource>()->resource->GetGPUVirtualAddress() + offset;
   return res;
 }
 
@@ -391,8 +391,8 @@ D3D12_RAYTRACING_GEOMETRY_DESC FillRaytracingGeometryDesc(const BufferDesc& vert
 {
   D3D12_RAYTRACING_GEOMETRY_DESC geometry_desc = {};
 
-  auto vertex_res = std::static_pointer_cast<DXResource>(vertex.res);
-  auto index_res = std::static_pointer_cast<DXResource>(index.res);
+  auto vertex_res = vertex.res.Downcast<DXResource>();
+  auto index_res = index.res.Downcast<DXResource>();
 
   geometry_desc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
   switch (flags)

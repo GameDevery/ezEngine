@@ -4,7 +4,7 @@
 #include <cassert>
 #include <directx/d3d12.h>
 
-DXView::DXView(DXDevice& device, const std::shared_ptr<DXResource>& resource, const ViewDesc& m_view_desc)
+DXView::DXView(DXDevice& device, const ezSharedPtr<DXResource>& resource, const ViewDesc& m_view_desc)
     : m_device(device)
     , m_resource(resource)
     , m_view_desc(m_view_desc)
@@ -418,7 +418,7 @@ void DXView::CreateSampler()
     m_device.GetDevice()->CreateSampler(&m_resource->sampler_desc, m_handle->GetCpuHandle());
 }
 
-std::shared_ptr<Resource> DXView::GetResource()
+ezSharedPtr<Resource> DXView::GetResource()
 {
     return m_resource;
 }

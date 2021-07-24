@@ -11,7 +11,7 @@ class EZ_RHI_DLL View : public QueryInterface
 {
 public:
   virtual ~View() = default;
-  virtual std::shared_ptr<Resource> GetResource() = 0;
+  virtual ezSharedPtr<Resource> GetResource() = 0;
   virtual ezUInt32 GetDescriptorId() const = 0;
   virtual ezUInt32 GetBaseMipLevel() const = 0;
   virtual ezUInt32 GetLevelCount() const = 0;

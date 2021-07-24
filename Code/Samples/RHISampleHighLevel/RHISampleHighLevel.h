@@ -147,7 +147,7 @@ private:
   std::shared_ptr<RenderDevice> device;
   std::shared_ptr<RenderCommandList> upload_command_list;
   //std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-  std::shared_ptr<Resource> index;
-  std::shared_ptr<Resource> pos;
+  ezSharedPtr<Resource> index;
+  ezSharedPtr<Resource> pos;
   std::shared_ptr<ProgramHolder<PixelShader, VertexShader>> m_program;
 };

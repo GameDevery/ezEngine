@@ -137,32 +137,32 @@ void VKCommandList::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, e
   m_command_list->drawIndexed(index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
-void VKCommandList::DrawIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void VKCommandList::DrawIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndirectCommand));
 }
 
-void VKCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void VKCommandList::DrawIndexedIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndexedIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndexedIndirectCommand));
 }
 
 void VKCommandList::DrawIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
 {
-  decltype(auto) vk_argument_buffer = pArgumentBuffer->As<VKResource>();
+  decltype(auto) vk_argument_buffer = pArgumentBuffer.Downcast<VKResource>();
   if (count_buffer)
   {
-    decltype(auto) vk_count_buffer = count_buffer->As<VKResource>();
+    decltype(auto) vk_count_buffer = count_buffer.Downcast<VKResource>();
     m_command_list->drawIndirectCount(
-      vk_argument_buffer.buffer.res.get(),
+      vk_argument_buffer->buffer.res.get(),
       argument_buffer_offset,
-      vk_count_buffer.buffer.res.get(),
+      vk_count_buffer->buffer.res.get(),
       count_buffer_offset,
       max_draw_count,
       stride);
@@ -171,7 +171,7 @@ void VKCommandList::DrawIndirectCount(
   {
     assert(count_buffer_offset == 0);
     m_command_list->drawIndirect(
-      vk_argument_buffer.buffer.res.get(),
+      vk_argument_buffer->buffer.res.get(),
       argument_buffer_offset,
       max_draw_count,
       stride);
@@ -179,21 +179,21 @@ void VKCommandList::DrawIndirectCount(
 }
 
 void VKCommandList::DrawIndexedIndirectCount(
-  const std::shared_ptr<Resource>& pArgumentBuffer,
+  const ezSharedPtr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
-  const std::shared_ptr<Resource>& count_buffer,
+  const ezSharedPtr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
 {
-  decltype(auto) vk_argument_buffer = pArgumentBuffer->As<VKResource>();
+  decltype(auto) vk_argument_buffer = pArgumentBuffer.Downcast<VKResource>();
   if (count_buffer)
   {
-    decltype(auto) vk_count_buffer = count_buffer->As<VKResource>();
+    decltype(auto) vk_count_buffer = count_buffer.Downcast<VKResource>();
     m_command_list->drawIndexedIndirectCount(
-      vk_argument_buffer.buffer.res.get(),
+      vk_argument_buffer->buffer.res.get(),
       argument_buffer_offset,
-      vk_count_buffer.buffer.res.get(),
+      vk_count_buffer->buffer.res.get(),
       count_buffer_offset,
       max_draw_count,
       stride);
@@ -202,7 +202,7 @@ void VKCommandList::DrawIndexedIndirectCount(
   {
     assert(count_buffer_offset == 0);
     m_command_list->drawIndexedIndirect(
-      vk_argument_buffer.buffer.res.get(),
+      vk_argument_buffer->buffer.res.get(),
       argument_buffer_offset,
       max_draw_count,
       stride);
@@ -214,11 +214,11 @@ void VKCommandList::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_grou
   m_command_list->dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void VKCommandList::DispatchIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
+void VKCommandList::DispatchIndirect(const ezSharedPtr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
-  decltype(auto) vk_argument_buffer = pArgumentBuffer->As<VKResource>();
+  decltype(auto) vk_argument_buffer = pArgumentBuffer.Downcast<VKResource>();
   m_command_list->dispatchIndirect(
-    vk_argument_buffer.buffer.res.get(),
+    vk_argument_buffer->buffer.res.get(),
     argument_buffer_offset);
 }
 
@@ -233,9 +233,9 @@ static vk::StridedDeviceAddressRegionKHR GetStridedDeviceAddressRegion(VKDevice&
   {
     return {};
   }
-  decltype(auto) vk_resource = table.resource->As<VKResource>();
+  decltype(auto) vk_resource = table.resource.Downcast<VKResource>();
   vk::StridedDeviceAddressRegionKHR vk_table = {};
-  vk_table.deviceAddress = device.GetDevice().getBufferAddress({vk_resource.buffer.res.get()}) + table.offset;
+  vk_table.deviceAddress = device.GetDevice().getBufferAddress({vk_resource->buffer.res.get()}) + table.offset;
   vk_table.size = table.size;
   vk_table.stride = table.stride;
   return vk_table;
@@ -264,8 +264,8 @@ void VKCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
       continue;
     }
 
-    decltype(auto) vk_resource = barrier.resource->As<VKResource>();
-    VKResource::Image& image = vk_resource.image;
+    decltype(auto) vk_resource = barrier.resource.Downcast<VKResource>();
+    VKResource::Image& image = vk_resource->image;
     if (!image.res)
       continue;
 
@@ -395,7 +395,7 @@ void VKCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
   }
 }
 
-void VKCommandList::UAVResourceBarrier(const std::shared_ptr<Resource>& /*resource*/)
+void VKCommandList::UAVResourceBarrier(const ezSharedPtr<Resource>& /*resource*/)
 {
   vk::MemoryBarrier memory_barrier = {};
   memory_barrier.srcAccessMask = vk::AccessFlagBits::eAccelerationStructureWriteKHR | vk::AccessFlagBits::eAccelerationStructureReadKHR | vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eShaderRead;
@@ -440,17 +440,17 @@ static vk::IndexType GetVkIndexType(ezRHIResourceFormat::Enum format)
   }
 }
 
-void VKCommandList::IASetIndexBuffer(const std::shared_ptr<Resource>& resource, ezRHIResourceFormat::Enum format)
+void VKCommandList::IASetIndexBuffer(const ezSharedPtr<Resource>& resource, ezRHIResourceFormat::Enum format)
 {
-  decltype(auto) vk_resource = resource->As<VKResource>();
+  decltype(auto) vk_resource = resource.Downcast<VKResource>();
   vk::IndexType index_type = GetVkIndexType(format);
-  m_command_list->bindIndexBuffer(vk_resource.buffer.res.get(), 0, index_type);
+  m_command_list->bindIndexBuffer(vk_resource->buffer.res.get(), 0, index_type);
 }
 
-void VKCommandList::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource)
+void VKCommandList::IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>& resource)
 {
-  decltype(auto) vk_resource = resource->As<VKResource>();
-  vk::Buffer vertex_buffers[] = {vk_resource.buffer.res.get()};
+  decltype(auto) vk_resource = resource.Downcast<VKResource>();
+  vk::Buffer vertex_buffers[] = {vk_resource->buffer.res.get()};
   vk::DeviceSize offsets[] = {0};
   m_command_list->bindVertexBuffers(slot, 1, vertex_buffers, offsets);
 }
@@ -523,9 +523,9 @@ void VKCommandList::RSSetShadingRate(ShadingRate shading_rate, const std::array<
 }
 
 void VKCommandList::BuildBottomLevelAS(
-  const std::shared_ptr<Resource>& src,
-  const std::shared_ptr<Resource>& dst,
-  const std::shared_ptr<Resource>& scratch,
+  const ezSharedPtr<Resource>& src,
+  const ezSharedPtr<Resource>& dst,
+  const ezSharedPtr<Resource>& scratch,
   ezUInt64 scratch_offset,
   const std::vector<RaytracingGeometryDesc>& descs,
   BuildAccelerationStructureFlags flags)
@@ -536,14 +536,14 @@ void VKCommandList::BuildBottomLevelAS(
     geometry_descs.emplace_back(m_device.FillRaytracingGeometryTriangles(desc.vertex, desc.index, desc.flags));
   }
 
-  decltype(auto) vk_dst = dst->As<VKResource>();
-  decltype(auto) vk_scratch = scratch->As<VKResource>();
+  decltype(auto) vk_dst = dst.Downcast<VKResource>();
+  decltype(auto) vk_scratch = scratch.Downcast<VKResource>();
 
   vk::AccelerationStructureKHR vk_src_as = {};
   if (src)
   {
-    decltype(auto) vk_src = src->As<VKResource>();
-    vk_src_as = vk_src.acceleration_structure_handle.get();
+    decltype(auto) vk_src = src.Downcast<VKResource>();
+    vk_src_as = vk_src->acceleration_structure_handle.get();
   }
 
   std::vector<vk::AccelerationStructureBuildRangeInfoKHR> ranges;
@@ -562,13 +562,13 @@ void VKCommandList::BuildBottomLevelAS(
   vk::AccelerationStructureBuildGeometryInfoKHR infos = {};
   infos.type = vk::AccelerationStructureTypeKHR::eBottomLevel;
   infos.flags = Convert(flags);
-  infos.dstAccelerationStructure = vk_dst.acceleration_structure_handle.get();
+  infos.dstAccelerationStructure = vk_dst->acceleration_structure_handle.get();
   infos.srcAccelerationStructure = vk_src_as;
   if (vk_src_as)
     infos.mode = vk::BuildAccelerationStructureModeKHR::eUpdate;
   else
     infos.mode = vk::BuildAccelerationStructureModeKHR::eBuild;
-  infos.scratchData = m_device.GetDevice().getBufferAddress({vk_scratch.buffer.res.get()}) + scratch_offset;
+  infos.scratchData = m_device.GetDevice().getBufferAddress({vk_scratch->buffer.res.get()}) + scratch_offset;
   infos.pGeometries = geometry_descs.data();
   infos.geometryCount = (ezUInt32)geometry_descs.size();
 
@@ -576,17 +576,17 @@ void VKCommandList::BuildBottomLevelAS(
 }
 
 void VKCommandList::BuildTopLevelAS(
-  const std::shared_ptr<Resource>& src,
-  const std::shared_ptr<Resource>& dst,
-  const std::shared_ptr<Resource>& scratch,
+  const ezSharedPtr<Resource>& src,
+  const ezSharedPtr<Resource>& dst,
+  const ezSharedPtr<Resource>& scratch,
   ezUInt64 scratch_offset,
-  const std::shared_ptr<Resource>& instance_data,
+  const ezSharedPtr<Resource>& instance_data,
   ezUInt64 instance_offset,
   ezUInt32 instance_count,
   BuildAccelerationStructureFlags flags)
 {
-  decltype(auto) vk_instance_data = instance_data->As<VKResource>();
-  vk::DeviceAddress instance_address = m_device.GetDevice().getBufferAddress(vk_instance_data.buffer.res.get()) + instance_offset;
+  decltype(auto) vk_instance_data = instance_data.Downcast<VKResource>();
+  vk::DeviceAddress instance_address = m_device.GetDevice().getBufferAddress(vk_instance_data->buffer.res.get()) + instance_offset;
 
   vk::AccelerationStructureGeometryKHR top_as_geometry = {};
   top_as_geometry.geometryType = vk::GeometryTypeKHR::eInstances;
@@ -594,14 +594,14 @@ void VKCommandList::BuildTopLevelAS(
   top_as_geometry.geometry.instances.arrayOfPointers = VK_FALSE;
   top_as_geometry.geometry.instances.data = instance_address;
 
-  decltype(auto) vk_dst = dst->As<VKResource>();
-  decltype(auto) vk_scratch = scratch->As<VKResource>();
+  decltype(auto) vk_dst = dst.Downcast<VKResource>();
+  decltype(auto) vk_scratch = scratch.Downcast<VKResource>();
 
   vk::AccelerationStructureKHR vk_src_as = {};
   if (src)
   {
-    decltype(auto) vk_src = src->As<VKResource>();
-    vk_src_as = vk_src.acceleration_structure_handle.get();
+    decltype(auto) vk_src = src.Downcast<VKResource>();
+    vk_src_as = vk_src->acceleration_structure_handle.get();
   }
 
   vk::AccelerationStructureBuildRangeInfoKHR acceleration_structure_build_range_info = {};
@@ -611,23 +611,23 @@ void VKCommandList::BuildTopLevelAS(
   vk::AccelerationStructureBuildGeometryInfoKHR infos = {};
   infos.type = vk::AccelerationStructureTypeKHR::eTopLevel;
   infos.flags = Convert(flags);
-  infos.dstAccelerationStructure = vk_dst.acceleration_structure_handle.get();
+  infos.dstAccelerationStructure = vk_dst->acceleration_structure_handle.get();
   infos.srcAccelerationStructure = vk_src_as;
   if (vk_src_as)
     infos.mode = vk::BuildAccelerationStructureModeKHR::eUpdate;
   else
     infos.mode = vk::BuildAccelerationStructureModeKHR::eBuild;
-  infos.scratchData = m_device.GetDevice().getBufferAddress({vk_scratch.buffer.res.get()}) + scratch_offset;
+  infos.scratchData = m_device.GetDevice().getBufferAddress({vk_scratch->buffer.res.get()}) + scratch_offset;
   infos.pGeometries = &top_as_geometry;
   infos.geometryCount = 1;
 
   m_command_list->buildAccelerationStructuresKHR(1, &infos, offset_infos.data());
 }
 
-void VKCommandList::CopyAccelerationStructure(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, CopyAccelerationStructureMode mode)
+void VKCommandList::CopyAccelerationStructure(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, CopyAccelerationStructureMode mode)
 {
-  decltype(auto) vk_src = src->As<VKResource>();
-  decltype(auto) vk_dst = dst->As<VKResource>();
+  decltype(auto) vk_src = src.Downcast<VKResource>();
+  decltype(auto) vk_dst = dst.Downcast<VKResource>();
   vk::CopyAccelerationStructureInfoKHR info = {};
   switch (mode)
   {
@@ -642,29 +642,29 @@ void VKCommandList::CopyAccelerationStructure(const std::shared_ptr<Resource>& s
       info.mode = vk::CopyAccelerationStructureModeKHR::eClone;
       break;
   }
-  info.dst = vk_dst.acceleration_structure_handle.get();
-  info.src = vk_src.acceleration_structure_handle.get();
+  info.dst = vk_dst->acceleration_structure_handle.get();
+  info.src = vk_src->acceleration_structure_handle.get();
   m_command_list->copyAccelerationStructureKHR(info);
 }
 
-void VKCommandList::CopyBuffer(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_buffer,
+void VKCommandList::CopyBuffer(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_buffer,
   const std::vector<BufferCopyRegion>& regions)
 {
-  decltype(auto) vk_src_buffer = src_buffer->As<VKResource>();
-  decltype(auto) vk_dst_buffer = dst_buffer->As<VKResource>();
+  decltype(auto) vk_src_buffer = src_buffer.Downcast<VKResource>();
+  decltype(auto) vk_dst_buffer = dst_buffer.Downcast<VKResource>();
   std::vector<vk::BufferCopy> vk_regions;
   for (const auto& region : regions)
   {
     vk_regions.emplace_back(region.src_offset, region.dst_offset, region.num_bytes);
   }
-  m_command_list->copyBuffer(vk_src_buffer.buffer.res.get(), vk_dst_buffer.buffer.res.get(), vk_regions);
+  m_command_list->copyBuffer(vk_src_buffer->buffer.res.get(), vk_dst_buffer->buffer.res.get(), vk_regions);
 }
 
-void VKCommandList::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_texture,
+void VKCommandList::CopyBufferToTexture(const ezSharedPtr<Resource>& src_buffer, const ezSharedPtr<Resource>& dst_texture,
   const std::vector<BufferToTextureCopyRegion>& regions)
 {
-  decltype(auto) vk_src_buffer = src_buffer->As<VKResource>();
-  decltype(auto) vk_dst_texture = dst_texture->As<VKResource>();
+  decltype(auto) vk_src_buffer = src_buffer.Downcast<VKResource>();
+  decltype(auto) vk_dst_texture = dst_texture.Downcast<VKResource>();
   std::vector<vk::BufferImageCopy> vk_regions;
   auto format = dst_texture->GetFormat();
   for (const auto& region : regions)
@@ -694,17 +694,17 @@ void VKCommandList::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buf
     vk_region.imageExtent.depth = region.texture_extent.depth;
   }
   m_command_list->copyBufferToImage(
-    vk_src_buffer.buffer.res.get(),
-    vk_dst_texture.image.res,
+    vk_src_buffer->buffer.res.get(),
+    vk_dst_texture->image.res,
     vk::ImageLayout::eTransferDstOptimal,
     vk_regions);
 }
 
-void VKCommandList::CopyTexture(const std::shared_ptr<Resource>& src_texture, const std::shared_ptr<Resource>& dst_texture,
+void VKCommandList::CopyTexture(const ezSharedPtr<Resource>& src_texture, const ezSharedPtr<Resource>& dst_texture,
   const std::vector<TextureCopyRegion>& regions)
 {
-  decltype(auto) vk_src_texture = src_texture->As<VKResource>();
-  decltype(auto) vk_dst_texture = dst_texture->As<VKResource>();
+  decltype(auto) vk_src_texture = src_texture.Downcast<VKResource>();
+  decltype(auto) vk_dst_texture = dst_texture.Downcast<VKResource>();
   std::vector<vk::ImageCopy> vk_regions;
   for (const auto& region : regions)
   {
@@ -729,11 +729,11 @@ void VKCommandList::CopyTexture(const std::shared_ptr<Resource>& src_texture, co
     vk_region.extent.height = region.extent.height;
     vk_region.extent.depth = region.extent.depth;
   }
-  m_command_list->copyImage(vk_src_texture.image.res, vk::ImageLayout::eTransferSrcOptimal, vk_dst_texture.image.res, vk::ImageLayout::eTransferDstOptimal, vk_regions);
+  m_command_list->copyImage(vk_src_texture->image.res, vk::ImageLayout::eTransferSrcOptimal, vk_dst_texture->image.res, vk::ImageLayout::eTransferDstOptimal, vk_regions);
 }
 
 void VKCommandList::WriteAccelerationStructuresProperties(
-  const std::vector<std::shared_ptr<Resource>>& acceleration_structures,
+  const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
   const std::shared_ptr<QueryHeap>& query_heap,
   ezUInt32 first_query)
 {
@@ -741,7 +741,7 @@ void VKCommandList::WriteAccelerationStructuresProperties(
   vk_acceleration_structures.reserve(acceleration_structures.size());
   for (const auto& acceleration_structure : acceleration_structures)
   {
-    vk_acceleration_structures.emplace_back(acceleration_structure->As<VKResource>().acceleration_structure_handle.get());
+    vk_acceleration_structures.emplace_back(acceleration_structure.Downcast<VKResource>()->acceleration_structure_handle.get());
   }
   decltype(auto) vk_query_heap = query_heap->As<VKQueryHeap>();
   auto query_type = vk_query_heap.GetQueryType();
@@ -759,7 +759,7 @@ void VKCommandList::ResolveQueryData(
   const std::shared_ptr<QueryHeap>& query_heap,
   ezUInt32 first_query,
   ezUInt32 query_count,
-  const std::shared_ptr<Resource>& dst_buffer,
+  const ezSharedPtr<Resource>& dst_buffer,
   ezUInt64 dst_offset)
 {
   decltype(auto) vk_query_heap = query_heap->As<VKQueryHeap>();
@@ -769,7 +769,7 @@ void VKCommandList::ResolveQueryData(
     vk_query_heap.GetQueryPool(),
     first_query,
     query_count,
-    dst_buffer->As<VKResource>().buffer.res.get(),
+    dst_buffer.Downcast<VKResource>()->buffer.res.get(),
     dst_offset,
     sizeof(ezUInt64),
     vk::QueryResultFlagBits::eWait);

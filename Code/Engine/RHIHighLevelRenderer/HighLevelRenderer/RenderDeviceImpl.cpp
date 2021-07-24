@@ -38,7 +38,7 @@ ezRHIResourceFormat::Enum RenderDeviceImpl::GetFormat() const
   return m_Swapchain->GetFormat();
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::GetBackBuffer(ezUInt32 buffer)
+ezSharedPtr<Resource> RenderDeviceImpl::GetBackBuffer(ezUInt32 buffer)
 {
   return m_Swapchain->GetBackBuffer(buffer);
 }
@@ -48,14 +48,14 @@ std::shared_ptr<RenderCommandList> RenderDeviceImpl::CreateRenderCommandList(Com
   return std::make_shared<RenderCommandListImpl>(*m_device, *m_object_cache, CommandListType::kGraphics);
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
+ezSharedPtr<Resource> RenderDeviceImpl::CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
 {
   auto res = m_device->CreateTexture(TextureType::k2D, bind_flag, format, sample_count, width, height, depth, mip_levels);
   res->CommitMemory(MemoryType::kDefault);
   return res;
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type)
+ezSharedPtr<Resource> RenderDeviceImpl::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type)
 {
   auto res = m_device->CreateBuffer(bind_flag, buffer_size);
   if (res)
@@ -63,28 +63,28 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateBuffer(ezUInt32 bind_flag, ezU
   return res;
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateSampler(const SamplerDesc& desc)
+ezSharedPtr<Resource> RenderDeviceImpl::CreateSampler(const SamplerDesc& desc)
 {
   return m_device->CreateSampler(desc);
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags)
+ezSharedPtr<Resource> RenderDeviceImpl::CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags)
 {
   auto prebuild_info = m_device->GetBLASPrebuildInfo(descs, flags);
-  std::shared_ptr<Resource> memory = m_device->CreateBuffer(BindFlag::kAccelerationStructure, (ezUInt32)prebuild_info.acceleration_structure_size);
+  ezSharedPtr<Resource> memory = m_device->CreateBuffer(BindFlag::kAccelerationStructure, (ezUInt32)prebuild_info.acceleration_structure_size);
   memory->CommitMemory(MemoryType::kDefault);
   return m_device->CreateAccelerationStructure(AccelerationStructureType::kBottomLevel, memory, 0);
 }
 
-std::shared_ptr<Resource> RenderDeviceImpl::CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags)
+ezSharedPtr<Resource> RenderDeviceImpl::CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags)
 {
   auto prebuild_info = m_device->GetTLASPrebuildInfo(instance_count, flags);
-  std::shared_ptr<Resource> memory = m_device->CreateBuffer(BindFlag::kAccelerationStructure, (ezUInt32)prebuild_info.acceleration_structure_size);
+  ezSharedPtr<Resource> memory = m_device->CreateBuffer(BindFlag::kAccelerationStructure, (ezUInt32)prebuild_info.acceleration_structure_size);
   memory->CommitMemory(MemoryType::kDefault);
   return m_device->CreateAccelerationStructure(AccelerationStructureType::kTopLevel, memory, 0);
 }
 
-std::shared_ptr<View> RenderDeviceImpl::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
+std::shared_ptr<View> RenderDeviceImpl::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
 {
   return m_device->CreateView(resource, view_desc);
 }
@@ -152,8 +152,8 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
     {
       if (c == 0 && barrier.resource->AllowCommonStatePromotion(barrier.state_after))
         continue;
-      decltype(auto) resource_base = barrier.resource->As<ResourceBase>();
-      auto& global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+      decltype(auto) resource_base = barrier.resource.Downcast<ResourceBase>();
+      auto& global_state_tracker = resource_base->GetGlobalResourceStateTracker();
       if (global_state_tracker.HasResourceState() && barrier.baseMipLevel == 0 && barrier.level_count == barrier.resource->GetLevelCount() &&
           barrier.base_array_layer == 0 && barrier.layer_count == barrier.resource->GetLayerCount())
       {
@@ -221,8 +221,8 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
     {
       auto& resource = state_tracker_pair.first;
       auto& state_tracker = state_tracker_pair.second;
-      decltype(auto) resource_base = resource->As<ResourceBase>();
-      auto& global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+      decltype(auto) resource_base = resource.Downcast<ResourceBase>();
+      auto& global_state_tracker = resource_base->GetGlobalResourceStateTracker();
       global_state_tracker.Merge(state_tracker);
     }
 
@@ -258,8 +258,8 @@ void RenderDeviceImpl::Resize(ezUInt32 width, ezUInt32 height)
 void RenderDeviceImpl::InsertPresentBarrier()
 {
   auto back_buffer = GetBackBuffer(GetFrameIndex());
-  decltype(auto) resource_base = back_buffer->As<ResourceBase>();
-  decltype(auto) global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+  decltype(auto) resource_base = back_buffer.Downcast<ResourceBase>();
+  decltype(auto) global_state_tracker = resource_base->GetGlobalResourceStateTracker();
 
   ResourceBarrierDesc barrier = {};
   barrier.resource = back_buffer;

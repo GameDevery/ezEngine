@@ -10,8 +10,8 @@ class VKDevice;
 class VKView : public View
 {
 public:
-  VKView(VKDevice& device, const std::shared_ptr<VKResource>& resource, const ViewDesc& view_desc);
-  std::shared_ptr<Resource> GetResource() override;
+  VKView(VKDevice& device, const ezSharedPtr<VKResource>& resource, const ViewDesc& view_desc);
+  ezSharedPtr<Resource> GetResource() override;
   ezUInt32 GetDescriptorId() const override;
   ezUInt32 GetBaseMipLevel() const override;
   ezUInt32 GetLevelCount() const override;
@@ -27,7 +27,7 @@ private:
   void CreateBufferView();
 
   VKDevice& m_device;
-  std::shared_ptr<VKResource> m_resource;
+  ezSharedPtr<VKResource> m_resource;
   ViewDesc m_view_desc;
   vk::UniqueImageView m_image_view;
   vk::UniqueBufferView m_buffer_view;

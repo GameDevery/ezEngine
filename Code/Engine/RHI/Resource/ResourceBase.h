@@ -23,7 +23,7 @@ public:
 
   ezRHIResourceFormat::Enum format = ezRHIResourceFormat::UNKNOWN;
   ResourceType resource_type = ResourceType::kUnknown;
-  std::shared_ptr<Resource> acceleration_structures_memory;
+  ezSharedPtr<Resource> acceleration_structures_memory;
   bool is_back_buffer = false;
 
 protected:

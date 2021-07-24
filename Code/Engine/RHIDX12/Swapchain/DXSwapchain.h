@@ -15,7 +15,7 @@ class DXSwapchain : public Swapchain
 public:
   DXSwapchain(DXCommandQueue& command_queue, Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync);
   ezRHIResourceFormat::Enum GetFormat() const override;
-  std::shared_ptr<Resource> GetBackBuffer(ezUInt32 buffer) override;
+  ezSharedPtr<Resource> GetBackBuffer(ezUInt32 buffer) override;
   ezUInt32 NextImage(const ezSharedPtr<Fence>& fence, ezUInt64 signal_value) override;
   void Present(const ezSharedPtr<Fence>& fence, ezUInt64 wait_value) override;
 
@@ -23,5 +23,5 @@ private:
   DXCommandQueue& m_CommandQueue;
   bool m_vsync;
   ComPtr<IDXGISwapChain3> m_SwapChain;
-  ezDynamicArray<std::shared_ptr<Resource>> m_BackBuffers;
+  ezDynamicArray<ezSharedPtr<Resource>> m_BackBuffers;
 };

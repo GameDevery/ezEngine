@@ -23,12 +23,12 @@ public:
     ~RenderDeviceImpl();
 
     std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type) override;
-    std::shared_ptr<Resource> CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
-    std::shared_ptr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type) override;
-    std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) override;
-    std::shared_ptr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) override;
-    std::shared_ptr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) override;
-    std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc) override;
+    ezSharedPtr<Resource> CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
+    ezSharedPtr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type) override;
+    ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) override;
+    ezSharedPtr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) override;
+    ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) override;
+    std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
     std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
     std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;
     bool IsDxrSupported() const override;
@@ -38,7 +38,7 @@ public:
     ezUInt32 GetShadingRateImageTileSize() const override;
     ezUInt32 GetFrameIndex() const override;
     ezRHIResourceFormat::Enum GetFormat() const override;
-    std::shared_ptr<Resource> GetBackBuffer(ezUInt32 buffer) override;
+    ezSharedPtr<Resource> GetBackBuffer(ezUInt32 buffer) override;
     const ezString& GetGpuName() const override;
     void ExecuteCommandLists(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists) override;
     void Present() override;

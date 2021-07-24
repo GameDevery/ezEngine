@@ -118,7 +118,7 @@ std::shared_ptr<Framebuffer> ObjectCache::GetFramebuffer(const FramebufferDesc& 
   return it->second;
 }
 
-ezUInt32 GetPlaneSlice(const std::shared_ptr<Resource>& resource, ViewType view_type, ReturnType return_type)
+ezUInt32 GetPlaneSlice(const ezSharedPtr<Resource>& resource, ViewType view_type, ReturnType return_type)
 {
   if (!resource)
   {
@@ -154,7 +154,7 @@ ezUInt32 GetPlaneSlice(const std::shared_ptr<Resource>& resource, ViewType view_
   return 0;
 }
 
-ViewDimension GetViewDimension(const std::shared_ptr<Resource>& resource)
+ViewDimension GetViewDimension(const ezSharedPtr<Resource>& resource)
 {
   if (resource->GetSampleCount() > 1)
   {
@@ -172,7 +172,7 @@ ViewDimension GetViewDimension(const std::shared_ptr<Resource>& resource)
   }
 }
 
-std::shared_ptr<View> ObjectCache::GetView(const std::shared_ptr<Program>& program, const BindKey& bind_key, const std::shared_ptr<Resource>& resource, const LazyViewDesc& view_desc)
+std::shared_ptr<View> ObjectCache::GetView(const std::shared_ptr<Program>& program, const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
 {
   auto it = m_views.find({program, bind_key, resource, view_desc});
   if (it != m_views.end())

@@ -23,19 +23,19 @@ public:
     ezSharedPtr<CommandList> CreateCommandList(CommandListType type) override;
     void DestroyCommandList(CommandList* pCommandList) override {}
 
-    ezSharedPtr<Fence> CreateFence(ezUInt64 initial_value) override;
+    ezSharedPtr<Fence> CreateFence(ezUInt64 initialValue) override;
     void DestroyFence(Fence* pFence) override {}
 
-    std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
+    ezSharedPtr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
     void DestroyTexture(Resource* pTexture) override {}
 
-    std::shared_ptr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size) override;
+    ezSharedPtr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size) override;
     void DestroyBuffer(Resource* pBuffer) override {}
 
-    std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) override;
+    ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) override;
     void DestroySampler(Resource* pSampler) override {}
 
-    std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc) override;
+    std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
     void DestroyView(View* pView) override {}
 
     std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;
@@ -65,7 +65,7 @@ public:
     std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) override;
     void DestroyRayTracingPipeline(Pipeline* pPipeline) override {}
 
-    std::shared_ptr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset) override;
+    ezSharedPtr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset) override;
     void DestroyAccelerationStructure(Resource* pAccelerationStructure) override {}
 
     std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) override;

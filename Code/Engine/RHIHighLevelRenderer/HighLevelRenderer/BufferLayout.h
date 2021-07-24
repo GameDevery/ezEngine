@@ -24,7 +24,7 @@ private:
     const ezUInt8* m_src_data;
     BufferLayout& m_layout;
     std::vector<ezUInt8> m_dst_data;
-    std::vector<std::shared_ptr<Resource>> m_free_resources;
+    std::vector<ezSharedPtr<Resource>> m_free_resources;
     std::shared_ptr<ResourceLazyViewDesc> m_last_view;
 };
 

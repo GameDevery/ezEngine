@@ -311,9 +311,9 @@ ezSharedPtr<Fence> VKDevice::CreateFence(ezUInt64 initialValue)
   return EZ_DEFAULT_NEW(VKTimelineSemaphore, *this, initialValue);
 }
 
-std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
+ezSharedPtr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
 {
-  std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
   res->format = format;
   res->resource_type = ResourceType::kTexture;
   res->image.size.height = height;
@@ -381,12 +381,12 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bin
   return res;
 }
 
-std::shared_ptr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
+ezSharedPtr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
 {
   if (buffer_size == 0)
     return {};
 
-  std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
   res->resource_type = ResourceType::kBuffer;
   res->buffer.size = buffer_size;
 
@@ -427,9 +427,9 @@ std::shared_ptr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 bu
   return res;
 }
 
-std::shared_ptr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
+ezSharedPtr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
 {
-  std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
 
   vk::SamplerCreateInfo samplerInfo = {};
   samplerInfo.magFilter = vk::Filter::eLinear;
@@ -496,9 +496,9 @@ std::shared_ptr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> VKDevice::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
+std::shared_ptr<View> VKDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
 {
-  return std::make_shared<VKView>(*this, std::static_pointer_cast<VKResource>(resource), view_desc);
+  return std::make_shared<VKView>(*this, resource.Downcast<VKResource>(), view_desc);
 }
 
 std::shared_ptr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
@@ -560,8 +560,8 @@ vk::AccelerationStructureGeometryKHR VKDevice::FillRaytracingGeometryTriangles(c
       break;
   }
 
-  auto vk_vertex_res = std::static_pointer_cast<VKResource>(vertex.res);
-  auto vk_index_res = std::static_pointer_cast<VKResource>(index.res);
+  auto vk_vertex_res = vertex.res.Downcast<VKResource>();
+  auto vk_index_res = index.res.Downcast<VKResource>();
 
   auto vertex_stride = ezRHIResourceFormat::GetFormatStride(vertex.format);
   geometry_desc.geometry.triangles.vertexData = m_Device->getBufferAddress({vk_vertex_res->buffer.res.get()}) + vertex.offset * vertex_stride;
@@ -622,14 +622,14 @@ vk::AccelerationStructureTypeKHR Convert(AccelerationStructureType type)
   return {};
 }
 
-std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset)
+ezSharedPtr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset)
 {
-  std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
   res->resource_type = ResourceType::kAccelerationStructure;
   res->acceleration_structures_memory = resource;
 
   vk::AccelerationStructureCreateInfoKHR accelerationStructureCreateInfo = {};
-  accelerationStructureCreateInfo.buffer = resource->As<VKResource>().buffer.res.get();
+  accelerationStructureCreateInfo.buffer = resource.Downcast<VKResource>()->buffer.res.get();
   accelerationStructureCreateInfo.offset = offset;
   accelerationStructureCreateInfo.size = 0;
   accelerationStructureCreateInfo.type = Convert(type);

@@ -17,7 +17,7 @@ public:
   VKSwapchain(VKCommandQueue& commandQueue, Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync);
   ~VKSwapchain();
   ezRHIResourceFormat::Enum GetFormat() const override;
-  std::shared_ptr<Resource> GetBackBuffer(ezUInt32 buffer) override;
+  ezSharedPtr<Resource> GetBackBuffer(ezUInt32 buffer) override;
   ezUInt32 NextImage(const ezSharedPtr<Fence>& fence, ezUInt64 signalValue) override;
   void Present(const ezSharedPtr<Fence>& fence, ezUInt64 waitValue) override;
 
@@ -27,7 +27,7 @@ private:
   vk::UniqueSurfaceKHR m_Surface;
   vk::Format m_SwapchainColorFormat = vk::Format::eB8G8R8Unorm;
   vk::UniqueSwapchainKHR m_Swapchain;
-  ezDynamicArray<std::shared_ptr<Resource>> m_BackBuffers;
+  ezDynamicArray<ezSharedPtr<Resource>> m_BackBuffers;
   ezUInt32 m_FrameIndex = 0;
   vk::UniqueSemaphore m_ImageAvailableSemaphore;
   vk::UniqueSemaphore m_RenderingFinishedSemaphore;

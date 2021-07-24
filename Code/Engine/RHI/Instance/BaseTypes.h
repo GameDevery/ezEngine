@@ -469,7 +469,7 @@ struct RayTracingPipelineDesc
 
 struct RayTracingShaderTable
 {
-  std::shared_ptr<Resource> resource;
+  ezSharedPtr<Resource> resource;
   ezUInt64 offset;
   ezUInt64 size;
   ezUInt64 stride;
@@ -547,7 +547,7 @@ enum class PipelineType
 
 struct BufferDesc
 {
-  std::shared_ptr<Resource> res;
+  ezSharedPtr<Resource> res;
   ezRHIResourceFormat::Enum format = ezRHIResourceFormat::UNKNOWN;
   ezUInt32 count = 0;
   ezUInt32 offset = 0;
@@ -639,7 +639,7 @@ EZ_CHECK_AT_COMPILETIME(sizeof(RaytracingGeometryInstance) == 64);
 
 struct ResourceBarrierDesc
 {
-  std::shared_ptr<Resource> resource;
+  ezSharedPtr<Resource> resource;
   ResourceState state_before;
   ResourceState state_after;
   ezUInt32 baseMipLevel = 0;
