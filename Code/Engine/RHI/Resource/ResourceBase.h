@@ -12,9 +12,9 @@ public:
   ezRHIResourceFormat::Enum GetFormat() const override final;
   MemoryType GetMemoryType() const override final;
 
-  void UpdateUploadBuffer(uint64_t buffer_offset, const void* data, uint64_t num_bytes) override final;
-  void UpdateUploadBufferWithTextureData(uint64_t buffer_offset, uint32_t buffer_row_pitch, uint32_t buffer_depth_pitch,
-    const void* src_data, uint32_t src_row_pitch, uint32_t src_depth_pitch, uint32_t num_rows, uint32_t num_slices) override final;
+  void UpdateUploadBuffer(ezUInt64 buffer_offset, const void* data, ezUInt64 num_bytes) override final;
+  void UpdateUploadBufferWithTextureData(ezUInt64 buffer_offset, ezUInt32 buffer_row_pitch, ezUInt32 buffer_depth_pitch,
+    const void* src_data, ezUInt32 src_row_pitch, ezUInt32 src_depth_pitch, ezUInt32 num_rows, ezUInt32 num_slices) override final;
   ResourceState GetInitialState() const override final;
   bool IsBackBuffer() const override final;
   void SetInitialState(ResourceState state);
@@ -27,7 +27,7 @@ public:
   bool is_back_buffer = false;
 
 protected:
-  std::shared_ptr<Memory> m_memory;
+  ezSharedPtr<Memory> m_memory;
   MemoryType m_memory_type = MemoryType::kDefault;
 
 private:

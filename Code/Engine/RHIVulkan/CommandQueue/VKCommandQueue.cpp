@@ -5,14 +5,14 @@
 #include <RHIVulkan/Fence/VKTimelineSemaphore.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
-VKCommandQueue::VKCommandQueue(VKDevice& device, CommandListType type, uint32_t queue_family_index)
+VKCommandQueue::VKCommandQueue(VKDevice& device, CommandListType type, ezUInt32 queue_family_index)
     : m_device(device)
     , m_queue_family_index(queue_family_index)
 {
     m_queue = m_device.GetDevice().getQueue(m_queue_family_index, 0);
 }
 
-void VKCommandQueue::Wait(const std::shared_ptr<Fence>& fence, uint64_t value)
+void VKCommandQueue::Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
     decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
     vk::TimelineSemaphoreSubmitInfo timeline_info = {};
@@ -28,7 +28,7 @@ void VKCommandQueue::Wait(const std::shared_ptr<Fence>& fence, uint64_t value)
     vk::Result res = m_queue.submit(1, &signal_submit_info, {});
 }
 
-void VKCommandQueue::Signal(const std::shared_ptr<Fence>& fence, uint64_t value)
+void VKCommandQueue::Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
     decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
     vk::TimelineSemaphoreSubmitInfo timeline_info = {};
@@ -68,7 +68,7 @@ VKDevice& VKCommandQueue::GetDevice()
     return m_device;
 }
 
-uint32_t VKCommandQueue::GetQueueFamilyIndex()
+ezUInt32 VKCommandQueue::GetQueueFamilyIndex()
 {
     return m_queue_family_index;
 }

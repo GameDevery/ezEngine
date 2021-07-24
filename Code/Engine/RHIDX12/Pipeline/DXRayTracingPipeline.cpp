@@ -28,7 +28,7 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
     library->SetDXILLibrary(&byte);
     for (const auto& entry_point : shader->GetReflection()->GetEntryPoints())
     {
-      uint64_t shader_id = shader->GetId(entry_point.name);
+      ezUInt64 shader_id = shader->GetId(entry_point.name);
       ezString shader_name = entry_point.name;
       if (m_shader_names.Contains(shader_name))
       {
@@ -87,8 +87,8 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
 
   decltype(auto) shader_config = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
 
-  uint32_t max_payload_size = 0;
-  uint32_t max_attribute_size = 0;
+  ezUInt32 max_payload_size = 0;
+  ezUInt32 max_attribute_size = 0;
   for (size_t i = 0; i < entry_points.size(); ++i)
   {
     max_payload_size = ezMath::Max(max_payload_size, entry_points[i].payload_size);
@@ -108,7 +108,7 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
 ezString DXRayTracingPipeline::GenerateUniqueName(ezString name)
 {
   ezStringBuilder builder(name);
-  static uint64_t id = 0;
+  static ezUInt64 id = 0;
   while (m_shader_names.Contains(builder))
   {
     builder.AppendFormat("_{}", ++id);
@@ -136,10 +136,10 @@ const ComPtr<ID3D12RootSignature>& DXRayTracingPipeline::GetRootSignature() cons
   return m_root_signature;
 }
 
-std::vector<uint8_t> DXRayTracingPipeline::GetRayTracingShaderGroupHandles(uint32_t first_group, uint32_t group_count) const
+std::vector<ezUInt8> DXRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
-  std::vector<uint8_t> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
-  for (uint32_t i = 0; i < group_count; ++i)
+  std::vector<ezUInt8> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
+  for (ezUInt32 i = 0; i < group_count; ++i)
   {
     memcpy(shader_handles_storage.data() + i * m_device.GetShaderGroupHandleSize(), m_state_ojbect_props->GetShaderIdentifier(ezStringWChar((*m_group_names.GetValue(i + first_group))).GetData()), m_device.GetShaderGroupHandleSize());
   }

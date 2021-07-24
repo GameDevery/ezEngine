@@ -14,7 +14,7 @@ VKRayTracingPipeline::VKRayTracingPipeline(VKDevice& device, const RayTracingPip
 {
   std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups(m_desc.groups.size());
 
-  auto get = [&](uint64_t id) -> uint32_t {
+  auto get = [&](ezUInt64 id) -> ezUInt32 {
     auto it = m_shader_ids.Find(id);
     if (it == end(m_shader_ids))
     {
@@ -50,9 +50,9 @@ VKRayTracingPipeline::VKRayTracingPipeline(VKDevice& device, const RayTracingPip
   }
 
   vk::RayTracingPipelineCreateInfoKHR ray_pipeline_info{};
-  ray_pipeline_info.stageCount = static_cast<uint32_t>(m_shader_stage_create_info.size());
+  ray_pipeline_info.stageCount = static_cast<ezUInt32>(m_shader_stage_create_info.size());
   ray_pipeline_info.pStages = m_shader_stage_create_info.data();
-  ray_pipeline_info.groupCount = static_cast<uint32_t>(groups.size());
+  ray_pipeline_info.groupCount = static_cast<ezUInt32>(groups.size());
   ray_pipeline_info.pGroups = groups.data();
   ray_pipeline_info.maxPipelineRayRecursionDepth = 1;
   ray_pipeline_info.layout = m_pipeline_layout;
@@ -65,9 +65,9 @@ PipelineType VKRayTracingPipeline::GetPipelineType() const
   return PipelineType::kRayTracing;
 }
 
-std::vector<uint8_t> VKRayTracingPipeline::GetRayTracingShaderGroupHandles(uint32_t first_group, uint32_t group_count) const
+std::vector<ezUInt8> VKRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
-  std::vector<uint8_t> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
+  std::vector<ezUInt8> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
   vk::Result res = m_device.GetDevice().getRayTracingShaderGroupHandlesKHR(m_pipeline.get(), first_group, group_count, (ezUInt32)shader_handles_storage.size(), shader_handles_storage.data());
   return shader_handles_storage;
 }

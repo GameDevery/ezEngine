@@ -5,10 +5,10 @@
 #include <directx/d3d12.h>
 #include <directx/d3dx12.h>
 
-DXRayTracingQueryHeap::DXRayTracingQueryHeap(DXDevice& device, QueryHeapType type, uint32_t count)
+DXRayTracingQueryHeap::DXRayTracingQueryHeap(DXDevice& device, QueryHeapType type, ezUInt32 count)
   : m_device(device)
 {
-  auto desc = CD3DX12_RESOURCE_DESC::Buffer(count * sizeof(uint64_t));
+  auto desc = CD3DX12_RESOURCE_DESC::Buffer(count * sizeof(ezUInt64));
   desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
   auto dx12HeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);

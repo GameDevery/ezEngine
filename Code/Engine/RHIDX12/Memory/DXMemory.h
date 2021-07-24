@@ -10,7 +10,7 @@ class DXDevice;
 class DXMemory : public Memory
 {
 public:
-    DXMemory(DXDevice& device, uint64_t size, MemoryType memory_type, uint32_t memory_type_bits);
+    DXMemory(DXDevice& device, ezUInt64 size, MemoryType memory_type, ezUInt32 memory_type_bits);
     MemoryType GetMemoryType() const override;
     ComPtr<ID3D12Heap> GetHeap() const;
 

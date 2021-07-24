@@ -24,7 +24,7 @@ public:
     D3D12_CPU_DESCRIPTOR_HANDLE& cpu_handle_readable,
     ezUInt32 offset,
     ezUInt32 size,
-    uint32_t increment_size,
+    ezUInt32 increment_size,
     D3D12_DESCRIPTOR_HEAP_TYPE type);
   DXGPUDescriptorPoolRange(DXGPUDescriptorPoolRange&& oth);
   ~DXGPUDescriptorPoolRange();
@@ -48,7 +48,7 @@ private:
   std::reference_wrapper<D3D12_CPU_DESCRIPTOR_HANDLE> m_cpu_handle_readable;
   ezUInt32 m_offset;
   ezUInt32 m_size;
-  uint32_t m_increment_size;
+  ezUInt32 m_increment_size;
   D3D12_DESCRIPTOR_HEAP_TYPE m_type;
   //std::unique_ptr<DXGPUDescriptorPoolRange, std::function<void(DXGPUDescriptorPoolRange*)>> m_callback;
 };

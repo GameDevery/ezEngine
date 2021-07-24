@@ -3,7 +3,7 @@
 #include <RHIVulkan/Memory/VKMemory.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
-VKMemory::VKMemory(VKDevice& device, uint64_t size, MemoryType memory_type, uint32_t memory_type_bits, const vk::MemoryDedicatedAllocateInfoKHR* dedicated_allocate_info)
+VKMemory::VKMemory(VKDevice& device, ezUInt64 size, MemoryType memory_type, ezUInt32 memory_type_bits, const vk::MemoryDedicatedAllocateInfoKHR* dedicated_allocate_info)
     : m_memory_type(memory_type)
 {
     vk::MemoryAllocateFlagsInfo alloc_flag_info = {};

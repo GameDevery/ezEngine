@@ -18,7 +18,7 @@ public:
         D3D12_CPU_DESCRIPTOR_HANDLE& cpu_handle,
         size_t offset,
         size_t size,
-        uint32_t increment_size,
+        ezUInt32 increment_size,
         D3D12_DESCRIPTOR_HEAP_TYPE type);
     D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(size_t offset = 0) const;
 
@@ -28,6 +28,6 @@ private:
     std::reference_wrapper<D3D12_CPU_DESCRIPTOR_HANDLE> m_cpu_handle;
     size_t m_offset;
     size_t m_size;
-    uint32_t m_increment_size;
+    ezUInt32 m_increment_size;
     D3D12_DESCRIPTOR_HEAP_TYPE m_type;
 };

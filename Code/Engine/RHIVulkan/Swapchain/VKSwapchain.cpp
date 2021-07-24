@@ -1,166 +1,186 @@
 #include <RHIVulkanPCH.h>
 
-#include <RHIVulkan/Swapchain/VKSwapchain.h>
-#include <RHIVulkan/Device/VKDevice.h>
-#include <RHIVulkan/CommandQueue/VKCommandQueue.h>
 #include <RHIVulkan/Adapter/VKAdapter.h>
-#include <RHIVulkan/Instance/VKInstance.h>
+#include <RHIVulkan/CommandQueue/VKCommandQueue.h>
+#include <RHIVulkan/Device/VKDevice.h>
 #include <RHIVulkan/Fence/VKTimelineSemaphore.h>
-#include <RHIVulkan/Utilities/VKUtility.h>
+#include <RHIVulkan/Instance/VKInstance.h>
 #include <RHIVulkan/Resource/VKResource.h>
+#include <RHIVulkan/Swapchain/VKSwapchain.h>
+#include <RHIVulkan/Utilities/VKUtility.h>
 
 #include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 
-VKSwapchain::VKSwapchain(VKCommandQueue& command_queue, Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
-    : m_command_queue(command_queue)
-    , m_device(command_queue.GetDevice())
+EZ_DEFINE_AS_POD_TYPE(vk::Image);
+EZ_DEFINE_AS_POD_TYPE(vk::PresentModeKHR);
+EZ_DEFINE_AS_POD_TYPE(vk::SurfaceFormatKHR);
+
+VKSwapchain::VKSwapchain(VKCommandQueue& commandQueue, Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync)
+  : m_CommandQueue(commandQueue)
+  , m_Device(commandQueue.GetDevice())
 {
-    VKAdapter& adapter = m_device.GetAdapter();
-    VKInstance& instance = adapter.GetInstance();
+  VKAdapter& adapter = m_Device.GetAdapter();
+  VKInstance& instance = adapter.GetInstance();
 
-    vk::Win32SurfaceCreateInfoKHR surface_desc = {};
-    surface_desc.hinstance = GetModuleHandle(nullptr);
-    surface_desc.hwnd = reinterpret_cast<HWND>(window);
-    m_surface = instance.GetInstance().createWin32SurfaceKHRUnique(surface_desc);
+  vk::Win32SurfaceCreateInfoKHR surfaceDesc = {};
+  surfaceDesc.hinstance = GetModuleHandle(nullptr);
+  surfaceDesc.hwnd = reinterpret_cast<HWND>(window);
+  m_Surface = instance.GetInstance().createWin32SurfaceKHRUnique(surfaceDesc);
 
-    auto surface_formats = adapter.GetPhysicalDevice().getSurfaceFormatsKHR(m_surface.get());
-    EZ_ASSERT_ALWAYS(!surface_formats.empty(), "");
+  ezUInt32 surfaceFormatsCount = 0;
+  vk::Result result = adapter.GetPhysicalDevice().getSurfaceFormatsKHR(m_Surface.get(), &surfaceFormatsCount, nullptr);
 
-    if (surface_formats.front().format != vk::Format::eUndefined)
-        m_swapchain_color_format = surface_formats.front().format;
+  ezDynamicArray<vk::SurfaceFormatKHR> surfaceFormats;
+  surfaceFormats.SetCountUninitialized(surfaceFormatsCount);
+  result = adapter.GetPhysicalDevice().getSurfaceFormatsKHR(m_Surface.get(), &surfaceFormatsCount, surfaceFormats.GetData());
 
-    vk::ColorSpaceKHR color_space = surface_formats.front().colorSpace;
+  EZ_ASSERT_ALWAYS(!surfaceFormats.IsEmpty(), "");
 
-    vk::SurfaceCapabilitiesKHR surface_capabilities = {};
-    EZ_ASSERT_ALWAYS(adapter.GetPhysicalDevice().getSurfaceCapabilitiesKHR(m_surface.get(), &surface_capabilities) == vk::Result::eSuccess, "");
+  if (surfaceFormats[0].format != vk::Format::eUndefined)
+    m_SwapchainColorFormat = surfaceFormats[0].format;
 
-    EZ_ASSERT_ALWAYS(surface_capabilities.currentExtent.width == width, "");
-    EZ_ASSERT_ALWAYS(surface_capabilities.currentExtent.height == height, "");
+  vk::ColorSpaceKHR color_space = surfaceFormats[0].colorSpace;
 
-    vk::Bool32 is_supported_surface = VK_FALSE;
-    vk::Result res = adapter.GetPhysicalDevice().getSurfaceSupportKHR(command_queue.GetQueueFamilyIndex(), m_surface.get(), &is_supported_surface);
-    EZ_ASSERT_ALWAYS(is_supported_surface, "");
+  vk::SurfaceCapabilitiesKHR surfaceCapabilities = {};
+  EZ_ASSERT_ALWAYS(adapter.GetPhysicalDevice().getSurfaceCapabilitiesKHR(m_Surface.get(), &surfaceCapabilities) == vk::Result::eSuccess, "");
 
-    auto modes = adapter.GetPhysicalDevice().getSurfacePresentModesKHR(m_surface.get());
+  EZ_ASSERT_ALWAYS(surfaceCapabilities.currentExtent.width == width, "");
+  EZ_ASSERT_ALWAYS(surfaceCapabilities.currentExtent.height == height, "");
 
-    vk::SwapchainCreateInfoKHR swap_chain_create_info = {};
-    swap_chain_create_info.surface = m_surface.get();
-    swap_chain_create_info.minImageCount = frame_count;
-    swap_chain_create_info.imageFormat = m_swapchain_color_format;
-    swap_chain_create_info.imageColorSpace = color_space;
-    swap_chain_create_info.imageExtent = surface_capabilities.currentExtent;
-    swap_chain_create_info.imageArrayLayers = 1;
-    swap_chain_create_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst;
-    swap_chain_create_info.imageSharingMode = vk::SharingMode::eExclusive;
-    swap_chain_create_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
-    swap_chain_create_info.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-    if (vsync)
-    {
-        if (std::count(modes.begin(), modes.end(), vk::PresentModeKHR::eFifoRelaxed))
-            swap_chain_create_info.presentMode = vk::PresentModeKHR::eFifoRelaxed;
-        else
-            swap_chain_create_info.presentMode = vk::PresentModeKHR::eFifo;
-    }
+  vk::Bool32 isSupportedSurface = VK_FALSE;
+  result = adapter.GetPhysicalDevice().getSurfaceSupportKHR(commandQueue.GetQueueFamilyIndex(), m_Surface.get(), &isSupportedSurface);
+  EZ_ASSERT_ALWAYS(isSupportedSurface, "");
+
+  ezUInt32 presentModesCount = 0;
+  result = adapter.GetPhysicalDevice().getSurfacePresentModesKHR(m_Surface.get(), &presentModesCount, nullptr);
+
+  ezDynamicArray<vk::PresentModeKHR> presentModes;
+  presentModes.SetCountUninitialized(presentModesCount);
+  result = adapter.GetPhysicalDevice().getSurfacePresentModesKHR(m_Surface.get(), &presentModesCount, presentModes.GetData());
+
+  vk::SwapchainCreateInfoKHR swapChainCreateInfo = {};
+  swapChainCreateInfo.surface = m_Surface.get();
+  swapChainCreateInfo.minImageCount = frameCount;
+  swapChainCreateInfo.imageFormat = m_SwapchainColorFormat;
+  swapChainCreateInfo.imageColorSpace = color_space;
+  swapChainCreateInfo.imageExtent = surfaceCapabilities.currentExtent;
+  swapChainCreateInfo.imageArrayLayers = 1;
+  swapChainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst;
+  swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
+  swapChainCreateInfo.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+  swapChainCreateInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+  if (vsync)
+  {
+    if (presentModes.Contains(vk::PresentModeKHR::eFifoRelaxed))
+      swapChainCreateInfo.presentMode = vk::PresentModeKHR::eFifoRelaxed;
     else
-    {
-        if (std::count(modes.begin(), modes.end(), vk::PresentModeKHR::eMailbox))
-            swap_chain_create_info.presentMode = vk::PresentModeKHR::eMailbox;
-        else
-            swap_chain_create_info.presentMode = vk::PresentModeKHR::eImmediate;
-    }
-    swap_chain_create_info.clipped = true;
+      swapChainCreateInfo.presentMode = vk::PresentModeKHR::eFifo;
+  }
+  else
+  {
+    if (presentModes.Contains(vk::PresentModeKHR::eMailbox))
+      swapChainCreateInfo.presentMode = vk::PresentModeKHR::eMailbox;
+    else
+      swapChainCreateInfo.presentMode = vk::PresentModeKHR::eImmediate;
+  }
+  swapChainCreateInfo.clipped = true;
 
-    m_swapchain = m_device.GetDevice().createSwapchainKHRUnique(swap_chain_create_info);
+  m_Swapchain = m_Device.GetDevice().createSwapchainKHRUnique(swapChainCreateInfo);
 
-    std::vector<vk::Image> m_images = m_device.GetDevice().getSwapchainImagesKHR(m_swapchain.get());
+  ezUInt32 imageCount = 0;
+  result = m_Device.GetDevice().getSwapchainImagesKHR(m_Swapchain.get(), &imageCount, nullptr);
 
-    m_command_list = m_device.CreateCommandList(CommandListType::kGraphics);
-    for (uint32_t i = 0; i < frame_count; ++i)
-    {
-        std::shared_ptr<VKResource> res = std::make_shared<VKResource>(m_device);
-        res->format = GetFormat();
-        res->image.res = m_images[i];
-        res->image.format = m_swapchain_color_format;
-        res->image.size = vk::Extent2D(1u * width, 1u * height);
-        res->resource_type = ResourceType::kTexture;
-        res->is_back_buffer = true;
-        m_command_list->ResourceBarrier({ { res, ResourceState::kUndefined, ResourceState::kPresent } });
-        res->SetInitialState(ResourceState::kPresent);
-        m_back_buffers.emplace_back(res);
-    }
-    m_command_list->Close();
+  ezDynamicArray<vk::Image> images;
+  images.SetCountUninitialized(imageCount);
+  result = m_Device.GetDevice().getSwapchainImagesKHR(m_Swapchain.get(), &imageCount, images.GetData());
 
-    vk::SemaphoreCreateInfo semaphore_create_info = {};
-    m_image_available_semaphore = m_device.GetDevice().createSemaphoreUnique(semaphore_create_info);
-    m_rendering_finished_semaphore = m_device.GetDevice().createSemaphoreUnique(semaphore_create_info);
-    m_fence = m_device.CreateFence(0);
-    command_queue.ExecuteCommandLists({ m_command_list });
-    command_queue.Signal(m_fence, 1);
+  m_CommandList = m_Device.CreateCommandList(CommandListType::kGraphics);
+  for (ezUInt32 i = 0; i < frameCount; ++i)
+  {
+    std::shared_ptr<VKResource> res = std::make_shared<VKResource>(m_Device);
+    res->format = GetFormat();
+    res->image.res = images[i];
+    res->image.format = m_SwapchainColorFormat;
+    res->image.size = vk::Extent2D(1u * width, 1u * height);
+    res->resource_type = ResourceType::kTexture;
+    res->is_back_buffer = true;
+    m_CommandList->ResourceBarrier({{res, ResourceState::kUndefined, ResourceState::kPresent}});
+    res->SetInitialState(ResourceState::kPresent);
+    m_BackBuffers.PushBack(res);
+  }
+  m_CommandList->Close();
+
+  vk::SemaphoreCreateInfo semaphoreCreateInfo = {};
+  m_ImageAvailableSemaphore = m_Device.GetDevice().createSemaphoreUnique(semaphoreCreateInfo);
+  m_RenderingFinishedSemaphore = m_Device.GetDevice().createSemaphoreUnique(semaphoreCreateInfo);
+  m_Fence = m_Device.CreateFence(0);
+  commandQueue.ExecuteCommandLists({m_CommandList});
+  commandQueue.Signal(m_Fence, 1);
 }
 
 VKSwapchain::~VKSwapchain()
 {
-    m_fence->Wait(1);
+  m_Fence->Wait(1);
 }
 
 ezRHIResourceFormat::Enum VKSwapchain::GetFormat() const
 {
-  return VKUtils::ToEngineFormat(m_swapchain_color_format);
+  return VKUtils::ToEngineFormat(m_SwapchainColorFormat);
 }
 
-std::shared_ptr<Resource> VKSwapchain::GetBackBuffer(uint32_t buffer)
+std::shared_ptr<Resource> VKSwapchain::GetBackBuffer(ezUInt32 buffer)
 {
-    return m_back_buffers[buffer];
+  return m_BackBuffers[buffer];
 }
 
-uint32_t VKSwapchain::NextImage(const std::shared_ptr<Fence>& fence, uint64_t signal_value)
+ezUInt32 VKSwapchain::NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signalValue)
 {
-    vk::Result res = m_device.GetDevice().acquireNextImageKHR(m_swapchain.get(), UINT64_MAX, m_image_available_semaphore.get(), nullptr, &m_frame_index);
+  vk::Result result = m_Device.GetDevice().acquireNextImageKHR(m_Swapchain.get(), UINT64_MAX, m_ImageAvailableSemaphore.get(), nullptr, &m_FrameIndex);
 
-    decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
-    uint64_t tmp = ezMath::MaxValue<ezUInt64>();
-    vk::TimelineSemaphoreSubmitInfo timeline_info = {};
-    timeline_info.waitSemaphoreValueCount = 1;
-    timeline_info.pWaitSemaphoreValues = &tmp;
-    timeline_info.signalSemaphoreValueCount = 1;
-    timeline_info.pSignalSemaphoreValues = &signal_value;
-    vk::SubmitInfo signal_submit_info = {};
-    signal_submit_info.pNext = &timeline_info;
-    signal_submit_info.waitSemaphoreCount = 1;
-    signal_submit_info.pWaitSemaphores = &m_image_available_semaphore.get();
-    vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
-    signal_submit_info.pWaitDstStageMask = &waitDstStageMask;
-    signal_submit_info.signalSemaphoreCount = 1;
-    signal_submit_info.pSignalSemaphores = &vk_fence.GetFence();
-    res = m_command_queue.GetQueue().submit(1, &signal_submit_info, {});
+  VKTimelineSemaphore& vkFence = fence->As<VKTimelineSemaphore>();
+  constexpr ezUInt64 tmp = ezMath::MaxValue<ezUInt64>();
+  vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
+  timelineInfo.waitSemaphoreValueCount = 1;
+  timelineInfo.pWaitSemaphoreValues = &tmp;
+  timelineInfo.signalSemaphoreValueCount = 1;
+  timelineInfo.pSignalSemaphoreValues = &signalValue;
+  vk::SubmitInfo signalSubmitInfo = {};
+  signalSubmitInfo.pNext = &timelineInfo;
+  signalSubmitInfo.waitSemaphoreCount = 1;
+  signalSubmitInfo.pWaitSemaphores = &m_ImageAvailableSemaphore.get();
+  vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
+  signalSubmitInfo.pWaitDstStageMask = &waitDstStageMask;
+  signalSubmitInfo.signalSemaphoreCount = 1;
+  signalSubmitInfo.pSignalSemaphores = &vkFence.GetFence();
+  result = m_CommandQueue.GetQueue().submit(1, &signalSubmitInfo, {});
 
-    return m_frame_index;
+  return m_FrameIndex;
 }
 
-void VKSwapchain::Present(const std::shared_ptr<Fence>& fence, uint64_t wait_value)
+void VKSwapchain::Present(const std::shared_ptr<Fence>& fence, ezUInt64 waitValue)
 {
-    decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
-    uint64_t tmp = std::numeric_limits<uint64_t>::max();
-    vk::TimelineSemaphoreSubmitInfo timeline_info = {};
-    timeline_info.waitSemaphoreValueCount = 1;
-    timeline_info.pWaitSemaphoreValues = &wait_value;
-    timeline_info.signalSemaphoreValueCount = 1;
-    timeline_info.pSignalSemaphoreValues = &tmp;
-    vk::SubmitInfo signal_submit_info = {};
-    signal_submit_info.pNext = &timeline_info;
-    signal_submit_info.waitSemaphoreCount = 1;
-    signal_submit_info.pWaitSemaphores = &vk_fence.GetFence();
-    vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
-    signal_submit_info.pWaitDstStageMask = &waitDstStageMask;
-    signal_submit_info.signalSemaphoreCount = 1;
-    signal_submit_info.pSignalSemaphores = &m_rendering_finished_semaphore.get();
-    vk::Result res = m_command_queue.GetQueue().submit(1, &signal_submit_info, {});
+  decltype(auto) vkFence = fence->As<VKTimelineSemaphore>();
+  constexpr ezUInt64 tmp = ezMath::MaxValue<ezUInt64>();
+  vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
+  timelineInfo.waitSemaphoreValueCount = 1;
+  timelineInfo.pWaitSemaphoreValues = &waitValue;
+  timelineInfo.signalSemaphoreValueCount = 1;
+  timelineInfo.pSignalSemaphoreValues = &tmp;
+  vk::SubmitInfo signalSubmitInfo = {};
+  signalSubmitInfo.pNext = &timelineInfo;
+  signalSubmitInfo.waitSemaphoreCount = 1;
+  signalSubmitInfo.pWaitSemaphores = &vkFence.GetFence();
+  vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
+  signalSubmitInfo.pWaitDstStageMask = &waitDstStageMask;
+  signalSubmitInfo.signalSemaphoreCount = 1;
+  signalSubmitInfo.pSignalSemaphores = &m_RenderingFinishedSemaphore.get();
+  vk::Result result = m_CommandQueue.GetQueue().submit(1, &signalSubmitInfo, {});
 
-    vk::PresentInfoKHR present_info = {};
-    present_info.swapchainCount = 1;
-    present_info.pSwapchains = &m_swapchain.get();
-    present_info.pImageIndices = &m_frame_index;
-    present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = &m_rendering_finished_semaphore.get();
-    res = m_command_queue.GetQueue().presentKHR(present_info);
+  vk::PresentInfoKHR presentInfo = {};
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains = &m_Swapchain.get();
+  presentInfo.pImageIndices = &m_FrameIndex;
+  presentInfo.waitSemaphoreCount = 1;
+  presentInfo.pWaitSemaphores = &m_RenderingFinishedSemaphore.get();
+  result = m_CommandQueue.GetQueue().presentKHR(presentInfo);
 }

@@ -179,7 +179,7 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
   };
 
   std::vector<D3D12_RENDER_PASS_RENDER_TARGET_DESC> om_rtv;
-  for (uint32_t slot = 0; slot < rtvs.size(); ++slot)
+  for (ezUInt32 slot = 0; slot < rtvs.size(); ++slot)
   {
     auto handle = get_handle(rtvs[slot]);
     if (!handle.ptr)
@@ -211,7 +211,7 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
     om_dsv_ptr = &om_dsv;
   }
 
-  m_command_list4->BeginRenderPass(static_cast<uint32_t>(om_rtv.size()), om_rtv.data(), om_dsv_ptr, D3D12_RENDER_PASS_FLAG_NONE);
+  m_command_list4->BeginRenderPass(static_cast<ezUInt32>(om_rtv.size()), om_rtv.data(), om_dsv_ptr, D3D12_RENDER_PASS_FLAG_NONE);
 }
 
 void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
@@ -228,7 +228,7 @@ void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_p
     decltype(auto) dx_view = view->As<DXView>();
     return dx_view.GetHandle();
   };
-  for (uint32_t slot = 0; slot < rtvs.size(); ++slot)
+  for (ezUInt32 slot = 0; slot < rtvs.size(); ++slot)
   {
     om_rtv[slot] = get_handle(rtvs[slot]);
     if (dx_render_pass.GetDesc().colors[slot].load_op == RenderPassLoadOp::kClear)
@@ -246,7 +246,7 @@ void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_p
     clear_flags |= D3D12_CLEAR_FLAG_STENCIL;
   if (om_dsv.ptr && clear_flags)
     m_command_list->ClearDepthStencilView(om_dsv, clear_flags, clear_desc.depth, clear_desc.stencil, 0, nullptr);
-  m_command_list->OMSetRenderTargets(static_cast<uint32_t>(om_rtv.size()), om_rtv.data(), FALSE, om_dsv.ptr ? &om_dsv : nullptr);
+  m_command_list->OMSetRenderTargets(static_cast<ezUInt32>(om_rtv.size()), om_rtv.data(), FALSE, om_dsv.ptr ? &om_dsv : nullptr);
 }
 
 void DXCommandList::EndRenderPass()
@@ -272,12 +272,12 @@ void DXCommandList::EndEvent()
   PIXEndEvent(m_command_list.Get());
 }
 
-void DXCommandList::Draw(uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance)
+void DXCommandList::Draw(ezUInt32 vertex_count, ezUInt32 instance_count, ezUInt32 first_vertex, ezUInt32 first_instance)
 {
   m_command_list->DrawInstanced(vertex_count, instance_count, first_vertex, first_instance);
 }
 
-void DXCommandList::DrawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance)
+void DXCommandList::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, ezUInt32 first_index, ezInt32 vertex_offset, ezUInt32 first_instance)
 {
   m_command_list->DrawIndexedInstanced(index_count, instance_count, first_index, vertex_offset, first_instance);
 }
@@ -285,11 +285,11 @@ void DXCommandList::DrawIndexed(uint32_t index_count, uint32_t instance_count, u
 void DXCommandList::ExecuteIndirect(
   D3D12_INDIRECT_ARGUMENT_TYPE type,
   const std::shared_ptr<Resource>& argument_buffer,
-  uint64_t argument_buffer_offset,
+  ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
-  uint64_t count_buffer_offset,
-  uint32_t max_draw_count,
-  uint32_t stride)
+  ezUInt64 count_buffer_offset,
+  ezUInt32 max_draw_count,
+  ezUInt32 stride)
 {
   decltype(auto) dx_argument_buffer = argument_buffer->As<DXResource>();
   ID3D12Resource* dx_count_buffer = nullptr;
@@ -310,23 +310,23 @@ void DXCommandList::ExecuteIndirect(
     count_buffer_offset);
 }
 
-void DXCommandList::DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void DXCommandList::DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndirectCount(argument_buffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndirectCommand));
 }
 
-void DXCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void DXCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   DrawIndexedIndirectCount(argument_buffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndexedIndirectCommand));
 }
 
 void DXCommandList::DrawIndirectCount(
   const std::shared_ptr<Resource>& argument_buffer,
-  uint64_t argument_buffer_offset,
+  ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
-  uint64_t count_buffer_offset,
-  uint32_t max_draw_count,
-  uint32_t stride)
+  ezUInt64 count_buffer_offset,
+  ezUInt32 max_draw_count,
+  ezUInt32 stride)
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DRAW,
@@ -340,11 +340,11 @@ void DXCommandList::DrawIndirectCount(
 
 void DXCommandList::DrawIndexedIndirectCount(
   const std::shared_ptr<Resource>& argument_buffer,
-  uint64_t argument_buffer_offset,
+  ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
-  uint64_t count_buffer_offset,
-  uint32_t max_draw_count,
-  uint32_t stride)
+  ezUInt64 count_buffer_offset,
+  ezUInt32 max_draw_count,
+  ezUInt32 stride)
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED,
@@ -356,12 +356,12 @@ void DXCommandList::DrawIndexedIndirectCount(
     stride);
 }
 
-void DXCommandList::Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z)
+void DXCommandList::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_group_count_y, ezUInt32 thread_group_count_z)
 {
   m_command_list->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset)
+void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH,
@@ -373,7 +373,7 @@ void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& argument_b
     sizeof(DispatchIndirectCommand));
 }
 
-void DXCommandList::DispatchMesh(uint32_t thread_group_count_x)
+void DXCommandList::DispatchMesh(ezUInt32 thread_group_count_x)
 {
   m_command_list6->DispatchMesh(thread_group_count_x, 1, 1);
 }
@@ -388,7 +388,7 @@ static D3D12_GPU_VIRTUAL_ADDRESS GetVirtualAddress(const RayTracingShaderTable& 
   return dx_resource.resource->GetGPUVirtualAddress() + table.offset;
 }
 
-void DXCommandList::DispatchRays(const RayTracingShaderTables& shader_tables, uint32_t width, uint32_t height, uint32_t depth)
+void DXCommandList::DispatchRays(const RayTracingShaderTables& shader_tables, ezUInt32 width, ezUInt32 height, ezUInt32 depth)
 {
   D3D12_DISPATCH_RAYS_DESC dispatch_rays_desc = {};
 
@@ -433,21 +433,21 @@ void DXCommandList::ResourceBarrier(const std::vector<ResourceBarrierDesc>& barr
     if (dx_state_before == dx_state_after)
       continue;
 
-    assert(barrier.base_mip_level + barrier.level_count <= dx_resource.desc.MipLevels);
+    assert(barrier.baseMipLevel + barrier.level_count <= dx_resource.desc.MipLevels);
     assert(barrier.base_array_layer + barrier.layer_count <= dx_resource.desc.DepthOrArraySize);
 
-    if (barrier.base_mip_level == 0 && barrier.level_count == dx_resource.desc.MipLevels &&
+    if (barrier.baseMipLevel == 0 && barrier.level_count == dx_resource.desc.MipLevels &&
         barrier.base_array_layer == 0 && barrier.layer_count == dx_resource.desc.DepthOrArraySize)
     {
       dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource.resource.Get(), dx_state_before, dx_state_after));
     }
     else
     {
-      for (uint32_t i = barrier.base_mip_level; i < barrier.base_mip_level + barrier.level_count; ++i)
+      for (ezUInt32 i = barrier.baseMipLevel; i < barrier.baseMipLevel + barrier.level_count; ++i)
       {
-        for (uint32_t j = barrier.base_array_layer; j < barrier.base_array_layer + barrier.layer_count; ++j)
+        for (ezUInt32 j = barrier.base_array_layer; j < barrier.base_array_layer + barrier.layer_count; ++j)
         {
-          uint32_t subresource = i + j * dx_resource.desc.MipLevels;
+          ezUInt32 subresource = i + j * dx_resource.desc.MipLevels;
           dx_barriers.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(dx_resource.resource.Get(), dx_state_before, dx_state_after, subresource));
         }
       }
@@ -481,7 +481,7 @@ void DXCommandList::SetViewport(float x, float y, float width, float height)
   m_command_list->RSSetViewports(1, &viewport);
 }
 
-void DXCommandList::SetScissorRect(int32_t left, int32_t top, uint32_t right, uint32_t bottom)
+void DXCommandList::SetScissorRect(ezInt32 left, ezInt32 top, ezUInt32 right, ezUInt32 bottom)
 {
   D3D12_RECT rect = {(LONG)left, (LONG)top, (LONG)right, (LONG)bottom};
   m_command_list->RSSetScissorRects(1, &rect);
@@ -498,7 +498,7 @@ void DXCommandList::IASetIndexBuffer(const std::shared_ptr<Resource>& resource, 
   m_command_list->IASetIndexBuffer(&index_buffer_view);
 }
 
-void DXCommandList::IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource)
+void DXCommandList::IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource)
 {
   if (m_state && m_state->GetPipelineType() == PipelineType::kGraphics)
   {
@@ -513,7 +513,7 @@ void DXCommandList::IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resou
   m_lazy_vertex[slot] = resource;
 }
 
-void DXCommandList::IASetVertexBufferImpl(uint32_t slot, const std::shared_ptr<Resource>& resource, uint32_t stride)
+void DXCommandList::IASetVertexBufferImpl(ezUInt32 slot, const std::shared_ptr<Resource>& resource, ezUInt32 stride)
 {
   D3D12_VERTEX_BUFFER_VIEW vertex_buffer_view = {};
   if (resource)
@@ -531,7 +531,7 @@ void DXCommandList::RSSetShadingRate(ShadingRate shading_rate, const std::array<
   m_command_list5->RSSetShadingRate(static_cast<D3D12_SHADING_RATE>(shading_rate), reinterpret_cast<const D3D12_SHADING_RATE_COMBINER*>(combiners.data()));
 }
 
-void DXCommandList::BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::shared_ptr<Resource>& scratch, uint64_t scratch_offset)
+void DXCommandList::BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::shared_ptr<Resource>& scratch, ezUInt64 scratch_offset)
 {
   decltype(auto) dx_dst = dst->As<DXResource>();
   decltype(auto) dx_scratch = scratch->As<DXResource>();
@@ -553,7 +553,7 @@ void DXCommandList::BuildBottomLevelAS(
   const std::shared_ptr<Resource>& src,
   const std::shared_ptr<Resource>& dst,
   const std::shared_ptr<Resource>& scratch,
-  uint64_t scratch_offset,
+  ezUInt64 scratch_offset,
   const std::vector<RaytracingGeometryDesc>& descs,
   BuildAccelerationStructureFlags flags)
 {
@@ -575,10 +575,10 @@ void DXCommandList::BuildTopLevelAS(
   const std::shared_ptr<Resource>& src,
   const std::shared_ptr<Resource>& dst,
   const std::shared_ptr<Resource>& scratch,
-  uint64_t scratch_offset,
+  ezUInt64 scratch_offset,
   const std::shared_ptr<Resource>& instance_data,
-  uint64_t instance_offset,
-  uint32_t instance_count,
+  ezUInt64 instance_offset,
+  ezUInt32 instance_count,
   BuildAccelerationStructureFlags flags)
 {
   decltype(auto) dx_instance_data = instance_data->As<DXResource>();
@@ -648,9 +648,9 @@ void DXCommandList::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buf
     if (ezRHIResourceFormat::IsFormatBlockCompressed(format))
     {
       auto extent = ezRHIResourceFormat::GetBlockExtent(format);
-      src.PlacedFootprint.Footprint.Width = std::max<uint32_t>(extent.x, src.PlacedFootprint.Footprint.Width);
-      src.PlacedFootprint.Footprint.Height = std::max<uint32_t>(extent.y, src.PlacedFootprint.Footprint.Height);
-      src.PlacedFootprint.Footprint.Depth = std::max<uint32_t>(extent.z, src.PlacedFootprint.Footprint.Depth);
+      src.PlacedFootprint.Footprint.Width = std::max<ezUInt32>(extent.x, src.PlacedFootprint.Footprint.Width);
+      src.PlacedFootprint.Footprint.Height = std::max<ezUInt32>(extent.y, src.PlacedFootprint.Footprint.Height);
+      src.PlacedFootprint.Footprint.Depth = std::max<ezUInt32>(extent.z, src.PlacedFootprint.Footprint.Depth);
     }
     src.PlacedFootprint.Footprint.RowPitch = region.buffer_row_pitch;
     src.PlacedFootprint.Footprint.Format = dx_format;
@@ -691,7 +691,7 @@ void DXCommandList::CopyTexture(const std::shared_ptr<Resource>& src_texture, co
 void DXCommandList::WriteAccelerationStructuresProperties(
   const std::vector<std::shared_ptr<Resource>>& acceleration_structures,
   const std::shared_ptr<QueryHeap>& query_heap,
-  uint32_t first_query)
+  ezUInt32 first_query)
 {
   if (query_heap->GetType() != QueryHeapType::kAccelerationStructureCompactedSize)
   {
@@ -701,7 +701,7 @@ void DXCommandList::WriteAccelerationStructuresProperties(
   decltype(auto) dx_query_heap = query_heap->As<DXRayTracingQueryHeap>();
   D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_DESC desc = {};
   desc.InfoType = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_COMPACTED_SIZE;
-  desc.DestBuffer = dx_query_heap.GetResource()->GetGPUVirtualAddress() + first_query * sizeof(uint64_t);
+  desc.DestBuffer = dx_query_heap.GetResource()->GetGPUVirtualAddress() + first_query * sizeof(ezUInt64);
   std::vector<D3D12_GPU_VIRTUAL_ADDRESS> dx_acceleration_structures;
   dx_acceleration_structures.reserve(acceleration_structures.size());
   for (const auto& acceleration_structure : acceleration_structures)
@@ -713,10 +713,10 @@ void DXCommandList::WriteAccelerationStructuresProperties(
 
 void DXCommandList::ResolveQueryData(
   const std::shared_ptr<QueryHeap>& query_heap,
-  uint32_t first_query,
-  uint32_t query_count,
+  ezUInt32 first_query,
+  ezUInt32 query_count,
   const std::shared_ptr<Resource>& dst_buffer,
-  uint64_t dst_offset)
+  ezUInt64 dst_offset)
 {
   if (query_heap->GetType() != QueryHeapType::kAccelerationStructureCompactedSize)
   {
@@ -733,8 +733,8 @@ void DXCommandList::ResolveQueryData(
     dx_dst_buffer.resource.Get(),
     dst_offset,
     dx_query_heap.GetResource().Get(),
-    first_query * sizeof(uint64_t),
-    query_count * sizeof(uint64_t));
+    first_query * sizeof(ezUInt64),
+    query_count * sizeof(ezUInt64));
 
   auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap.GetResource().Get(), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, 0);
   m_command_list->ResourceBarrier(1, &barrier2);

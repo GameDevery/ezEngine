@@ -25,13 +25,13 @@ void DXCPUDescriptorPoolTyped::ResizeHeap(size_t req_size)
 
     ComPtr<ID3D12DescriptorHeap> heap;
     D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {};
-    heap_desc.NumDescriptors = static_cast<uint32_t>(req_size);
+    heap_desc.NumDescriptors = static_cast<ezUInt32>(req_size);
     heap_desc.Type = m_type;
     EZ_ASSERT_ALWAYS(m_device.GetDevice()->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&heap)) == S_OK, "");
     if (m_size > 0)
     {
         m_device.GetDevice()->CopyDescriptorsSimple(
-            static_cast<uint32_t>(m_size),
+            static_cast<ezUInt32>(m_size),
             heap->GetCPUDescriptorHandleForHeapStart(),
             m_heap->GetCPUDescriptorHandleForHeapStart(),
             m_type);

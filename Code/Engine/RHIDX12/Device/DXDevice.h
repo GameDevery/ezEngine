@@ -14,38 +14,75 @@ class DXDevice : public Device
 {
 public:
     DXDevice(DXAdapter& adapter);
-    std::shared_ptr<Memory> AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits) override;
-    std::shared_ptr<CommandQueue> GetCommandQueue(CommandListType type) override;
-    std::shared_ptr<Swapchain> CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync) override;
+    ezSharedPtr<Memory> AllocateMemory(ezUInt64 size, MemoryType memory_type, ezUInt32 memory_type_bits) override;
+    ezSharedPtr<CommandQueue> GetCommandQueue(CommandListType type) override;
+
+    std::shared_ptr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync) override;
+    void DestroySwapchain(Swapchain* pSwapChain) override {}
+
     std::shared_ptr<CommandList> CreateCommandList(CommandListType type) override;
-    std::shared_ptr<Fence> CreateFence(uint64_t initial_value) override;
-    std::shared_ptr<Resource> CreateTexture(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels) override;
-    std::shared_ptr<Resource> CreateBuffer(uint32_t bind_flag, uint32_t buffer_size) override;
+    void DestroyCommandList(CommandList* pCommandList) override {}
+
+    std::shared_ptr<Fence> CreateFence(ezUInt64 initial_value) override;
+    void DestroyFence(Fence* pFence) override {}
+
+    std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
+    void DestroyTexture(Resource* pTexture) override {}
+
+    std::shared_ptr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size) override;
+    void DestroyBuffer(Resource* pBuffer) override {}
+
     std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) override;
+    void DestroySampler(Resource* pSampler) override {}
+
     std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc) override;
+    void DestroyView(View* pView) override {}
+
     std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;
+    void DestroyBindingSetLayout(BindingSetLayout* pBindingSetLayout) override {}
+
     std::shared_ptr<BindingSet> CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout) override;
+    void DestroyBindingSet(BindingSet* pBindingSet) override {}
+
     std::shared_ptr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) override;
+    void DestroyRenderPass(RenderPass* pRenderPass) override {}
+
     std::shared_ptr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) override;
-    std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
+    void DestroyFramebuffer(Framebuffer* pFramebuffer) override {}
+
+    std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
+    void DestroyShader(Shader* pShader) override {}
+
     std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;
+    void DestroyProgram(Program* pProgram) override {}
+
     std::shared_ptr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;
+    void DestroyGraphicsPipeline(Pipeline* pPipeline) override {}
+
     std::shared_ptr<Pipeline> CreateComputePipeline(const ComputePipelineDesc& desc) override;
+    void DestroyComputePipeline(Pipeline* pPipeline) override {}
+
     std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) override;
-    std::shared_ptr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset) override;
-    std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, uint32_t count) override;
-    uint32_t GetTextureDataPitchAlignment() const override;
+    void DestroyRayTracingPipeline(Pipeline* pPipeline) override {}
+
+    std::shared_ptr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset) override;
+    void DestroyAccelerationStructure(Resource* pAccelerationStructure) override {}
+
+    std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) override;
+    void DestroyQueryHeap(QueryHeap* pQueryHeap) override {}
+
+    ezUInt32 GetTextureDataPitchAlignment() const override;
     bool IsDxrSupported() const override;
     bool IsRayQuerySupported() const override;
     bool IsVariableRateShadingSupported() const override;
     bool IsMeshShadingSupported() const override;
-    uint32_t GetShadingRateImageTileSize() const override;
+    ezUInt32 GetShadingRateImageTileSize() const override;
     MemoryBudget GetMemoryBudget() const override;
-    uint32_t GetShaderGroupHandleSize() const override;
-    uint32_t GetShaderRecordAlignment() const override;
-    uint32_t GetShaderTableAlignment() const override;
+    ezUInt32 GetShaderGroupHandleSize() const override;
+    ezUInt32 GetShaderRecordAlignment() const override;
+    ezUInt32 GetShaderTableAlignment() const override;
     RaytracingASPrebuildInfo GetBLASPrebuildInfo(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) const override;
-    RaytracingASPrebuildInfo GetTLASPrebuildInfo(uint32_t instance_count, BuildAccelerationStructureFlags flags) const override;
+    RaytracingASPrebuildInfo GetTLASPrebuildInfo(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) const override;
 
     DXAdapter& GetAdapter();
     ComPtr<ID3D12Device> GetDevice();
@@ -54,7 +91,7 @@ public:
     bool IsRenderPassesSupported() const;
     bool IsUnderGraphicsDebugger() const;
     bool IsCreateNotZeroedAvailable() const;
-    ID3D12CommandSignature* GetCommandSignature(D3D12_INDIRECT_ARGUMENT_TYPE type, uint32_t stride);
+    ID3D12CommandSignature* GetCommandSignature(D3D12_INDIRECT_ARGUMENT_TYPE type, ezUInt32 stride);
 
 private:
     RaytracingASPrebuildInfo GetAccelerationStructurePrebuildInfo(const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs) const;
@@ -62,7 +99,7 @@ private:
     DXAdapter& m_adapter;
     ComPtr<ID3D12Device> m_device;
     ComPtr<ID3D12Device5> m_device5;
-    ezMap<CommandListType, std::shared_ptr<DXCommandQueue>> m_command_queues;
+    ezMap<CommandListType, ezSharedPtr<DXCommandQueue>> m_command_queues;
     DXCPUDescriptorPool m_cpu_descriptor_pool;
     DXGPUDescriptorPool m_gpu_descriptor_pool;
     bool m_is_dxr_supported = false;
@@ -70,10 +107,10 @@ private:
     bool m_is_render_passes_supported = false;
     bool m_is_variable_rate_shading_supported = false;
     bool m_is_mesh_shading_supported = false;
-    uint32_t m_shading_rate_image_tile_size = 0;
+    ezUInt32 m_shading_rate_image_tile_size = 0;
     bool m_is_under_graphics_debugger = false;
     bool m_is_create_not_zeroed_available = false;
-    ezMap<std::pair<D3D12_INDIRECT_ARGUMENT_TYPE, uint32_t>, ComPtr<ID3D12CommandSignature>> m_command_signature_cache;
+    ezMap<std::pair<D3D12_INDIRECT_ARGUMENT_TYPE, ezUInt32>, ComPtr<ID3D12CommandSignature>> m_command_signature_cache;
 };
 
 D3D12_RESOURCE_STATES ConvertState(ResourceState state);

@@ -96,7 +96,7 @@ void DXView::CreateSRV()
         }
     }
 
-    auto setup_mips = [&](uint32_t& most_detailed_mip, uint32_t& mip_levels)
+    auto setup_mips = [&](ezUInt32& most_detailed_mip, ezUInt32& mip_levels)
     {
         most_detailed_mip = GetBaseMipLevel();
         mip_levels = GetLevelCount();
@@ -169,7 +169,7 @@ void DXView::CreateSRV()
     case ViewDimension::kBuffer:
     {
         srv_desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-        uint32_t stride = 0;
+        ezUInt32 stride = 0;
         if (m_view_desc.view_type == ViewType::kBuffer)
         {
             //srv_desc.Format = static_cast<DXGI_FORMAT>(gli::dx().translate(m_view_desc.buffer_format).DXGIFormat.DDS);
@@ -183,7 +183,7 @@ void DXView::CreateSRV()
             srv_desc.Buffer.StructureByteStride = m_view_desc.structure_stride;
             stride = srv_desc.Buffer.StructureByteStride;
         }
-        uint64_t size = ezMath::Min(m_resource->desc.Width, m_view_desc.buffer_size);
+        ezUInt64 size = ezMath::Min(m_resource->desc.Width, m_view_desc.bufferSize);
         srv_desc.Buffer.FirstElement = m_view_desc.offset / stride;
         srv_desc.Buffer.NumElements = (ezUInt32)((size - m_view_desc.offset) / (stride));
         break;
@@ -253,7 +253,7 @@ void DXView::CreateUAV()
     case ViewDimension::kBuffer:
     {
         uav_desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-        uint32_t stride = 0;
+        ezUInt32 stride = 0;
         if (m_view_desc.view_type == ViewType::kRWBuffer)
         {
             //uav_desc.Format = static_cast<DXGI_FORMAT>(gli::dx().translate(m_view_desc.buffer_format).DXGIFormat.DDS);
@@ -267,7 +267,7 @@ void DXView::CreateUAV()
             uav_desc.Buffer.StructureByteStride = m_view_desc.structure_stride;
             stride = uav_desc.Buffer.StructureByteStride;
         }
-        uint64_t size = ezMath::Min(m_resource->desc.Width, m_view_desc.buffer_size);
+        ezUInt64 size = ezMath::Min(m_resource->desc.Width, m_view_desc.bufferSize);
         uav_desc.Buffer.FirstElement = m_view_desc.offset / stride;
         uav_desc.Buffer.NumElements = (ezUInt32)((size - m_view_desc.offset) / (stride));
         break;
@@ -408,7 +408,7 @@ void DXView::CreateCBV()
 {
     D3D12_CONSTANT_BUFFER_VIEW_DESC cvb_desc = {};
     cvb_desc.BufferLocation = m_resource->resource->GetGPUVirtualAddress();
-    cvb_desc.SizeInBytes = (ezUInt32)ezMath::Min(m_resource->desc.Width, m_view_desc.buffer_size);
+    cvb_desc.SizeInBytes = (ezUInt32)ezMath::Min(m_resource->desc.Width, m_view_desc.bufferSize);
     assert(cvb_desc.SizeInBytes % 256 == 0);
     m_device.GetDevice()->CreateConstantBufferView(&cvb_desc, m_handle->GetCpuHandle());
 }
@@ -423,29 +423,29 @@ std::shared_ptr<Resource> DXView::GetResource()
     return m_resource;
 }
 
-uint32_t DXView::GetDescriptorId() const
+ezUInt32 DXView::GetDescriptorId() const
 {
     if (m_range)
         return m_range->GetOffset();
     return -1;
 }
 
-uint32_t DXView::GetBaseMipLevel() const
+ezUInt32 DXView::GetBaseMipLevel() const
 {
-    return m_view_desc.base_mip_level;
+    return m_view_desc.baseMipLevel;
 }
 
-uint32_t DXView::GetLevelCount() const
+ezUInt32 DXView::GetLevelCount() const
 {
-    return std::min<uint32_t>(m_view_desc.level_count, m_resource->GetLevelCount() - m_view_desc.base_mip_level);
+  return std::min<ezUInt32>(m_view_desc.level_count, m_resource->GetLevelCount() - m_view_desc.baseMipLevel);
 }
 
-uint32_t DXView::GetBaseArrayLayer() const
+ezUInt32 DXView::GetBaseArrayLayer() const
 {
     return m_view_desc.base_array_layer;
 }
 
-uint32_t DXView::GetLayerCount() const
+ezUInt32 DXView::GetLayerCount() const
 {
-    return std::min<uint32_t>(m_view_desc.layer_count, m_resource->GetLayerCount() - m_view_desc.base_array_layer);
+    return std::min<ezUInt32>(m_view_desc.layer_count, m_resource->GetLayerCount() - m_view_desc.base_array_layer);
 }

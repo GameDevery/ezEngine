@@ -209,7 +209,6 @@ ezApplication::Execution ezRHISampleApp::Run()
     command_list->EndRenderPass();
     command_list->Close();
 
-
     device->ExecuteCommandLists({command_list});
     device->Present();
     device->WaitForIdle();

@@ -734,13 +734,13 @@ void RenderCommandListImpl::LazyResourceBarrier(const std::vector<LazyResourceBa
         {
           ResourceBarrierDesc manual_barrier = {};
           manual_barrier.resource = barrier.resource;
-          manual_barrier.base_mip_level = barrier.base_mip_level + i;
+          manual_barrier.baseMipLevel = barrier.base_mip_level + i;
           manual_barrier.level_count = 1;
           manual_barrier.base_array_layer = barrier.base_array_layer + j;
           manual_barrier.layer_count = 1;
-          manual_barrier.state_before = state_tracker.GetSubresourceState(manual_barrier.base_mip_level, manual_barrier.base_array_layer);
+          manual_barrier.state_before = state_tracker.GetSubresourceState(manual_barrier.baseMipLevel, manual_barrier.base_array_layer);
           manual_barrier.state_after = barrier.state;
-          state_tracker.SetSubresourceState(manual_barrier.base_mip_level, manual_barrier.base_array_layer, manual_barrier.state_after);
+          state_tracker.SetSubresourceState(manual_barrier.baseMipLevel, manual_barrier.base_array_layer, manual_barrier.state_after);
           if (manual_barrier.state_before != ResourceState::kUnknown)
             manual_barriers.emplace_back(manual_barrier);
           else

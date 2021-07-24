@@ -29,13 +29,13 @@ public:
 
   const ezMap<D3D12_DESCRIPTOR_HEAP_TYPE, ezUInt32>& GetHeapDescs() const;
   const ezMap<BindKey, BindingLayout>& GetLayout() const;
-  const ezMap<uint32_t, DescriptorTableDesc>& GetDescriptorTables() const;
+  const ezMap<ezUInt32, DescriptorTableDesc>& GetDescriptorTables() const;
   const ComPtr<ID3D12RootSignature>& /* DXBindingSetLayout::*/ GetRootSignature() const;
 
 private:
   DXDevice& m_device;
   ezMap<D3D12_DESCRIPTOR_HEAP_TYPE, ezUInt32> m_heap_descs;
   ezMap<BindKey, BindingLayout> m_layout;
-  ezMap<uint32_t, DescriptorTableDesc> m_descriptor_tables;
+  ezMap<ezUInt32, DescriptorTableDesc> m_descriptor_tables;
   ComPtr<ID3D12RootSignature> m_root_signature;
 };

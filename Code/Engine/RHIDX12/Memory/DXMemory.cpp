@@ -2,7 +2,7 @@
 #include <RHIDX12/Device/DXDevice.h>
 #include <directx/d3dx12.h>
 
-DXMemory::DXMemory(DXDevice& device, uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
+DXMemory::DXMemory(DXDevice& device, ezUInt64 size, MemoryType memory_type, ezUInt32 memory_type_bits)
     : m_memory_type(memory_type)
 {
     D3D12_HEAP_DESC desc = {};

@@ -6,7 +6,7 @@
 #include <RHIDX12/Resource/DXResource.h>
 #include <RHIDX12/Utilities/DXUtility.h>
 
-DXSwapchain::DXSwapchain(DXCommandQueue& command_queue, Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
+DXSwapchain::DXSwapchain(DXCommandQueue& command_queue, Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync)
     : m_command_queue(command_queue)
     , m_vsync(vsync)
 {
@@ -36,7 +36,7 @@ DXSwapchain::DXSwapchain(DXCommandQueue& command_queue, Window window, uint32_t 
         res->resource = back_buffer;
         res->desc = back_buffer->GetDesc();
         res->is_back_buffer = true;
-        m_back_buffers.emplace_back(res);
+        m_BackBuffers.PushBack(res);
     }
 }
 
@@ -45,19 +45,19 @@ ezRHIResourceFormat::Enum DXSwapchain::GetFormat() const
     return ezRHIResourceFormat::R8G8B8A8_UNORM;
 }
 
-std::shared_ptr<Resource> DXSwapchain::GetBackBuffer(uint32_t buffer)
+std::shared_ptr<Resource> DXSwapchain::GetBackBuffer(ezUInt32 buffer)
 {
-    return m_back_buffers[buffer];
+  return m_BackBuffers[buffer];
 }
 
-uint32_t DXSwapchain::NextImage(const std::shared_ptr<Fence>& fence, uint64_t signal_value)
+ezUInt32 DXSwapchain::NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signal_value)
 {
-    uint32_t frame_index = m_swap_chain->GetCurrentBackBufferIndex();
+    ezUInt32 frame_index = m_swap_chain->GetCurrentBackBufferIndex();
     m_command_queue.Signal(fence, signal_value);
     return frame_index;
 }
 
-void DXSwapchain::Present(const std::shared_ptr<Fence>& fence, uint64_t wait_value)
+void DXSwapchain::Present(const std::shared_ptr<Fence>& fence, ezUInt64 wait_value)
 {
     m_command_queue.Wait(fence, wait_value);
     if (m_vsync)

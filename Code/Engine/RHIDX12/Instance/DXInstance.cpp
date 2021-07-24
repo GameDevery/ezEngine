@@ -30,7 +30,7 @@ ON_CORESYSTEMS_SHUTDOWN
 EZ_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-bool EnableAgilitySDKIfExist(uint32_t version, const ezString& path)
+bool EnableAgilitySDKIfExist(ezUInt32 version, const ezString& path)
 {
   ezStringBuilder d3d12_core(ezOSFile::GetApplicationDirectory(), "/", path, "/D3D12Core.dll");
   if (!ezOSFile::ExistsFile(d3d12_core))
@@ -83,7 +83,7 @@ DXInstance::DXInstance()
     EZ_ASSERT_ALWAYS(D3D12EnableExperimentalFeatures(1, &D3D12ExperimentalShaderModelsID, nullptr, nullptr) == S_OK, "");
 #endif
 
-  uint32_t flags = 0;
+  ezUInt32 flags = 0;
   static const bool debug_enabled = IsDebuggerPresent();
   if (debug_enabled)
   {
@@ -109,7 +109,7 @@ std::vector<std::shared_ptr<Adapter>> DXInstance::EnumerateAdapters()
   ComPtr<IDXGIFactory6> dxgi_factory6;
   m_dxgi_factory.As(&dxgi_factory6);
 
-  auto NextAdapted = [&](uint32_t adapter_index, ComPtr<IDXGIAdapter1>& adapter) {
+  auto NextAdapted = [&](ezUInt32 adapter_index, ComPtr<IDXGIAdapter1>& adapter) {
     if (dxgi_factory6)
       return dxgi_factory6->EnumAdapterByGpuPreference(adapter_index, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter));
     else
@@ -117,8 +117,8 @@ std::vector<std::shared_ptr<Adapter>> DXInstance::EnumerateAdapters()
   };
 
   ComPtr<IDXGIAdapter1> adapter;
-  uint32_t gpu_index = 0;
-  for (uint32_t adapter_index = 0; DXGI_ERROR_NOT_FOUND != NextAdapted(adapter_index, adapter); ++adapter_index)
+  ezUInt32 gpu_index = 0;
+  for (ezUInt32 adapter_index = 0; DXGI_ERROR_NOT_FOUND != NextAdapted(adapter_index, adapter); ++adapter_index)
   {
     DXGI_ADAPTER_DESC1 desc = {};
     adapter->GetDesc1(&desc);

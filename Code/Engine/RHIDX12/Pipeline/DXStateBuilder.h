@@ -1,4 +1,5 @@
 #pragma once
+#include <RHIDX12/RHIDX12DLL.h>
 #include <vector>
 #include <directx/d3d12.h>
 
@@ -22,5 +23,5 @@ public:
     }
 
 private:
-    std::vector<uint8_t> m_data;
+    std::vector<ezUInt8> m_data;
 };

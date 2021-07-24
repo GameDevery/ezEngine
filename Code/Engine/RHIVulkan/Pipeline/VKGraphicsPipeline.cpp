@@ -57,7 +57,7 @@ vk::StencilOp Convert(StencilOp op)
   }
 }
 
-vk::StencilOpState Convert(const StencilOpDesc& desc, uint8_t read_mask, uint8_t write_mask)
+vk::StencilOpState Convert(const StencilOpDesc& desc, ezUInt8 read_mask, ezUInt8 write_mask)
 {
   vk::StencilOpState res = {};
   res.failOp = Convert(desc.fail_op);

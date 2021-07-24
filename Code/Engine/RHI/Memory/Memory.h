@@ -4,7 +4,7 @@
 #include <RHI/Instance/BaseTypes.h>
 #include <RHI/Instance/QueryInterface.h>
 
-class EZ_RHI_DLL Memory : public QueryInterface
+class EZ_RHI_DLL Memory : public ezRefCounted
 {
 public:
   virtual ~Memory() = default;

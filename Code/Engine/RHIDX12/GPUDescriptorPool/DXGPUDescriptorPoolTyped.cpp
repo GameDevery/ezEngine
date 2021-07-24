@@ -38,7 +38,7 @@ void DXGPUDescriptorPoolTyped::ResizeHeap(ezUInt32 req_size)
   ComPtr<ID3D12DescriptorHeap> heap;
   ComPtr<ID3D12DescriptorHeap> heap_readable;
   D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {};
-  heap_desc.NumDescriptors = static_cast<uint32_t>(req_size);
+  heap_desc.NumDescriptors = static_cast<ezUInt32>(req_size);
   heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
   heap_desc.Type = m_type;
   EZ_ASSERT_ALWAYS(m_device.GetDevice()->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&heap)) == S_OK, "");

@@ -99,7 +99,7 @@ void VKView::CreateView()
     case ViewType::kRWStructuredBuffer:
         m_descriptor_buffer.buffer = m_resource->buffer.res.get();
         m_descriptor_buffer.offset = m_view_desc.offset;
-        m_descriptor_buffer.range = m_view_desc.buffer_size;
+        m_descriptor_buffer.range = m_view_desc.bufferSize;
         m_descriptor.pBufferInfo = &m_descriptor_buffer;
         break;
     case ViewType::kBuffer:
@@ -147,7 +147,7 @@ void VKView::CreateBufferView()
     buffer_view_desc.buffer = m_resource->buffer.res.get();
     buffer_view_desc.format = VKUtils::ToVkFormat(m_view_desc.buffer_format);
     buffer_view_desc.offset = m_view_desc.offset;
-    buffer_view_desc.range = m_view_desc.buffer_size;
+    buffer_view_desc.range = m_view_desc.bufferSize;
     m_buffer_view = m_device.GetDevice().createBufferViewUnique(buffer_view_desc);
 }
 
@@ -156,31 +156,31 @@ std::shared_ptr<Resource> VKView::GetResource()
     return m_resource;
 }
 
-uint32_t VKView::GetDescriptorId() const
+ezUInt32 VKView::GetDescriptorId() const
 {
     if (m_range)
         return m_range->GetOffset();
     return -1;
 }
 
-uint32_t VKView::GetBaseMipLevel() const
+ezUInt32 VKView::GetBaseMipLevel() const
 {
-    return m_view_desc.base_mip_level;
+    return m_view_desc.baseMipLevel;
 }
 
-uint32_t VKView::GetLevelCount() const
+ezUInt32 VKView::GetLevelCount() const
 {
-    return std::min<uint32_t>(m_view_desc.level_count, m_resource->GetLevelCount() - m_view_desc.base_mip_level);
+    return std::min<ezUInt32>(m_view_desc.level_count, m_resource->GetLevelCount() - m_view_desc.baseMipLevel);
 }
 
-uint32_t VKView::GetBaseArrayLayer() const
+ezUInt32 VKView::GetBaseArrayLayer() const
 {
     return m_view_desc.base_array_layer;
 }
 
-uint32_t VKView::GetLayerCount() const
+ezUInt32 VKView::GetLayerCount() const
 {
-    return std::min<uint32_t>(m_view_desc.layer_count, m_resource->GetLayerCount() - m_view_desc.base_array_layer);
+    return std::min<ezUInt32>(m_view_desc.layer_count, m_resource->GetLayerCount() - m_view_desc.base_array_layer);
 }
 
 vk::ImageView VKView::GetImageView() const

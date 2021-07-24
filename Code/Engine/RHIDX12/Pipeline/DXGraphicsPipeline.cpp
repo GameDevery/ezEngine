@@ -271,7 +271,7 @@ void DXGraphicsPipeline::ParseInputLayout(const std::shared_ptr<Shader>& shader)
 D3D12_INPUT_LAYOUT_DESC DXGraphicsPipeline::GetInputLayoutDesc()
 {
   D3D12_INPUT_LAYOUT_DESC input_layout_desc = {};
-  input_layout_desc.NumElements = static_cast<uint32_t>(m_input_layout_desc.size());
+  input_layout_desc.NumElements = static_cast<ezUInt32>(m_input_layout_desc.size());
   input_layout_desc.pInputElementDescs = m_input_layout_desc.data();
   return input_layout_desc;
 }
@@ -296,7 +296,7 @@ const ComPtr<ID3D12RootSignature>& DXGraphicsPipeline::GetRootSignature() const
   return m_root_signature;
 }
 
-const ezMap<ezUInt32, uint32_t>& DXGraphicsPipeline::GetStrideMap() const
+const ezMap<ezUInt32, ezUInt32>& DXGraphicsPipeline::GetStrideMap() const
 {
   return m_input_layout_stride;
 }

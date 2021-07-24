@@ -23,7 +23,7 @@ void ResourceStateTracker::SetResourceState(ResourceState state)
     m_subresource_state_groups.clear();
 }
 
-ResourceState ResourceStateTracker::GetSubresourceState(uint32_t mip_level, uint32_t array_layer) const
+ResourceState ResourceStateTracker::GetSubresourceState(ezUInt32 mip_level, ezUInt32 array_layer) const
 {
     auto it = m_subresource_states.find({ mip_level, array_layer });
     if (it != m_subresource_states.end())
@@ -31,11 +31,11 @@ ResourceState ResourceStateTracker::GetSubresourceState(uint32_t mip_level, uint
     return m_resource_state;
 }
 
-void ResourceStateTracker::SetSubresourceState(uint32_t mip_level, uint32_t array_layer, ResourceState state)
+void ResourceStateTracker::SetSubresourceState(ezUInt32 mip_level, ezUInt32 array_layer, ResourceState state)
 {
     if (HasResourceState() && GetResourceState() == state)
         return;
-    std::tuple<uint32_t, uint32_t> key = { mip_level, array_layer };
+    std::tuple<ezUInt32, ezUInt32> key = { mip_level, array_layer };
     if (m_subresource_states.count(key))
     {
         if (--m_subresource_state_groups[m_subresource_states[key]] == 0)
@@ -63,9 +63,9 @@ void ResourceStateTracker::Merge(const ResourceStateTracker& other)
     }
     else
     {
-        for (uint32_t i = 0; i < other.m_resource.GetLevelCount(); ++i)
+        for (ezUInt32 i = 0; i < other.m_resource.GetLevelCount(); ++i)
         {
-            for (uint32_t j = 0; j < other.m_resource.GetLayerCount(); ++j)
+            for (ezUInt32 j = 0; j < other.m_resource.GetLayerCount(); ++j)
             {
                 auto state = other.GetSubresourceState(i, j);
                 if (state != ResourceState::kUnknown)

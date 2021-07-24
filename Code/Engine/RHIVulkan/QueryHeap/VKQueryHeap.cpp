@@ -3,7 +3,7 @@
 #include <RHIVulkan/Device/VKDevice.h>
 #include <RHIVulkan/QueryHeap/VKQueryHeap.h>
 
-VKQueryHeap::VKQueryHeap(VKDevice& device, QueryHeapType type, uint32_t count)
+VKQueryHeap::VKQueryHeap(VKDevice& device, QueryHeapType type, ezUInt32 count)
   : m_device(device)
 {
   assert(type == QueryHeapType::kAccelerationStructureCompactedSize);

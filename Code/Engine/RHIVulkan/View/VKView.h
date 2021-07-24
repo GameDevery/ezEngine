@@ -12,11 +12,11 @@ class VKView : public View
 public:
   VKView(VKDevice& device, const std::shared_ptr<VKResource>& resource, const ViewDesc& view_desc);
   std::shared_ptr<Resource> GetResource() override;
-  uint32_t GetDescriptorId() const override;
-  uint32_t GetBaseMipLevel() const override;
-  uint32_t GetLevelCount() const override;
-  uint32_t GetBaseArrayLayer() const override;
-  uint32_t GetLayerCount() const override;
+  ezUInt32 GetDescriptorId() const override;
+  ezUInt32 GetBaseMipLevel() const override;
+  ezUInt32 GetLevelCount() const override;
+  ezUInt32 GetBaseArrayLayer() const override;
+  ezUInt32 GetLayerCount() const override;
 
   vk::ImageView GetImageView() const;
   vk::WriteDescriptorSet GetDescriptor() const;

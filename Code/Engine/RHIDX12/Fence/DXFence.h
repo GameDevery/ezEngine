@@ -10,10 +10,10 @@ class DXDevice;
 class DXFence : public Fence
 {
 public:
-    DXFence(DXDevice& device, uint64_t initial_value);
-    uint64_t GetCompletedValue() override;
-    void Wait(uint64_t value) override;
-    void Signal(uint64_t value) override;
+    DXFence(DXDevice& device, ezUInt64 initial_value);
+    ezUInt64 GetCompletedValue() override;
+    void Wait(ezUInt64 value) override;
+    void Signal(ezUInt64 value) override;
 
     ComPtr<ID3D12Fence> GetFence();
 

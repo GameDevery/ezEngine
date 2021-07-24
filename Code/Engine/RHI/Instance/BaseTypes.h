@@ -13,7 +13,7 @@
 
 namespace enum_class
 {
-  enum ResourceState : uint32_t
+  enum ResourceState : ezUInt32
   {
     kUnknown = 0,
     kCommon = 1 << 0,
@@ -164,7 +164,7 @@ struct RasterizerDesc
 {
   FillMode fill_mode = FillMode::kSolid;
   CullMode cull_mode = CullMode::kBack;
-  int32_t depth_bias = 0;
+  ezInt32 depth_bias = 0;
 
   auto MakeTie() const
   {
@@ -244,8 +244,8 @@ struct DepthStencilDesc
   bool depth_write_enable = true;
   bool depth_bounds_test_enable = false;
   bool stencil_enable = false;
-  uint8_t stencil_read_mask = 0xff;
-  uint8_t stencil_write_mask = 0xff;
+  ezUInt8 stencil_read_mask = 0xff;
+  ezUInt8 stencil_write_mask = 0xff;
   StencilOpDesc front_face = {};
   StencilOpDesc back_face = {};
 
@@ -271,26 +271,26 @@ struct ViewDesc
 {
   ViewType view_type = ViewType::kUnknown;
   ViewDimension dimension = ViewDimension::kUnknown;
-  uint32_t base_mip_level = 0;
-  uint32_t level_count = static_cast<uint32_t>(-1);
-  uint32_t base_array_layer = 0;
-  uint32_t layer_count = static_cast<uint32_t>(-1);
-  uint32_t plane_slice = 0;
-  uint64_t offset = 0;
-  uint32_t structure_stride = 0;
-  uint64_t buffer_size = static_cast<uint64_t>(-1);
+  ezUInt32 baseMipLevel = 0;
+  ezUInt32 level_count = static_cast<ezUInt32>(-1);
+  ezUInt32 base_array_layer = 0;
+  ezUInt32 layer_count = static_cast<ezUInt32>(-1);
+  ezUInt32 plane_slice = 0;
+  ezUInt64 offset = 0;
+  ezUInt32 structure_stride = 0;
+  ezUInt64 bufferSize = static_cast<ezUInt64>(-1);
   ezRHIResourceFormat::Enum buffer_format = ezRHIResourceFormat::UNKNOWN;
   bool bindless = false;
 
   auto MakeTie() const
   {
-    return std::tie(view_type, dimension, base_mip_level, level_count, base_array_layer, layer_count, plane_slice, offset, structure_stride, buffer_size, buffer_format, bindless);
+    return std::tie(view_type, dimension, baseMipLevel, level_count, base_array_layer, layer_count, plane_slice, offset, structure_stride, bufferSize, buffer_format, bindless);
   }
 };
 
 struct ShaderDesc
 {
-  //std::vector<uint8_t> blob;
+  //std::vector<ezUInt8> blob;
   //std::shared_ptr<ShaderReflection> reflection;
 
   ezString shader_path;
@@ -329,10 +329,10 @@ struct ShaderDesc
 
 struct InputLayoutDesc
 {
-  uint32_t slot = 0;
+  ezUInt32 slot = 0;
   ezString semantic_name;
   ezRHIResourceFormat::Enum format = ezRHIResourceFormat::UNKNOWN;
-  uint32_t stride = 0;
+  ezUInt32 stride = 0;
 
   auto MakeTie() const
   {
@@ -384,7 +384,7 @@ struct RenderPassDesc
   std::vector<RenderPassColorDesc> colors;
   RenderPassDepthStencilDesc depth_stencil;
   ezRHIResourceFormat::Enum shading_rate_format = ezRHIResourceFormat::UNKNOWN;
-  uint32_t sample_count = 1;
+  ezUInt32 sample_count = 1;
 
   auto MakeTie() const
   {
@@ -395,8 +395,8 @@ struct RenderPassDesc
 struct FramebufferDesc
 {
   std::shared_ptr<RenderPass> render_pass;
-  uint32_t width;
-  uint32_t height;
+  ezUInt32 width;
+  ezUInt32 height;
   std::vector<std::shared_ptr<View>> colors;
   std::shared_ptr<View> depth_stencil;
   std::shared_ptr<View> shading_rate_image;
@@ -444,10 +444,10 @@ enum class RayTracingShaderGroupType
 struct RayTracingShaderGroup
 {
   RayTracingShaderGroupType type = RayTracingShaderGroupType::kGeneral;
-  uint64_t general = 0;
-  uint64_t closest_hit = 0;
-  uint64_t any_hit = 0;
-  uint64_t intersection = 0;
+  ezUInt64 general = 0;
+  ezUInt64 closest_hit = 0;
+  ezUInt64 any_hit = 0;
+  ezUInt64 intersection = 0;
 
   auto MakeTie() const
   {
@@ -470,9 +470,9 @@ struct RayTracingPipelineDesc
 struct RayTracingShaderTable
 {
   std::shared_ptr<Resource> resource;
-  uint64_t offset;
-  uint64_t size;
-  uint64_t stride;
+  ezUInt64 offset;
+  ezUInt64 size;
+  ezUInt64 stride;
 };
 
 struct RayTracingShaderTables
@@ -487,9 +487,9 @@ struct BindKey
 {
   ShaderType shader_type = ShaderType::kUnknown;
   ViewType view_type = ViewType::kUnknown;
-  uint32_t slot = 0;
-  uint32_t space = 0;
-  uint32_t count = 0;
+  ezUInt32 slot = 0;
+  ezUInt32 space = 0;
+  ezUInt32 count = 0;
 
   auto MakeTie() const
   {
@@ -530,12 +530,12 @@ struct ResourceBindingDesc
 {
   ezString name;
   ViewType type;
-  uint32_t slot;
-  uint32_t space;
-  uint32_t count;
+  ezUInt32 slot;
+  ezUInt32 space;
+  ezUInt32 count;
   ViewDimension dimension;
   ReturnType return_type;
-  uint32_t structure_stride;
+  ezUInt32 structure_stride;
 };
 
 enum class PipelineType
@@ -549,11 +549,11 @@ struct BufferDesc
 {
   std::shared_ptr<Resource> res;
   ezRHIResourceFormat::Enum format = ezRHIResourceFormat::UNKNOWN;
-  uint32_t count = 0;
-  uint32_t offset = 0;
+  ezUInt32 count = 0;
+  ezUInt32 offset = 0;
 };
 
-enum class RaytracingInstanceFlags : uint32_t
+enum class RaytracingInstanceFlags : ezUInt32
 {
   kNone = 0x0,
   kTriangleCullDisable = 0x1,
@@ -585,24 +585,24 @@ enum class MemoryType
 
 struct TextureOffset
 {
-  int32_t x;
-  int32_t y;
-  int32_t z;
+  ezInt32 x;
+  ezInt32 y;
+  ezInt32 z;
 };
 
 struct TextureExtent3D
 {
-  uint32_t width;
-  uint32_t height;
-  uint32_t depth;
+  ezUInt32 width;
+  ezUInt32 height;
+  ezUInt32 depth;
 };
 
 struct BufferToTextureCopyRegion
 {
-  uint64_t buffer_offset;
-  uint32_t buffer_row_pitch;
-  uint32_t texture_mip_level;
-  uint32_t texture_array_layer;
+  ezUInt64 buffer_offset;
+  ezUInt32 buffer_row_pitch;
+  ezUInt32 texture_mip_level;
+  ezUInt32 texture_array_layer;
   TextureOffset texture_offset;
   TextureExtent3D texture_extent;
 };
@@ -610,29 +610,29 @@ struct BufferToTextureCopyRegion
 struct TextureCopyRegion
 {
   TextureExtent3D extent;
-  uint32_t src_mip_level;
-  uint32_t src_array_layer;
+  ezUInt32 src_mip_level;
+  ezUInt32 src_array_layer;
   TextureOffset src_offset;
-  uint32_t dst_mip_level;
-  uint32_t dst_array_layer;
+  ezUInt32 dst_mip_level;
+  ezUInt32 dst_array_layer;
   TextureOffset dst_offset;
 };
 
 struct BufferCopyRegion
 {
-  uint64_t src_offset;
-  uint64_t dst_offset;
-  uint64_t num_bytes;
+  ezUInt64 src_offset;
+  ezUInt64 dst_offset;
+  ezUInt64 num_bytes;
 };
 
 struct RaytracingGeometryInstance
 {
   ezRHIFloat3X4 transform;
-  uint32_t instance_id : 24;
-  uint32_t instance_mask : 8;
-  uint32_t instance_offset : 24;
+  ezUInt32 instance_id : 24;
+  ezUInt32 instance_mask : 8;
+  ezUInt32 instance_offset : 24;
   RaytracingInstanceFlags flags : 8;
-  uint64_t acceleration_structure_handle;
+  ezUInt64 acceleration_structure_handle;
 };
 
 EZ_CHECK_AT_COMPILETIME(sizeof(RaytracingGeometryInstance) == 64);
@@ -642,13 +642,13 @@ struct ResourceBarrierDesc
   std::shared_ptr<Resource> resource;
   ResourceState state_before;
   ResourceState state_after;
-  uint32_t base_mip_level = 0;
-  uint32_t level_count = 1;
-  uint32_t base_array_layer = 0;
-  uint32_t layer_count = 1;
+  ezUInt32 baseMipLevel = 0;
+  ezUInt32 level_count = 1;
+  ezUInt32 base_array_layer = 0;
+  ezUInt32 layer_count = 1;
 };
 
-enum class ShadingRate : uint8_t
+enum class ShadingRate : ezUInt8
 {
   k1x1 = 0,
   k1x2 = 0x1,
@@ -670,9 +670,9 @@ enum class ShadingRateCombiner
 
 struct RaytracingASPrebuildInfo
 {
-  uint64_t acceleration_structure_size = 0;
-  uint64_t build_scratch_data_size = 0;
-  uint64_t update_scratch_data_size = 0;
+  ezUInt64 acceleration_structure_size = 0;
+  ezUInt64 build_scratch_data_size = 0;
+  ezUInt64 update_scratch_data_size = 0;
 };
 
 enum class AccelerationStructureType
@@ -692,7 +692,7 @@ struct ClearDesc
 {
   std::vector<ezColor> colors;
   float depth = 1.0f;
-  uint8_t stencil = 0;
+  ezUInt8 stencil = 0;
 };
 
 enum class CopyAccelerationStructureMode
@@ -719,31 +719,31 @@ ENABLE_BITMASK_OPERATORS(BuildAccelerationStructureFlags);
 
 struct DrawIndirectCommand
 {
-  uint32_t vertex_count;
-  uint32_t instance_count;
-  uint32_t first_vertex;
-  uint32_t first_instance;
+  ezUInt32 vertex_count;
+  ezUInt32 instanceCount;
+  ezUInt32 first_vertex;
+  ezUInt32 first_instance;
 };
 
 struct DrawIndexedIndirectCommand
 {
-  uint32_t index_count;
-  uint32_t instance_count;
-  uint32_t first_index;
-  int32_t vertex_offset;
-  uint32_t first_instance;
+  ezUInt32 index_count;
+  ezUInt32 instanceCount;
+  ezUInt32 firstIndex;
+  ezInt32 vertexOffset;
+  ezUInt32 first_instance;
 };
 
 struct DispatchIndirectCommand
 {
-  uint32_t thread_group_count_x;
-  uint32_t thread_group_count_y;
-  uint32_t thread_group_count_z;
+  ezUInt32 thread_group_count_x;
+  ezUInt32 thread_group_count_y;
+  ezUInt32 thread_group_count_z;
 };
 
-using IndirectCountType = uint32_t;
+using IndirectCountType = ezUInt32;
 
-constexpr uint64_t kAccelerationStructureAlignment = 256;
+constexpr ezUInt64 kAccelerationStructureAlignment = 256;
 
 enum class QueryHeapType
 {
@@ -767,6 +767,6 @@ struct RenderDeviceDesc
   ApiType api_type = ApiType::kVulkan;
   bool vsync = true;
   bool round_fps = false;
-  uint32_t required_gpu_index = 0;
-  uint32_t frame_count = 3;
+  ezUInt32 required_gpu_index = 0;
+  ezUInt32 frame_count = 3;
 };

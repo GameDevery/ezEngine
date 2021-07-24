@@ -16,16 +16,16 @@ class VKResource : public ResourceBase
 public:
     VKResource(VKDevice& device);
 
-    void CommitMemory(MemoryType memory_type) override;
-    void BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offset) override;
-    uint64_t GetWidth() const override;
-    uint32_t GetHeight() const override;
-    uint16_t GetLayerCount() const override;
-    uint16_t GetLevelCount() const override;
-    uint32_t GetSampleCount() const override;
-    uint64_t GetAccelerationStructureHandle() const override;
+    void CommitMemory(MemoryType memoryType) override;
+    void BindMemory(const ezSharedPtr<Memory>& memory, ezUInt64 offset) override;
+    ezUInt64 GetWidth() const override;
+    ezUInt32 GetHeight() const override;
+    ezUInt16 GetLayerCount() const override;
+    ezUInt16 GetLevelCount() const override;
+    ezUInt32 GetSampleCount() const override;
+    ezUInt64 GetAccelerationStructureHandle() const override;
     void SetName(const ezString& name) override;
-    uint8_t* Map() override;
+    ezUInt8* Map() override;
     void Unmap() override;
     bool AllowCommonStatePromotion(ResourceState state_after) override;
     MemoryRequirements GetMemoryRequirements() const override;
@@ -36,15 +36,15 @@ public:
         vk::UniqueImage res_owner;
         vk::Format format = vk::Format::eUndefined;
         vk::Extent2D size = {};
-        uint32_t level_count = 1;
-        uint32_t sample_count = 1;
-        uint32_t array_layers = 1;
+        ezUInt32 level_count = 1;
+        ezUInt32 sample_count = 1;
+        ezUInt32 array_layers = 1;
     } image;
 
     struct Buffer
     {
         vk::UniqueBuffer res;
-        uint32_t size = 0;
+        ezUInt32 size = 0;
     } buffer;
 
     struct Sampler

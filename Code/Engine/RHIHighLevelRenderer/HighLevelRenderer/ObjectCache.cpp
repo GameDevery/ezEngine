@@ -182,7 +182,7 @@ std::shared_ptr<View> ObjectCache::GetView(const std::shared_ptr<Program>& progr
 
   ViewDesc desc = {};
   desc.view_type = bind_key.view_type;
-  desc.base_mip_level = view_desc.level;
+  desc.baseMipLevel = view_desc.level;
   desc.level_count = view_desc.count;
   desc.buffer_format = view_desc.buffer_format;
 

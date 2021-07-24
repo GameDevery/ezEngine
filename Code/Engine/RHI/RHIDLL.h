@@ -4,6 +4,7 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <Foundation/Types/Id.h>
 #include <Foundation/Types/RefCounted.h>
+#include <Foundation/Types/SharedPtr.h>
 
 // Configure the DLL Import/Export Define
 #if EZ_ENABLED(EZ_COMPILE_ENGINE_AS_DLL)
@@ -263,14 +264,14 @@ struct EZ_RHI_DLL ezRHIResourceFormat
     ezUInt32& num_bytes,
     ezUInt32& row_bytes,
     ezUInt32& num_rows,
-    uint32_t alignment);
+    ezUInt32 alignment);
   EZ_ALWAYS_INLINE static void GetInfo(ezUInt32 width,
     ezUInt32 height,
     ezRHIResourceFormat::Enum format,
     ezUInt32& num_bytes,
     ezUInt32& row_bytes);
 
-  EZ_ALWAYS_INLINE static uint32_t Align(uint32_t size, uint32_t alignment);
+  EZ_ALWAYS_INLINE static ezUInt32 Align(ezUInt32 size, ezUInt32 alignment);
 };
 
 EZ_DECLARE_REFLECTABLE_TYPE(EZ_RHI_DLL, ezRHIResourceFormat);
@@ -560,7 +561,7 @@ EZ_ALWAYS_INLINE void ezRHIResourceFormat::GetInfo(ezUInt32 width,
   ezUInt32& num_bytes,
   ezUInt32& row_bytes,
   ezUInt32& num_rows,
-  uint32_t alignment)
+  ezUInt32 alignment)
 {
   if (IsFormatBlockCompressed(format))
   {
@@ -584,11 +585,11 @@ EZ_ALWAYS_INLINE void ezRHIResourceFormat::GetInfo(ezUInt32 width,
   ezUInt32& row_bytes)
 {
   ezUInt32 num_rows = 0;
-  uint32_t alignment = 1;
+  ezUInt32 alignment = 1;
   return GetInfo(width, height, format, num_bytes, row_bytes, num_rows, alignment);
 }
 
-EZ_ALWAYS_INLINE uint32_t ezRHIResourceFormat::Align(uint32_t size, uint32_t alignment)
+EZ_ALWAYS_INLINE ezUInt32 ezRHIResourceFormat::Align(ezUInt32 size, ezUInt32 alignment)
 {
   return (size + (alignment - 1)) & ~(alignment - 1);
 }

@@ -31,7 +31,7 @@ void DXBindingSet::WriteBindings(const std::vector<BindingDesc>& bindings)
   }
 }
 
-void SetRootDescriptorTable(const ComPtr<ID3D12GraphicsCommandList>& command_list, uint32_t root_parameter, bool is_compute, D3D12_GPU_DESCRIPTOR_HANDLE base_descriptor)
+void SetRootDescriptorTable(const ComPtr<ID3D12GraphicsCommandList>& command_list, ezUInt32 root_parameter, bool is_compute, D3D12_GPU_DESCRIPTOR_HANDLE base_descriptor)
 {
   if (is_compute)
   {

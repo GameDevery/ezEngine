@@ -29,8 +29,8 @@ struct EZ_RHI_DLL EntryPoint
 {
   ezString name;
   ShaderKind kind;
-  uint32_t payload_size;
-  uint32_t attribute_size;
+  ezUInt32 payload_size;
+  ezUInt32 attribute_size;
 };
 
 inline bool operator==(const EntryPoint& lhs, const EntryPoint& rhs)
@@ -60,14 +60,14 @@ inline bool operator<(const ResourceBindingDesc& lhs, const ResourceBindingDesc&
 
 struct EZ_RHI_DLL InputParameterDesc
 {
-  uint32_t location;
+  ezUInt32 location;
   ezString semantic_name;
   ezRHIResourceFormat::Enum format;
 };
 
 struct EZ_RHI_DLL OutputParameterDesc
 {
-  uint32_t slot;
+  ezUInt32 slot;
 };
 
 enum class VariableType
@@ -83,11 +83,11 @@ struct EZ_RHI_DLL VariableLayout
 {
   ezString name;
   VariableType type;
-  uint32_t offset;
-  uint32_t size;
-  uint32_t rows;
-  uint32_t columns;
-  uint32_t elements;
+  ezUInt32 offset;
+  ezUInt32 size;
+  ezUInt32 rows;
+  ezUInt32 columns;
+  ezUInt32 elements;
   std::vector<VariableLayout> members;
 };
 

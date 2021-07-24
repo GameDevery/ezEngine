@@ -116,9 +116,9 @@ DXDevice::DXDevice(DXAdapter& adapter)
     m_is_mesh_shading_supported = feature_support7.MeshShaderTier >= D3D12_MESH_SHADER_TIER_1;
   }
 
-  m_command_queues[CommandListType::kGraphics] = std::make_shared<DXCommandQueue>(*this, CommandListType::kGraphics);
-  m_command_queues[CommandListType::kCompute] = std::make_shared<DXCommandQueue>(*this, CommandListType::kCompute);
-  m_command_queues[CommandListType::kCopy] = std::make_shared<DXCommandQueue>(*this, CommandListType::kCopy);
+  m_command_queues[CommandListType::kGraphics] = EZ_DEFAULT_NEW(DXCommandQueue, *this, CommandListType::kGraphics);
+  m_command_queues[CommandListType::kCompute] = EZ_DEFAULT_NEW(DXCommandQueue, *this, CommandListType::kCompute);
+  m_command_queues[CommandListType::kCopy] = EZ_DEFAULT_NEW(DXCommandQueue, *this, CommandListType::kCopy);
 
   static const bool debug_enabled = IsDebuggerPresent();
   if (debug_enabled)
@@ -154,17 +154,17 @@ DXDevice::DXDevice(DXAdapter& adapter)
   }
 }
 
-std::shared_ptr<Memory> DXDevice::AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
+ezSharedPtr<Memory> DXDevice::AllocateMemory(ezUInt64 size, MemoryType memoryType, ezUInt32 memoryTypeBits)
 {
-  return std::make_shared<DXMemory>(*this, size, memory_type, memory_type_bits);
+  return EZ_DEFAULT_NEW(DXMemory, *this, size, memoryType, memoryTypeBits);
 }
 
-std::shared_ptr<CommandQueue> DXDevice::GetCommandQueue(CommandListType type)
+ezSharedPtr<CommandQueue> DXDevice::GetCommandQueue(CommandListType type)
 {
   return m_command_queues[type];
 }
 
-std::shared_ptr<Swapchain> DXDevice::CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
+std::shared_ptr<Swapchain> DXDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync)
 {
   return std::make_shared<DXSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
 }
@@ -174,12 +174,12 @@ std::shared_ptr<CommandList> DXDevice::CreateCommandList(CommandListType type)
   return std::make_shared<DXCommandList>(*this, type);
 }
 
-std::shared_ptr<Fence> DXDevice::CreateFence(uint64_t initial_value)
+std::shared_ptr<Fence> DXDevice::CreateFence(ezUInt64 initial_value)
 {
   return std::make_shared<DXFence>(*this, initial_value);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
 {
   DXGI_FORMAT dx_format = DXUtils::ToDXGIFormat(format); //static_cast<DXGI_FORMAT>(gli::dx().translate(format).DXGIFormat.DDS);
   if (bind_flag & BindFlag::kShaderResource)
@@ -229,7 +229,7 @@ std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, uint32_t bin
   return res;
 }
 
-std::shared_ptr<Resource> DXDevice::CreateBuffer(uint32_t bind_flag, uint32_t buffer_size)
+std::shared_ptr<Resource> DXDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
 {
   if (buffer_size == 0)
     return {};
@@ -344,7 +344,7 @@ std::shared_ptr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& 
   return std::make_shared<DXFramebuffer>(desc);
 }
 
-std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kDXIL);
 }
@@ -369,7 +369,7 @@ std::shared_ptr<Pipeline> DXDevice::CreateRayTracingPipeline(const RayTracingPip
   return std::make_shared<DXRayTracingPipeline>(*this, desc);
 }
 
-std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
+std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset)
 {
   std::shared_ptr<DXResource> res = std::make_shared<DXResource>(*this);
   res->resource_type = ResourceType::kAccelerationStructure;
@@ -378,7 +378,7 @@ std::shared_ptr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStru
   return res;
 }
 
-std::shared_ptr<QueryHeap> DXDevice::CreateQueryHeap(QueryHeapType type, uint32_t count)
+std::shared_ptr<QueryHeap> DXDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
 {
   if (type == QueryHeapType::kAccelerationStructureCompactedSize)
   {
@@ -448,7 +448,7 @@ D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS Convert(BuildAccelerationStr
   return dx_flags;
 }
 
-uint32_t DXDevice::GetTextureDataPitchAlignment() const
+ezUInt32 DXDevice::GetTextureDataPitchAlignment() const
 {
   return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 }
@@ -473,7 +473,7 @@ bool DXDevice::IsMeshShadingSupported() const
   return m_is_mesh_shading_supported;
 }
 
-uint32_t DXDevice::GetShadingRateImageTileSize() const
+ezUInt32 DXDevice::GetShadingRateImageTileSize() const
 {
   return m_shading_rate_image_tile_size;
 }
@@ -489,17 +489,17 @@ MemoryBudget DXDevice::GetMemoryBudget() const
   return {local_memory_info.Budget + non_local_memory_info.Budget, local_memory_info.CurrentUsage + non_local_memory_info.CurrentUsage};
 }
 
-uint32_t DXDevice::GetShaderGroupHandleSize() const
+ezUInt32 DXDevice::GetShaderGroupHandleSize() const
 {
   return D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 }
 
-uint32_t DXDevice::GetShaderRecordAlignment() const
+ezUInt32 DXDevice::GetShaderRecordAlignment() const
 {
   return D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 }
 
-uint32_t DXDevice::GetShaderTableAlignment() const
+ezUInt32 DXDevice::GetShaderTableAlignment() const
 {
   return D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
 }
@@ -520,7 +520,7 @@ RaytracingASPrebuildInfo DXDevice::GetBLASPrebuildInfo(const std::vector<Raytrac
   return GetAccelerationStructurePrebuildInfo(inputs);
 }
 
-RaytracingASPrebuildInfo DXDevice::GetTLASPrebuildInfo(uint32_t instance_count, BuildAccelerationStructureFlags flags) const
+RaytracingASPrebuildInfo DXDevice::GetTLASPrebuildInfo(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) const
 {
   D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs = {};
   inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
@@ -565,7 +565,7 @@ bool DXDevice::IsCreateNotZeroedAvailable() const
   return m_is_create_not_zeroed_available;
 }
 
-ID3D12CommandSignature* DXDevice::GetCommandSignature(D3D12_INDIRECT_ARGUMENT_TYPE type, uint32_t stride)
+ID3D12CommandSignature* DXDevice::GetCommandSignature(D3D12_INDIRECT_ARGUMENT_TYPE type, ezUInt32 stride)
 {
   auto it = m_command_signature_cache.Find(std::pair{type, stride});
   if (it != end(m_command_signature_cache))

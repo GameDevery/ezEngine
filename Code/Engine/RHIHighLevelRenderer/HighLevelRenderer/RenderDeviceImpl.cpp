@@ -154,7 +154,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         continue;
       decltype(auto) resource_base = barrier.resource->As<ResourceBase>();
       auto& global_state_tracker = resource_base.GetGlobalResourceStateTracker();
-      if (global_state_tracker.HasResourceState() && barrier.base_mip_level == 0 && barrier.level_count == barrier.resource->GetLevelCount() &&
+      if (global_state_tracker.HasResourceState() && barrier.baseMipLevel == 0 && barrier.level_count == barrier.resource->GetLevelCount() &&
           barrier.base_array_layer == 0 && barrier.layer_count == barrier.resource->GetLayerCount())
       {
         barrier.state_before = global_state_tracker.GetResourceState();
@@ -167,11 +167,11 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         {
           for (uint32_t j = 0; j < barrier.layer_count; ++j)
           {
-            barrier.state_before = global_state_tracker.GetSubresourceState(barrier.base_mip_level + i, barrier.base_array_layer + j);
+            barrier.state_before = global_state_tracker.GetSubresourceState(barrier.baseMipLevel + i, barrier.base_array_layer + j);
             if (barrier.state_before != barrier.state_after)
             {
               auto& new_barrier = new_barriers.emplace_back(barrier);
-              new_barrier.base_mip_level = barrier.base_mip_level + i;
+              new_barrier.baseMipLevel = barrier.baseMipLevel + i;
               new_barrier.level_count = 1;
               new_barrier.base_array_layer = barrier.base_array_layer + j;
               new_barrier.layer_count = 1;

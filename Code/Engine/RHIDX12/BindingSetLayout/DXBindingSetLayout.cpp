@@ -95,7 +95,7 @@ DXBindingSetLayout::DXBindingSetLayout(DXDevice& device, const std::vector<BindK
     return root_param_index;
   };
 
-  auto add_bindless_range = [&](ShaderType shader_type, ViewType view_type, uint32_t base_slot, uint32_t space) {
+  auto add_bindless_range = [&](ShaderType shader_type, ViewType view_type, ezUInt32 base_slot, ezUInt32 space) {
     auto& descriptor_table_range = bindless_ranges.emplace_back();
     descriptor_table_range.RangeType = GetRangeType(view_type);
     descriptor_table_range.NumDescriptors = UINT_MAX;
@@ -116,7 +116,7 @@ DXBindingSetLayout::DXBindingSetLayout(DXDevice& device, const std::vector<BindK
 
   for (const auto& bind_key : descs)
   {
-    if (bind_key.count == ezMath::MaxValue<uint32_t>())
+    if (bind_key.count == ezMath::MaxValue<ezUInt32>())
     {
       add_bindless_range(bind_key.shader_type, bind_key.view_type, bind_key.slot, bind_key.space);
       continue;
@@ -163,7 +163,7 @@ DXBindingSetLayout::DXBindingSetLayout(DXDevice& device, const std::vector<BindK
     D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 
   CD3DX12_ROOT_SIGNATURE_DESC root_signature_desc = {};
-  root_signature_desc.Init(static_cast<uint32_t>(root_parameters.size()),
+  root_signature_desc.Init(static_cast<ezUInt32>(root_parameters.size()),
     root_parameters.data(),
     0,
     nullptr,
@@ -186,7 +186,7 @@ const ezMap<BindKey, BindingLayout>& DXBindingSetLayout::GetLayout() const
   return m_layout;
 }
 
-const ezMap<uint32_t, DescriptorTableDesc>& DXBindingSetLayout::GetDescriptorTables() const
+const ezMap<ezUInt32, DescriptorTableDesc>& DXBindingSetLayout::GetDescriptorTables() const
 {
   return m_descriptor_tables;
 }

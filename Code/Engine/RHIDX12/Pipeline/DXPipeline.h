@@ -9,5 +9,5 @@ class DXPipeline : public Pipeline
 public:
     virtual ~DXPipeline() = default;
     virtual const ComPtr<ID3D12RootSignature>& GetRootSignature() const = 0;
-    std::vector<uint8_t> GetRayTracingShaderGroupHandles(uint32_t first_group, uint32_t group_count) const override;
+    std::vector<ezUInt8> GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const override;
 };

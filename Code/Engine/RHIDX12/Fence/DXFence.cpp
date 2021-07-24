@@ -4,19 +4,19 @@
 #include <dxgi1_6.h>
 #include <directx/d3d12.h>
 
-DXFence::DXFence(DXDevice& device, uint64_t initial_value)
+DXFence::DXFence(DXDevice& device, ezUInt64 initial_value)
   : m_device(device)
 {
   EZ_ASSERT_ALWAYS(device.GetDevice()->CreateFence(initial_value, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)) == S_OK, "");
   m_fence_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
-uint64_t DXFence::GetCompletedValue()
+ezUInt64 DXFence::GetCompletedValue()
 {
   return m_fence->GetCompletedValue();
 }
 
-void DXFence::Wait(uint64_t value)
+void DXFence::Wait(ezUInt64 value)
 {
   if (GetCompletedValue() < value)
   {
@@ -25,7 +25,7 @@ void DXFence::Wait(uint64_t value)
   }
 }
 
-void DXFence::Signal(uint64_t value)
+void DXFence::Signal(ezUInt64 value)
 {
   m_fence->Signal(value);
 }

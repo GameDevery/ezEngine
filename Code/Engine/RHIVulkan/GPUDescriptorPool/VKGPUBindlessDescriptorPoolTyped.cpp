@@ -9,7 +9,7 @@ VKGPUBindlessDescriptorPoolTyped::VKGPUBindlessDescriptorPoolTyped(VKDevice& dev
 {
 }
 
-void VKGPUBindlessDescriptorPoolTyped::ResizeHeap(uint32_t req_size)
+void VKGPUBindlessDescriptorPoolTyped::ResizeHeap(ezUInt32 req_size)
 {
   if (req_size > max_bindless_heap_size)
   {
@@ -80,7 +80,7 @@ void VKGPUBindlessDescriptorPoolTyped::ResizeHeap(uint32_t req_size)
   m_descriptor = std::move(descriptor);
 }
 
-VKGPUDescriptorPoolRange VKGPUBindlessDescriptorPoolTyped::Allocate(uint32_t count)
+VKGPUDescriptorPoolRange VKGPUBindlessDescriptorPoolTyped::Allocate(ezUInt32 count)
 {
   auto index = m_empty_ranges.LowerBound(count);
   if (index != ezInvalidIndex)
@@ -101,7 +101,7 @@ VKGPUDescriptorPoolRange VKGPUBindlessDescriptorPoolTyped::Allocate(uint32_t cou
   return VKGPUDescriptorPoolRange(*this, m_descriptor.set.get(), m_offset - count, count, m_type);
 }
 
-void VKGPUBindlessDescriptorPoolTyped::OnRangeDestroy(uint32_t offset, uint32_t size)
+void VKGPUBindlessDescriptorPoolTyped::OnRangeDestroy(ezUInt32 offset, ezUInt32 size)
 {
   m_empty_ranges.Insert(size, offset);
 }

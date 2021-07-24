@@ -8,10 +8,10 @@ class VKDevice;
 class VKTimelineSemaphore : public Fence
 {
 public:
-    VKTimelineSemaphore(VKDevice& device, uint64_t initial_value);
-    uint64_t GetCompletedValue() override;
-    void Wait(uint64_t value) override;
-    void Signal(uint64_t value) override;
+    VKTimelineSemaphore(VKDevice& device, ezUInt64 initial_value);
+    ezUInt64 GetCompletedValue() override;
+    void Wait(ezUInt64 value) override;
+    void Signal(ezUInt64 value) override;
 
     const vk::Semaphore& GetFence() const;
 

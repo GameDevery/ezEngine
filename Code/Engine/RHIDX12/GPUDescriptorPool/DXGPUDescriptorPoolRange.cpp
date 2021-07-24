@@ -13,7 +13,7 @@ DXGPUDescriptorPoolRange::DXGPUDescriptorPoolRange(
     D3D12_CPU_DESCRIPTOR_HANDLE& cpu_handle_readable,
   ezUInt32 offset,
   ezUInt32 size,
-    uint32_t increment_size,
+    ezUInt32 increment_size,
     D3D12_DESCRIPTOR_HEAP_TYPE type)
     : m_pool(pool)
     , m_device(device)

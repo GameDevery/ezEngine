@@ -3,7 +3,7 @@
 #include <RHIVulkan/Fence/VKTimelineSemaphore.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
-VKTimelineSemaphore::VKTimelineSemaphore(VKDevice& device, uint64_t initial_value)
+VKTimelineSemaphore::VKTimelineSemaphore(VKDevice& device, ezUInt64 initial_value)
     : m_device(device)
 {
     vk::SemaphoreTypeCreateInfo timeline_create_info = {};
@@ -14,12 +14,12 @@ VKTimelineSemaphore::VKTimelineSemaphore(VKDevice& device, uint64_t initial_valu
     m_timeline_semaphore = device.GetDevice().createSemaphoreUnique(create_info);
 }
 
-uint64_t VKTimelineSemaphore::GetCompletedValue()
+ezUInt64 VKTimelineSemaphore::GetCompletedValue()
 {
     return m_device.GetDevice().getSemaphoreCounterValueKHR(m_timeline_semaphore.get());
 }
 
-void VKTimelineSemaphore::Wait(uint64_t value)
+void VKTimelineSemaphore::Wait(ezUInt64 value)
 {
     vk::SemaphoreWaitInfo wait_info = {};
     wait_info.semaphoreCount = 1;
@@ -28,7 +28,7 @@ void VKTimelineSemaphore::Wait(uint64_t value)
     vk::Result res = m_device.GetDevice().waitSemaphoresKHR(wait_info, UINT64_MAX);
 }
 
-void VKTimelineSemaphore::Signal(uint64_t value)
+void VKTimelineSemaphore::Signal(ezUInt64 value)
 {
     vk::SemaphoreSignalInfo signal_info = {};
     signal_info.semaphore = m_timeline_semaphore.get();

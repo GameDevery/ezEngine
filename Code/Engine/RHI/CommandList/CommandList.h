@@ -25,50 +25,50 @@ public:
   virtual void EndRenderPass() = 0;
   virtual void BeginEvent(const ezString& name) = 0;
   virtual void EndEvent() = 0;
-  virtual void Draw(uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) = 0;
-  virtual void DrawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) = 0;
-  virtual void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
-  virtual void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
+  virtual void Draw(ezUInt32 vertex_count, ezUInt32 instanceCount, ezUInt32 first_vertex, ezUInt32 first_instance) = 0;
+  virtual void DrawIndexed(ezUInt32 index_count, ezUInt32 instanceCount, ezUInt32 firstIndex, ezInt32 vertexOffset, ezUInt32 first_instance) = 0;
+  virtual void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
+  virtual void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
   virtual void DrawIndirectCount(
     const std::shared_ptr<Resource>& argument_buffer,
-    uint64_t argument_buffer_offset,
+    ezUInt64 argument_buffer_offset,
     const std::shared_ptr<Resource>& count_buffer,
-    uint64_t count_buffer_offset,
-    uint32_t max_draw_count,
-    uint32_t stride) = 0;
+    ezUInt64 count_buffer_offset,
+    ezUInt32 max_draw_count,
+    ezUInt32 stride) = 0;
   virtual void DrawIndexedIndirectCount(
     const std::shared_ptr<Resource>& argument_buffer,
-    uint64_t argument_buffer_offset,
+    ezUInt64 argument_buffer_offset,
     const std::shared_ptr<Resource>& count_buffer,
-    uint64_t count_buffer_offset,
-    uint32_t max_draw_count,
-    uint32_t stride) = 0;
-  virtual void Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z) = 0;
-  virtual void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) = 0;
-  virtual void DispatchMesh(uint32_t thread_group_count_x) = 0;
-  virtual void DispatchRays(const RayTracingShaderTables& shader_tables, uint32_t width, uint32_t height, uint32_t depth) = 0;
+    ezUInt64 count_buffer_offset,
+    ezUInt32 max_draw_count,
+    ezUInt32 stride) = 0;
+  virtual void Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_group_count_y, ezUInt32 thread_group_count_z) = 0;
+  virtual void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) = 0;
+  virtual void DispatchMesh(ezUInt32 thread_group_count_x) = 0;
+  virtual void DispatchRays(const RayTracingShaderTables& shader_tables, ezUInt32 width, ezUInt32 height, ezUInt32 depth) = 0;
   virtual void ResourceBarrier(const std::vector<ResourceBarrierDesc>& barriers) = 0;
   virtual void UAVResourceBarrier(const std::shared_ptr<Resource>& resource) = 0;
   virtual void SetViewport(float x, float y, float width, float height) = 0;
-  virtual void SetScissorRect(int32_t left, int32_t top, uint32_t right, uint32_t bottom) = 0;
+  virtual void SetScissorRect(ezInt32 left, ezInt32 top, ezUInt32 right, ezUInt32 bottom) = 0;
   virtual void IASetIndexBuffer(const std::shared_ptr<Resource>& resource, ezRHIResourceFormat::Enum format) = 0;
-  virtual void IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource) = 0;
+  virtual void IASetVertexBuffer(ezUInt32 slot, const std::shared_ptr<Resource>& resource) = 0;
   virtual void RSSetShadingRate(ShadingRate shading_rate, const std::array<ShadingRateCombiner, 2>& combiners) = 0;
   virtual void BuildBottomLevelAS(
     const std::shared_ptr<Resource>& src,
     const std::shared_ptr<Resource>& dst,
     const std::shared_ptr<Resource>& scratch,
-    uint64_t scratch_offset,
+    ezUInt64 scratch_offset,
     const std::vector<RaytracingGeometryDesc>& descs,
     BuildAccelerationStructureFlags flags) = 0;
   virtual void BuildTopLevelAS(
     const std::shared_ptr<Resource>& src,
     const std::shared_ptr<Resource>& dst,
     const std::shared_ptr<Resource>& scratch,
-    uint64_t scratch_offset,
+    ezUInt64 scratch_offset,
     const std::shared_ptr<Resource>& instance_data,
-    uint64_t instance_offset,
-    uint32_t instance_count,
+    ezUInt64 instance_offset,
+    ezUInt32 instanceCount,
     BuildAccelerationStructureFlags flags) = 0;
   virtual void CopyAccelerationStructure(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, CopyAccelerationStructureMode mode) = 0;
   virtual void CopyBuffer(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_buffer,
@@ -80,11 +80,11 @@ public:
   virtual void WriteAccelerationStructuresProperties(
     const std::vector<std::shared_ptr<Resource>>& acceleration_structures,
     const std::shared_ptr<QueryHeap>& query_heap,
-    uint32_t first_query) = 0;
+    ezUInt32 first_query) = 0;
   virtual void ResolveQueryData(
     const std::shared_ptr<QueryHeap>& query_heap,
-    uint32_t first_query,
-    uint32_t query_count,
+    ezUInt32 first_query,
+    ezUInt32 query_count,
     const std::shared_ptr<Resource>& dst_buffer,
-    uint64_t dst_offset) = 0;
+    ezUInt64 dst_offset) = 0;
 };

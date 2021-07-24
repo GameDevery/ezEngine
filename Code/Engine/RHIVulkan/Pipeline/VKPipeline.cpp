@@ -49,7 +49,7 @@ VKPipeline::VKPipeline(VKDevice& device, const std::shared_ptr<Program>& program
         decltype(auto) blob = shader->GetBlob();
         vk::ShaderModuleCreateInfo shader_module_info = {};
         shader_module_info.codeSize = blob.size();
-        shader_module_info.pCode = (uint32_t*)blob.data();
+        shader_module_info.pCode = (ezUInt32*)blob.data();
         m_shader_modules.emplace_back(m_device.GetDevice().createShaderModuleUnique(shader_module_info));
 
         decltype(auto) reflection = shader->GetReflection();
@@ -76,7 +76,7 @@ vk::PipelineLayout VKPipeline::GetPipelineLayout() const
     return m_pipeline_layout;
 }
 
-std::vector<uint8_t> VKPipeline::GetRayTracingShaderGroupHandles(uint32_t first_group, uint32_t group_count) const
+std::vector<ezUInt8> VKPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
     return {};
 }

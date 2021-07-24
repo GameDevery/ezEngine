@@ -8,7 +8,7 @@ DXCPUDescriptorHandle::DXCPUDescriptorHandle(
     D3D12_CPU_DESCRIPTOR_HANDLE& cpu_handle,
     size_t offset,
     size_t size,
-    uint32_t increment_size,
+    ezUInt32 increment_size,
     D3D12_DESCRIPTOR_HEAP_TYPE type)
     : m_device(device)
     , m_heap(heap)

@@ -58,9 +58,9 @@ static bool SkipIt(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objec
 static VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
   VkDebugReportFlagsEXT flags,
   VkDebugReportObjectTypeEXT objectType,
-  uint64_t object,
+  ezUInt64 object,
   size_t location,
-  int32_t messageCode,
+  ezInt32 messageCode,
   const char* pLayerPrefix,
   const char* pMessage,
   void* pUserData)

@@ -57,8 +57,8 @@ vk::ShaderStageFlagBits ShaderType2Bit(ShaderType type)
 
 VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindKey>& descs)
 {
-    ezMap<uint32_t, std::vector<vk::DescriptorSetLayoutBinding>> bindings_by_set;
-    ezMap<uint32_t, std::vector<vk::DescriptorBindingFlags>> bindings_flags_by_set;
+    ezMap<ezUInt32, std::vector<vk::DescriptorSetLayoutBinding>> bindings_by_set;
+    ezMap<ezUInt32, std::vector<vk::DescriptorBindingFlags>> bindings_flags_by_set;
 
     for (const auto& bind_key : descs)
     {
@@ -125,7 +125,7 @@ VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindK
     m_pipeline_layout = device.GetDevice().createPipelineLayoutUnique(pipeline_layout_info);
 }
 
-const ezMap<uint32_t, vk::DescriptorType>& VKBindingSetLayout::GetBindlessType() const
+const ezMap<ezUInt32, vk::DescriptorType>& VKBindingSetLayout::GetBindlessType() const
 {
     return m_bindless_type;
 }

@@ -30,13 +30,13 @@ DXCommandQueue::DXCommandQueue(DXDevice& device, CommandListType type)
   EZ_ASSERT_ALWAYS(m_device.GetDevice()->CreateCommandQueue(&queue_desc, IID_PPV_ARGS(&m_command_queue)) == S_OK, "");
 }
 
-void DXCommandQueue::Wait(const std::shared_ptr<Fence>& fence, uint64_t value)
+void DXCommandQueue::Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
   decltype(auto) dx_fence = fence->As<DXFence>();
   EZ_ASSERT_ALWAYS(m_command_queue->Wait(dx_fence.GetFence().Get(), value) == S_OK, "");
 }
 
-void DXCommandQueue::Signal(const std::shared_ptr<Fence>& fence, uint64_t value)
+void DXCommandQueue::Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
   decltype(auto) dx_fence = fence->As<DXFence>();
   EZ_ASSERT_ALWAYS(m_command_queue->Signal(dx_fence.GetFence().Get(), value) == S_OK, "");

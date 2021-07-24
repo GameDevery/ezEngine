@@ -11,7 +11,7 @@ VKResource::VKResource(VKDevice& device)
 {
 }
 
-void VKResource::CommitMemory(MemoryType memory_type)
+void VKResource::CommitMemory(MemoryType memoryType)
 {
   MemoryRequirements mem_requirements = GetMemoryRequirements();
   vk::MemoryDedicatedAllocateInfoKHR dedicated_allocate_info = {};
@@ -26,15 +26,15 @@ void VKResource::CommitMemory(MemoryType memory_type)
     dedicated_allocate_info.image = image.res;
     p_dedicated_allocate_info = &dedicated_allocate_info;
   }
-  auto memory = std::make_shared<VKMemory>(m_device, mem_requirements.size, memory_type, mem_requirements.memory_type_bits, p_dedicated_allocate_info);
+  auto memory = EZ_DEFAULT_NEW(VKMemory, m_device, mem_requirements.size, memoryType, mem_requirements.memory_type_bits, p_dedicated_allocate_info);
   BindMemory(memory, 0);
 }
 
-void VKResource::BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offset)
+void VKResource::BindMemory(const ezSharedPtr<Memory>& memory, ezUInt64 offset)
 {
   m_memory = memory;
   m_memory_type = m_memory->GetMemoryType();
-  m_vk_memory = m_memory->As<VKMemory>().GetMemory();
+  m_vk_memory = m_memory.Downcast<VKMemory>()->GetMemory();
 
   if (resource_type == ResourceType::kBuffer)
   {
@@ -46,34 +46,34 @@ void VKResource::BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offs
   }
 }
 
-uint64_t VKResource::GetWidth() const
+ezUInt64 VKResource::GetWidth() const
 {
   if (resource_type == ResourceType::kTexture)
     return image.size.width;
   return buffer.size;
 }
 
-uint32_t VKResource::GetHeight() const
+ezUInt32 VKResource::GetHeight() const
 {
   return image.size.height;
 }
 
-uint16_t VKResource::GetLayerCount() const
+ezUInt16 VKResource::GetLayerCount() const
 {
   return image.array_layers;
 }
 
-uint16_t VKResource::GetLevelCount() const
+ezUInt16 VKResource::GetLevelCount() const
 {
   return image.level_count;
 }
 
-uint32_t VKResource::GetSampleCount() const
+ezUInt32 VKResource::GetSampleCount() const
 {
   return image.sample_count;
 }
 
-uint64_t VKResource::GetAccelerationStructureHandle() const
+ezUInt64 VKResource::GetAccelerationStructureHandle() const
 {
   return m_device.GetDevice().getAccelerationStructureAddressKHR({acceleration_structure_handle.get()});
 }
@@ -85,19 +85,19 @@ void VKResource::SetName(const ezString& name)
   if (resource_type == ResourceType::kBuffer)
   {
     info.objectType = buffer.res.get().objectType;
-    info.objectHandle = reinterpret_cast<uint64_t>(static_cast<VkBuffer>(buffer.res.get()));
+    info.objectHandle = reinterpret_cast<ezUInt64>(static_cast<VkBuffer>(buffer.res.get()));
   }
   else if (resource_type == ResourceType::kTexture)
   {
     info.objectType = image.res.objectType;
-    info.objectHandle = reinterpret_cast<uint64_t>(static_cast<VkImage>(image.res));
+    info.objectHandle = reinterpret_cast<ezUInt64>(static_cast<VkImage>(image.res));
   }
   m_device.GetDevice().setDebugUtilsObjectNameEXT(info);
 }
 
-uint8_t* VKResource::Map()
+ezUInt8* VKResource::Map()
 {
-  uint8_t* dst_data = nullptr;
+  ezUInt8* dst_data = nullptr;
   vk::Result res = m_device.GetDevice().mapMemory(m_vk_memory, 0, VK_WHOLE_SIZE, {}, reinterpret_cast<void**>(&dst_data));
   return dst_data;
 }

@@ -14,7 +14,7 @@ public:
     DXRayTracingPipeline(DXDevice& device, const RayTracingPipelineDesc& desc);
     PipelineType GetPipelineType() const override;
     const ComPtr<ID3D12RootSignature>& GetRootSignature() const override;
-    std::vector<uint8_t> GetRayTracingShaderGroupHandles(uint32_t first_group, uint32_t group_count) const override;
+    std::vector<ezUInt8> GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const override;
 
     const ComPtr<ID3D12StateObject>& GetPipeline() const;
     const RayTracingPipelineDesc& GetDesc() const;
@@ -26,7 +26,7 @@ private:
     RayTracingPipelineDesc m_desc;
     ComPtr<ID3D12RootSignature> m_root_signature;
     ComPtr<ID3D12StateObject> m_pipeline_state;
-    ezMap<uint64_t, ezString> m_shader_ids;
+    ezMap<ezUInt64, ezString> m_shader_ids;
     ezSet<ezString> m_shader_names;
     ezMap<ezUInt64, ezString> m_group_names;
     ComPtr<ID3D12StateObjectProperties> m_state_ojbect_props;

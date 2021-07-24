@@ -36,7 +36,7 @@ private:
   std::shared_ptr<Swapchain> swapchain = nullptr;
   std::shared_ptr<Fence> fence = nullptr;
   uint64_t fence_value = 0;
-  std::shared_ptr<CommandQueue> command_queue = nullptr;
+  ezSharedPtr<CommandQueue> command_queue = nullptr;
   std::array<uint64_t, frame_count> fence_values = {};
   //std::vector<std::shared_ptr<CommandList>> command_lists;
   //std::vector<std::shared_ptr<Framebuffer>> framebuffers;

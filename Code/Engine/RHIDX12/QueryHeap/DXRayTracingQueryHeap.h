@@ -9,7 +9,7 @@ class DXDevice;
 class DXRayTracingQueryHeap : public QueryHeap
 {
 public:
-    DXRayTracingQueryHeap(DXDevice& device, QueryHeapType type, uint32_t count);
+    DXRayTracingQueryHeap(DXDevice& device, QueryHeapType type, ezUInt32 count);
 
     QueryHeapType GetType() const override;
 

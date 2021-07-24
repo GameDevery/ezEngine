@@ -153,7 +153,7 @@ VKDevice::VKDevice(VKAdapter& adapter)
     for (const auto& fragment_shading_rate : fragment_shading_rates)
     {
       vk::Extent2D size = fragment_shading_rate.fragmentSize;
-      uint8_t shading_rate = ((size.width >> 1) << 2) | (size.height >> 1);
+      ezUInt8 shading_rate = ((size.width >> 1) << 2) | (size.height >> 1);
       EZ_ASSERT_ALWAYS((1 << ((shading_rate >> 2) & 3)) == size.width, "");
       EZ_ASSERT_ALWAYS((1 << (shading_rate & 3)) == size.height, "");
       EZ_ASSERT_ALWAYS(shading_rate_palette[(ShadingRate)shading_rate] == size, "");
@@ -260,21 +260,21 @@ VKDevice::VKDevice(VKAdapter& adapter)
     cmd_pool_create_info.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
     cmd_pool_create_info.queueFamilyIndex = queue_info.Value().queue_family_index;
     m_cmd_pools.Insert(queue_info.Key(), m_device->createCommandPoolUnique(cmd_pool_create_info));
-    m_command_queues[queue_info.Key()] = std::make_shared<VKCommandQueue>(*this, queue_info.Key(), queue_info.Value().queue_family_index);
+    m_command_queues[queue_info.Key()] = EZ_DEFAULT_NEW(VKCommandQueue, *this, queue_info.Key(), queue_info.Value().queue_family_index);
   }
 }
 
-std::shared_ptr<Memory> VKDevice::AllocateMemory(uint64_t size, MemoryType memory_type, uint32_t memory_type_bits)
+ezSharedPtr<Memory> VKDevice::AllocateMemory(ezUInt64 size, MemoryType memoryType, ezUInt32 memoryTypeBits)
 {
-  return std::make_shared<VKMemory>(*this, size, memory_type, memory_type_bits, nullptr);
+  return EZ_DEFAULT_NEW(VKMemory, *this, size, memoryType, memoryTypeBits, nullptr);
 }
 
-std::shared_ptr<CommandQueue> VKDevice::GetCommandQueue(CommandListType type)
+ezSharedPtr<CommandQueue> VKDevice::GetCommandQueue(CommandListType type)
 {
   return m_command_queues[GetAvailableCommandListType(type)];
 }
 
-std::shared_ptr<Swapchain> VKDevice::CreateSwapchain(Window window, uint32_t width, uint32_t height, uint32_t frame_count, bool vsync)
+std::shared_ptr<Swapchain> VKDevice::CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frame_count, bool vsync)
 {
   return std::make_shared<VKSwapchain>(*m_command_queues[CommandListType::kGraphics], window, width, height, frame_count, vsync);
 }
@@ -284,12 +284,12 @@ std::shared_ptr<CommandList> VKDevice::CreateCommandList(CommandListType type)
   return std::make_shared<VKCommandList>(*this, type);
 }
 
-std::shared_ptr<Fence> VKDevice::CreateFence(uint64_t initial_value)
+std::shared_ptr<Fence> VKDevice::CreateFence(ezUInt64 initial_value)
 {
   return std::make_shared<VKTimelineSemaphore>(*this, initial_value);
 }
 
-std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, uint32_t bind_flag, ezRHIResourceFormat::Enum format, uint32_t sample_count, int width, int height, int depth, int mip_levels)
+std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
   res->format = format;
@@ -359,7 +359,7 @@ std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, uint32_t bin
   return res;
 }
 
-std::shared_ptr<Resource> VKDevice::CreateBuffer(uint32_t bind_flag, uint32_t buffer_size)
+std::shared_ptr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size)
 {
   if (buffer_size == 0)
     return {};
@@ -499,7 +499,7 @@ std::shared_ptr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& 
   return std::make_shared<VKFramebuffer>(*this, desc);
 }
 
-std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, std::vector<uint8_t> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kSPIRV);
 }
@@ -560,7 +560,7 @@ vk::AccelerationStructureGeometryKHR VKDevice::FillRaytracingGeometryTriangles(c
   return geometry_desc;
 }
 
-RaytracingASPrebuildInfo VKDevice::GetAccelerationStructurePrebuildInfo(const vk::AccelerationStructureBuildGeometryInfoKHR& acceleration_structure_info, const std::vector<uint32_t>& max_primitive_counts) const
+RaytracingASPrebuildInfo VKDevice::GetAccelerationStructurePrebuildInfo(const vk::AccelerationStructureBuildGeometryInfoKHR& acceleration_structure_info, const std::vector<ezUInt32>& max_primitive_counts) const
 {
   vk::AccelerationStructureBuildSizesInfoKHR size_info = {};
   m_device->getAccelerationStructureBuildSizesKHR(vk::AccelerationStructureBuildTypeKHR::eDevice, &acceleration_structure_info, max_primitive_counts.data(), &size_info);
@@ -600,7 +600,7 @@ vk::AccelerationStructureTypeKHR Convert(AccelerationStructureType type)
   return {};
 }
 
-std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, uint64_t offset)
+std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const std::shared_ptr<Resource>& resource, ezUInt64 offset)
 {
   std::shared_ptr<VKResource> res = std::make_shared<VKResource>(*this);
   res->resource_type = ResourceType::kAccelerationStructure;
@@ -616,12 +616,12 @@ std::shared_ptr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStru
   return res;
 }
 
-std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, uint32_t count)
+std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
 {
   return std::make_shared<VKQueryHeap>(*this, type, count);
 }
 
-uint32_t VKDevice::GetTextureDataPitchAlignment() const
+ezUInt32 VKDevice::GetTextureDataPitchAlignment() const
 {
   return 1;
 }
@@ -646,7 +646,7 @@ bool VKDevice::IsMeshShadingSupported() const
   return m_is_mesh_shading_supported;
 }
 
-uint32_t VKDevice::GetShadingRateImageTileSize() const
+ezUInt32 VKDevice::GetShadingRateImageTileSize() const
 {
   return m_shading_rate_image_tile_size;
 }
@@ -666,17 +666,17 @@ MemoryBudget VKDevice::GetMemoryBudget() const
   return res;
 }
 
-uint32_t VKDevice::GetShaderGroupHandleSize() const
+ezUInt32 VKDevice::GetShaderGroupHandleSize() const
 {
   return m_shader_group_handle_size;
 }
 
-uint32_t VKDevice::GetShaderRecordAlignment() const
+ezUInt32 VKDevice::GetShaderRecordAlignment() const
 {
   return m_shader_record_alignment;
 }
 
-uint32_t VKDevice::GetShaderTableAlignment() const
+ezUInt32 VKDevice::GetShaderTableAlignment() const
 {
   return m_shader_table_alignment;
 }
@@ -684,7 +684,7 @@ uint32_t VKDevice::GetShaderTableAlignment() const
 RaytracingASPrebuildInfo VKDevice::GetBLASPrebuildInfo(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) const
 {
   std::vector<vk::AccelerationStructureGeometryKHR> geometry_descs;
-  std::vector<uint32_t> max_primitive_counts;
+  std::vector<ezUInt32> max_primitive_counts;
   for (const auto& desc : descs)
   {
     geometry_descs.emplace_back(FillRaytracingGeometryTriangles(desc.vertex, desc.index, desc.flags));
@@ -701,7 +701,7 @@ RaytracingASPrebuildInfo VKDevice::GetBLASPrebuildInfo(const std::vector<Raytrac
   return GetAccelerationStructurePrebuildInfo(acceleration_structure_info, max_primitive_counts);
 }
 
-RaytracingASPrebuildInfo VKDevice::GetTLASPrebuildInfo(uint32_t instance_count, BuildAccelerationStructureFlags flags) const
+RaytracingASPrebuildInfo VKDevice::GetTLASPrebuildInfo(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) const
 {
   vk::AccelerationStructureGeometryKHR geometry_info{};
   geometry_info.geometryType = vk::GeometryTypeKHR::eInstances;
@@ -758,12 +758,12 @@ vk::ImageAspectFlags VKDevice::GetAspectFlags(vk::Format format) const
   }
 }
 
-uint32_t VKDevice::FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties)
+ezUInt32 VKDevice::FindMemoryType(ezUInt32 type_filter, vk::MemoryPropertyFlags properties)
 {
   vk::PhysicalDeviceMemoryProperties memProperties;
   m_physical_device.getMemoryProperties(&memProperties);
 
-  for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
+  for (ezUInt32 i = 0; i < memProperties.memoryTypeCount; ++i)
   {
     if ((type_filter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
       return i;

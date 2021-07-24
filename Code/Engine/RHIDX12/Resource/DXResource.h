@@ -12,15 +12,15 @@ public:
     DXResource(DXDevice& device);
 
     void CommitMemory(MemoryType memory_type) override;
-    void BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offset) override;
-    uint64_t GetWidth() const override;
-    uint32_t GetHeight() const override;
+    void BindMemory(const ezSharedPtr<Memory>& memory, ezUInt64 offset) override;
+    ezUInt64 GetWidth() const override;
+    ezUInt32 GetHeight() const override;
     uint16_t GetLayerCount() const override;
     uint16_t GetLevelCount() const override;
-    uint32_t GetSampleCount() const override;
-    uint64_t GetAccelerationStructureHandle() const override;
+    ezUInt32 GetSampleCount() const override;
+    ezUInt64 GetAccelerationStructureHandle() const override;
     void SetName(const ezString& name) override;
-    uint8_t* Map() override;
+    ezUInt8* Map() override;
     void Unmap() override;
     bool AllowCommonStatePromotion(ResourceState state_after) override;
     MemoryRequirements GetMemoryRequirements() const override;

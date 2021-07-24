@@ -4,7 +4,6 @@
 #include <RHI/Device/Device.h>
 #include <RHI/Instance/QueryInterface.h>
 #include <memory>
-#include <string>
 
 class EZ_RHI_DLL Adapter : public QueryInterface
 {

@@ -1,4 +1,5 @@
 #pragma once
+#include <RHIDX12/RHIDX12DLL.h>
 #include <RHI/CommandQueue/CommandQueue.h>
 #include <directx/d3d12.h>
 #include <wrl.h>
@@ -10,8 +11,8 @@ class DXCommandQueue : public CommandQueue
 {
 public:
     DXCommandQueue(DXDevice& device, CommandListType type);
-    void Wait(const std::shared_ptr<Fence>& fence, uint64_t value) override;
-    void Signal(const std::shared_ptr<Fence>& fence, uint64_t value) override;
+    void Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value) override;
+    void Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value) override;
     void ExecuteCommandLists(const std::vector<std::shared_ptr<CommandList>>& command_lists) override;
 
     DXDevice& GetDevice();

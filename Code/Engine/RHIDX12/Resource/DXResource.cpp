@@ -63,7 +63,7 @@ void DXResource::CommitMemory(MemoryType memory_type)
     IID_PPV_ARGS(&resource));
 }
 
-void DXResource::BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offset)
+void DXResource::BindMemory(const ezSharedPtr<Memory>& memory, ezUInt64 offset)
 {
   m_memory = memory;
   m_memory_type = m_memory->GetMemoryType();
@@ -76,9 +76,9 @@ void DXResource::BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offs
   if (m_memory_type == MemoryType::kUpload)
     SetInitialState(ResourceState::kGenericRead);
 
-  decltype(auto) dx_memory = m_memory->As<DXMemory>();
+  ezSharedPtr<DXMemory> dx_memory = m_memory.Downcast<DXMemory>();
   m_device.GetDevice()->CreatePlacedResource(
-    dx_memory.GetHeap().Get(),
+    dx_memory->GetHeap().Get(),
     offset,
     &desc,
     ConvertState(GetInitialState()),
@@ -86,12 +86,12 @@ void DXResource::BindMemory(const std::shared_ptr<Memory>& memory, uint64_t offs
     IID_PPV_ARGS(&resource));
 }
 
-uint64_t DXResource::GetWidth() const
+ezUInt64 DXResource::GetWidth() const
 {
   return desc.Width;
 }
 
-uint32_t DXResource::GetHeight() const
+ezUInt32 DXResource::GetHeight() const
 {
   return desc.Height;
 }
@@ -106,12 +106,12 @@ uint16_t DXResource::GetLevelCount() const
   return desc.MipLevels;
 }
 
-uint32_t DXResource::GetSampleCount() const
+ezUInt32 DXResource::GetSampleCount() const
 {
   return desc.SampleDesc.Count;
 }
 
-uint64_t DXResource::GetAccelerationStructureHandle() const
+ezUInt64 DXResource::GetAccelerationStructureHandle() const
 {
   return acceleration_structure_handle;
 }
@@ -124,10 +124,10 @@ void DXResource::SetName(const ezString& name)
   }
 }
 
-uint8_t* DXResource::Map()
+ezUInt8* DXResource::Map()
 {
   CD3DX12_RANGE range(0, 0);
-  uint8_t* dst_data = nullptr;
+  ezUInt8* dst_data = nullptr;
   EZ_ASSERT_ALWAYS(resource->Map(0, &range, reinterpret_cast<void**>(&dst_data)) == S_OK, "");
   return dst_data;
 }
