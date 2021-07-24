@@ -344,7 +344,7 @@ void RenderCommandListImpl::CopyAccelerationStructure(const ezSharedPtr<Resource
   m_CommandList->CopyAccelerationStructure(src, dst, mode);
 }
 
-void RenderCommandListImpl::UseProgram(const std::shared_ptr<Program>& program)
+void RenderCommandListImpl::UseProgram(const ezSharedPtr<Program>& program)
 {
   m_program = program;
   m_layout = m_object_cache.GetBindingSetLayout(m_program->GetBindings());
@@ -421,7 +421,7 @@ void RenderCommandListImpl::UseProgram(const std::shared_ptr<Program>& program)
   m_bound_deferred_view.clear();
 }
 
-void RenderCommandListImpl::CreateShaderTable(std::shared_ptr<Pipeline> pipeline)
+void RenderCommandListImpl::CreateShaderTable(ezSharedPtr<Pipeline> pipeline)
 {
   decltype(auto) shader_handles = pipeline->GetRayTracingShaderGroupHandles(0, (ezUInt32)m_ray_tracing_pipeline_desc.groups.size());
 
@@ -604,7 +604,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
   framebuffer_desc.colors = rtvs;
   framebuffer_desc.depth_stencil = dsv;
   framebuffer_desc.shading_rate_image = m_shading_rate_image;
-  std::shared_ptr<Framebuffer> framebuffer = m_object_cache.GetFramebuffer(framebuffer_desc);
+  ezSharedPtr<Framebuffer> framebuffer = m_object_cache.GetFramebuffer(framebuffer_desc);
   m_framebuffers.emplace_back(framebuffer);
 
   std::array<ShadingRateCombiner, 2> combiners = {

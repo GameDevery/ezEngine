@@ -4,7 +4,7 @@
 #include <RHI/Instance/QueryInterface.h>
 #include <memory>
 
-class EZ_RHI_DLL Framebuffer : public QueryInterface
+class EZ_RHI_DLL Framebuffer : public ezRefCounted
 {
 public:
   virtual ~Framebuffer() = default;

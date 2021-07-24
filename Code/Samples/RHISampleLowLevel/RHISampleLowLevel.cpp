@@ -43,7 +43,7 @@ private:
   ezRHISampleApp* m_pApp = nullptr;
 };
 
-std::shared_ptr<Shader> CreateShader()
+ezSharedPtr<Shader> CreateShader()
 {
   return nullptr;
 }
@@ -206,7 +206,7 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   //  framebufferDesc.width = m_pWindow->GetClientAreaSize().width;
   //  framebufferDesc.height = m_pWindow->GetClientAreaSize().height;
   //  framebufferDesc.colors = {backBufferView};
-  //  std::shared_ptr<Framebuffer> framebuffer = framebuffers.emplace_back(m_pDevice->CreateFramebuffer(framebufferDesc));
+  //  ezSharedPtr<Framebuffer> framebuffer = framebuffers.emplace_back(m_pDevice->CreateFramebuffer(framebufferDesc));
   //  std::shared_ptr<CommandList> commandList = command_lists.emplace_back(m_pDevice->CreateCommandList(CommandListType::kGraphics));
   //  commandList->BindPipeline(m_pPipeline);
   //  commandList->BindBindingSet(m_pBindingSet);
@@ -276,7 +276,7 @@ ezApplication::Execution ezRHISampleApp::Run()
     framebufferDesc.width = m_pWindow->GetClientAreaSize().width;
     framebufferDesc.height = m_pWindow->GetClientAreaSize().height;
     framebufferDesc.colors = {backBufferView};
-    std::shared_ptr<Framebuffer> framebuffer = m_pDevice->CreateFramebuffer(framebufferDesc);
+    ezSharedPtr<Framebuffer> framebuffer = m_pDevice->CreateFramebuffer(framebufferDesc);
     ezSharedPtr<CommandList> commandList = m_pDevice->CreateCommandList(CommandListType::kGraphics);
     commandList->BindPipeline(m_pPipeline);
     commandList->BindBindingSet(m_pBindingSet);

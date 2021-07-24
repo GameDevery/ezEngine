@@ -6,7 +6,7 @@ static ezUInt64 GenId()
   return ++id;
 }
 
-ShaderBase::ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection, ShaderBlobType blob_type)
+ShaderBase::ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection, ShaderBlobType blob_type)
     : m_shader_type(desc.type)
     , m_blob_type(blob_type)
 {
@@ -83,7 +83,7 @@ const std::vector<BindKey>& ShaderBase::GetBindings() const
     return m_binding_keys;
 }
 
-const std::shared_ptr<ShaderReflection>& ShaderBase::GetReflection() const
+const ezSharedPtr<ShaderReflection>& ShaderBase::GetReflection() const
 {
     return m_reflection;
 }

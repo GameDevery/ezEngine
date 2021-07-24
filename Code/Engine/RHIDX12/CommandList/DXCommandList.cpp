@@ -49,7 +49,7 @@ void DXCommandList::Reset()
   EZ_ASSERT_ALWAYS(m_command_list->Reset(m_command_allocator.Get(), nullptr) == S_OK, "");
   m_closed = false;
   m_Heaps.Clear();
-  m_state.reset();
+  m_state.Clear();
   m_binding_set.Clear();
   m_lazy_vertex.Clear();
   m_shading_rate_image_view.Clear();
@@ -64,20 +64,20 @@ void DXCommandList::Close()
   }
 }
 
-void DXCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
+void DXCommandList::BindPipeline(const ezSharedPtr<Pipeline>& state)
 {
   if (state == m_state)
     return;
-  m_state = std::static_pointer_cast<DXPipeline>(state);
+  m_state = state.Downcast<DXPipeline>();
   m_command_list->SetComputeRootSignature(m_state->GetRootSignature().Get());
   auto type = m_state->GetPipelineType();
   if (type == PipelineType::kGraphics)
   {
-    decltype(auto) dx_state = state->As<DXGraphicsPipeline>();
+    decltype(auto) dx_state = state.Downcast<DXGraphicsPipeline>();
     m_command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_command_list->SetGraphicsRootSignature(dx_state.GetRootSignature().Get());
-    m_command_list->SetPipelineState(dx_state.GetPipeline().Get());
-    for (const auto& x : dx_state.GetStrideMap())
+    m_command_list->SetGraphicsRootSignature(dx_state->GetRootSignature().Get());
+    m_command_list->SetPipelineState(dx_state->GetPipeline().Get());
+    for (const auto& x : dx_state->GetStrideMap())
     {
       auto it = m_lazy_vertex.Find(x.Key());
       if (it != end(m_lazy_vertex))
@@ -88,13 +88,13 @@ void DXCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
   }
   else if (type == PipelineType::kCompute)
   {
-    decltype(auto) dx_state = state->As<DXComputePipeline>();
-    m_command_list->SetPipelineState(dx_state.GetPipeline().Get());
+    decltype(auto) dx_state = state.Downcast<DXComputePipeline>();
+    m_command_list->SetPipelineState(dx_state->GetPipeline().Get());
   }
   else if (type == PipelineType::kRayTracing)
   {
-    decltype(auto) dx_state = state->As<DXRayTracingPipeline>();
-    m_command_list4->SetPipelineState1(dx_state.GetPipeline().Get());
+    decltype(auto) dx_state = state.Downcast<DXRayTracingPipeline>();
+    m_command_list4->SetPipelineState1(dx_state->GetPipeline().Get());
   }
 }
 
@@ -108,7 +108,7 @@ void DXCommandList::BindBindingSet(const ezSharedPtr<BindingSet>& binding_set)
   m_binding_set = binding_set;
 }
 
-void DXCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
 {
   if (m_device.IsRenderPassesSupported())
   {
@@ -119,7 +119,7 @@ void DXCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, 
     OMSetFramebuffer(render_pass, framebuffer, clear_desc);
   }
 
-  decltype(auto) shading_rate_image_view = framebuffer->As<FramebufferBase>().GetDesc().shading_rate_image;
+  decltype(auto) shading_rate_image_view = framebuffer.Downcast<FramebufferBase>()->GetDesc().shading_rate_image;
   if (shading_rate_image_view == m_shading_rate_image_view)
   {
     return;
@@ -164,12 +164,12 @@ D3D12_RENDER_PASS_ENDING_ACCESS_TYPE Convert(RenderPassStoreOp op)
   return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
 }
 
-void DXCommandList::BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
 {
   decltype(auto) dx_render_pass = render_pass.Downcast<DXRenderPass>();
-  decltype(auto) dx_framebuffer = framebuffer->As<DXFramebuffer>();
-  auto& rtvs = dx_framebuffer.GetDesc().colors;
-  auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
+  decltype(auto) dx_framebuffer = framebuffer.Downcast<DXFramebuffer>();
+  auto& rtvs = dx_framebuffer->GetDesc().colors;
+  auto& dsv = dx_framebuffer->GetDesc().depth_stencil;
 
   auto get_handle = [](const ezSharedPtr<View>& view) {
     if (!view)
@@ -214,12 +214,12 @@ void DXCommandList::BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pa
   m_command_list4->BeginRenderPass(static_cast<ezUInt32>(om_rtv.size()), om_rtv.data(), om_dsv_ptr, D3D12_RENDER_PASS_FLAG_NONE);
 }
 
-void DXCommandList::OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clearDesc)
 {
   decltype(auto) dx_render_pass = render_pass.Downcast<DXRenderPass>();
-  decltype(auto) dx_framebuffer = framebuffer->As<DXFramebuffer>();
-  auto& rtvs = dx_framebuffer.GetDesc().colors;
-  auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
+  decltype(auto) dx_framebuffer = framebuffer.Downcast<DXFramebuffer>();
+  auto& rtvs = dx_framebuffer->GetDesc().colors;
+  auto& dsv = dx_framebuffer->GetDesc().depth_stencil;
 
   std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> om_rtv(rtvs.size());
   auto get_handle = [](const ezSharedPtr<View>& view) {
@@ -232,7 +232,7 @@ void DXCommandList::OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass,
   {
     om_rtv[slot] = get_handle(rtvs[slot]);
     if (dx_render_pass->GetDesc().colors[slot].load_op == RenderPassLoadOp::kClear)
-      m_command_list->ClearRenderTargetView(om_rtv[slot], &clear_desc.colors[slot].a, 0, nullptr);
+      m_command_list->ClearRenderTargetView(om_rtv[slot], &clearDesc.colors[slot].a, 0, nullptr);
   }
   while (!om_rtv.empty() && om_rtv.back().ptr == 0)
   {
@@ -245,7 +245,7 @@ void DXCommandList::OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass,
   if (dx_render_pass->GetDesc().depth_stencil.stencil_load_op == RenderPassLoadOp::kClear)
     clear_flags |= D3D12_CLEAR_FLAG_STENCIL;
   if (om_dsv.ptr && clear_flags)
-    m_command_list->ClearDepthStencilView(om_dsv, clear_flags, clear_desc.depth, clear_desc.stencil, 0, nullptr);
+    m_command_list->ClearDepthStencilView(om_dsv, clear_flags, clearDesc.depth, clearDesc.stencil, 0, nullptr);
   m_command_list->OMSetRenderTargets(static_cast<ezUInt32>(om_rtv.size()), om_rtv.data(), FALSE, om_dsv.ptr ? &om_dsv : nullptr);
 }
 
@@ -502,8 +502,8 @@ void DXCommandList::IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>
 {
   if (m_state && m_state->GetPipelineType() == PipelineType::kGraphics)
   {
-    decltype(auto) dx_state = m_state->As<DXGraphicsPipeline>();
-    auto& strides = dx_state.GetStrideMap();
+    decltype(auto) dx_state = m_state.Downcast<DXGraphicsPipeline>();
+    auto& strides = dx_state->GetStrideMap();
     auto it = strides.Find(slot);
     if (it != end(strides))
       IASetVertexBufferImpl(slot, resource, it.Value());
@@ -690,7 +690,7 @@ void DXCommandList::CopyTexture(const ezSharedPtr<Resource>& src_texture, const 
 
 void DXCommandList::WriteAccelerationStructuresProperties(
   const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
-  const std::shared_ptr<QueryHeap>& query_heap,
+  const ezSharedPtr<QueryHeap>& query_heap,
   ezUInt32 first_query)
 {
   if (query_heap->GetType() != QueryHeapType::kAccelerationStructureCompactedSize)
@@ -698,10 +698,10 @@ void DXCommandList::WriteAccelerationStructuresProperties(
     assert(false);
     return;
   }
-  decltype(auto) dx_query_heap = query_heap->As<DXRayTracingQueryHeap>();
+  decltype(auto) dx_query_heap = query_heap.Downcast<DXRayTracingQueryHeap>();
   D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_DESC desc = {};
   desc.InfoType = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_COMPACTED_SIZE;
-  desc.DestBuffer = dx_query_heap.GetResource()->GetGPUVirtualAddress() + first_query * sizeof(ezUInt64);
+  desc.DestBuffer = dx_query_heap->GetResource()->GetGPUVirtualAddress() + first_query * sizeof(ezUInt64);
   std::vector<D3D12_GPU_VIRTUAL_ADDRESS> dx_acceleration_structures;
   dx_acceleration_structures.reserve(acceleration_structures.size());
   for (const auto& acceleration_structure : acceleration_structures)
@@ -712,7 +712,7 @@ void DXCommandList::WriteAccelerationStructuresProperties(
 }
 
 void DXCommandList::ResolveQueryData(
-  const std::shared_ptr<QueryHeap>& query_heap,
+  const ezSharedPtr<QueryHeap>& query_heap,
   ezUInt32 first_query,
   ezUInt32 query_count,
   const ezSharedPtr<Resource>& dst_buffer,
@@ -724,19 +724,19 @@ void DXCommandList::ResolveQueryData(
     return;
   }
 
-  decltype(auto) dx_query_heap = query_heap->As<DXRayTracingQueryHeap>();
+  decltype(auto) dx_query_heap = query_heap.Downcast<DXRayTracingQueryHeap>();
   decltype(auto) dx_dst_buffer = dst_buffer.Downcast<DXResource>();
 
-  auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap.GetResource().Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, 0);
+  auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap->GetResource().Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, 0);
   m_command_list->ResourceBarrier(1, &barrier1);
   m_command_list->CopyBufferRegion(
     dx_dst_buffer->resource.Get(),
     dst_offset,
-    dx_query_heap.GetResource().Get(),
+    dx_query_heap->GetResource().Get(),
     first_query * sizeof(ezUInt64),
     query_count * sizeof(ezUInt64));
 
-  auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap.GetResource().Get(), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, 0);
+  auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(dx_query_heap->GetResource().Get(), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, 0);
   m_command_list->ResourceBarrier(1, &barrier2);
 }
 

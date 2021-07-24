@@ -5,7 +5,7 @@
 #include <RHI/Instance/QueryInterface.h>
 #include <memory>
 
-class EZ_RHI_DLL Pipeline : public QueryInterface
+class EZ_RHI_DLL Pipeline : public ezRefCounted
 {
 public:
   virtual ~Pipeline() = default;

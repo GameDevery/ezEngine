@@ -291,7 +291,7 @@ struct ViewDesc
 struct ShaderDesc
 {
   //ezDynamicArray<ezUInt8> blob;
-  //std::shared_ptr<ShaderReflection> reflection;
+  //ezSharedPtr<ShaderReflection> reflection;
 
   ezString shader_path;
   ezString entrypoint;
@@ -411,7 +411,7 @@ struct FramebufferDesc
 
 struct GraphicsPipelineDesc
 {
-  std::shared_ptr<Program> program;
+  ezSharedPtr<Program> program;
   ezSharedPtr<BindingSetLayout> layout;
   std::vector<InputLayoutDesc> input;
   ezSharedPtr<RenderPass> render_pass;
@@ -427,7 +427,7 @@ struct GraphicsPipelineDesc
 
 struct ComputePipelineDesc
 {
-  std::shared_ptr<Program> program;
+  ezSharedPtr<Program> program;
   ezSharedPtr<BindingSetLayout> layout;
 
   auto MakeTie() const
@@ -459,7 +459,7 @@ struct RayTracingShaderGroup
 
 struct RayTracingPipelineDesc
 {
-  std::shared_ptr<Program> program;
+  ezSharedPtr<Program> program;
   ezSharedPtr<BindingSetLayout> layout;
   std::vector<RayTracingShaderGroup> groups;
 

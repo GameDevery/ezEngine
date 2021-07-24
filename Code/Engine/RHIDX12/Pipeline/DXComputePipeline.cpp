@@ -14,10 +14,10 @@ DXComputePipeline::DXComputePipeline(DXDevice& device, const ComputePipelineDesc
 {
     DXStateBuilder computeStateBuilder;
 
-    decltype(auto) dxProgram = m_Desc.program->As<DXProgram>();
+    decltype(auto) dxProgram = m_Desc.program.Downcast<DXProgram>();
     ezSharedPtr<DXBindingSetLayout> dxLayout = m_Desc.layout.Downcast<DXBindingSetLayout>();
     m_RootSignature = dxLayout->GetRootSignature();
-    for (const auto& shader : dxProgram.GetShaders())
+    for (const auto& shader : dxProgram->GetShaders())
     {
         D3D12_SHADER_BYTECODE shaderBytecode = {};
         decltype(auto) blob = shader->GetBlob();

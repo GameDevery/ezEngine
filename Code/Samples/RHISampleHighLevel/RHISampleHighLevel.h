@@ -54,11 +54,11 @@ public:
   {
     auto full_desc = desc;
     ezDynamicArray<ezUInt8> byteCode = Compile(full_desc, m_ShaderBlobType);
-    std::shared_ptr<ShaderReflection> reflection = CreateShaderReflection(m_ShaderBlobType, byteCode.GetData(), byteCode.GetCount());
+    ezSharedPtr<ShaderReflection> reflection = CreateShaderReflection(m_ShaderBlobType, byteCode.GetData(), byteCode.GetCount());
     shader = device.CreateShader(full_desc, byteCode, reflection);
   }
 
-  std::shared_ptr<Shader> shader;
+  ezSharedPtr<Shader> shader;
 
 private:
   ShaderBlobType m_ShaderBlobType;
@@ -115,12 +115,12 @@ public:
   {
     auto full_desc = desc;
     ezDynamicArray<ezUInt8> byteCode = Compile(full_desc, m_ShaderBlobType);
-    std::shared_ptr<ShaderReflection> reflection = CreateShaderReflection(m_ShaderBlobType, byteCode.GetData(), byteCode.GetCount());
+    ezSharedPtr<ShaderReflection> reflection = CreateShaderReflection(m_ShaderBlobType, byteCode.GetData(), byteCode.GetCount());
     shader = device.CreateShader(full_desc, byteCode, reflection);
     cbv.Settings = shader->GetBindKey("Settings");
   }
 
-  std::shared_ptr<Shader> shader;
+  ezSharedPtr<Shader> shader;
 
 private:
   ShaderBlobType m_ShaderBlobType;

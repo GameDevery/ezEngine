@@ -45,28 +45,28 @@ public:
   ezSharedPtr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) override;
   void DestroyRenderPass(RenderPass* pRenderPass) override {}
 
-  std::shared_ptr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) override;
+  ezSharedPtr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) override;
   void DestroyFramebuffer(Framebuffer* pFramebuffer) override {}
 
-  std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
+  ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) override;
   void DestroyShader(Shader* pShader) override {}
 
-  std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;
+  ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) override;
   void DestroyProgram(Program* pProgram) override {}
 
-  std::shared_ptr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;
+  ezSharedPtr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;
   void DestroyGraphicsPipeline(Pipeline* pPipeline) override {}
 
-  std::shared_ptr<Pipeline> CreateComputePipeline(const ComputePipelineDesc& desc) override;
+  ezSharedPtr<Pipeline> CreateComputePipeline(const ComputePipelineDesc& desc) override;
   void DestroyComputePipeline(Pipeline* pPipeline) override {}
 
-  std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) override;
+  ezSharedPtr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) override;
   void DestroyRayTracingPipeline(Pipeline* pPipeline) override {}
 
   ezSharedPtr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset) override;
   void DestroyAccelerationStructure(Resource* pAccelerationStructure) override {}
 
-  std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) override;
+  ezSharedPtr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) override;
   void DestroyQueryHeap(QueryHeap* pQueryHeap) override {}
 
   ezUInt32 GetTextureDataPitchAlignment() const override;

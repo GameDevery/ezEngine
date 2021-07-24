@@ -4,7 +4,7 @@
 #include <RHIVulkan/Device/VKDevice.h>
 #include <RHIVulkan/Program/VKProgram.h>
 
-VKProgram::VKProgram(VKDevice& device, const std::vector<std::shared_ptr<Shader>>& shaders)
+VKProgram::VKProgram(VKDevice& device, const std::vector<ezSharedPtr<Shader>>& shaders)
   : ProgramBase(shaders)
 {
 }

@@ -33,7 +33,7 @@ public:
   void SetRasterizeState(const RasterizerDesc& desc) override;
   void SetBlendState(const BlendDesc& desc) override;
   void SetDepthStencilState(const DepthStencilDesc& desc) override;
-  void UseProgram(const std::shared_ptr<Program>& program) override;
+  void UseProgram(const ezSharedPtr<Program>& program) override;
   void BeginRenderPass(const RenderPassBeginDesc& desc) override;
   void EndRenderPass() override;
   void BeginEvent(const ezString& name) override;
@@ -89,11 +89,11 @@ private:
   void ApplyPipeline();
   void ApplyBindingSet();
   ResourceStateTracker& GetResourceStateTracker(const ezSharedPtr<Resource>& resource);
-  void CreateShaderTable(std::shared_ptr<Pipeline> pipeline);
+  void CreateShaderTable(ezSharedPtr<Pipeline> pipeline);
 
   Device& m_device;
   ObjectCache& m_object_cache;
-  std::vector<std::shared_ptr<Framebuffer>> m_framebuffers;
+  std::vector<ezSharedPtr<Framebuffer>> m_framebuffers;
   ezSharedPtr<CommandList> m_CommandList;
   ezUInt32 m_viewport_width = 0;
   ezUInt32 m_viewport_height = 0;
@@ -102,7 +102,7 @@ private:
   std::map<BindKey, std::shared_ptr<DeferredView>> m_bound_deferred_view;
   std::vector<std::shared_ptr<ResourceLazyViewDesc>> m_resource_lazy_view_descs;
 
-  std::shared_ptr<Program> m_program;
+  ezSharedPtr<Program> m_program;
   std::vector<ezSharedPtr<BindingSet>> m_binding_sets;
 
   ComputePipelineDesc m_compute_pipeline_desc = {};
@@ -119,7 +119,7 @@ private:
   RayTracingShaderTables m_shader_tables = {};
   ezSharedPtr<Resource> m_shader_table;
   PipelineType m_pipeline_type = PipelineType::kGraphics;
-  std::shared_ptr<Pipeline> m_pipeline;
+  ezSharedPtr<Pipeline> m_pipeline;
   ezSharedPtr<View> m_shading_rate_image;
   ShadingRateCombiner m_shading_rate_combiner = ShadingRateCombiner::kPassthrough;
 };

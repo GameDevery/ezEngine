@@ -24,7 +24,7 @@ struct EZ_RHI_DLL MemoryBudget
   ezUInt64 usage;
 };
 
-class EZ_RHI_DLL Device : public QueryInterface
+class EZ_RHI_DLL Device : public ezRefCounted
 {
 public:
   virtual ~Device() = default;
@@ -61,28 +61,28 @@ public:
   virtual ezSharedPtr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) = 0;
   virtual void DestroyRenderPass(RenderPass* pRenderPass) = 0;
 
-  virtual std::shared_ptr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) = 0;
+  virtual ezSharedPtr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) = 0;
   virtual void DestroyFramebuffer(Framebuffer* pFramebuffer) = 0;
 
-  virtual std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) = 0;
+  virtual ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) = 0;
   virtual void DestroyShader(Shader* pShader) = 0;
 
-  virtual std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) = 0;
+  virtual ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) = 0;
   virtual void DestroyProgram(Program* pProgram) = 0;
 
-  virtual std::shared_ptr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) = 0;
+  virtual ezSharedPtr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) = 0;
   virtual void DestroyGraphicsPipeline(Pipeline* pPipeline) = 0;
 
-  virtual std::shared_ptr<Pipeline> CreateComputePipeline(const ComputePipelineDesc& desc) = 0;
+  virtual ezSharedPtr<Pipeline> CreateComputePipeline(const ComputePipelineDesc& desc) = 0;
   virtual void DestroyComputePipeline(Pipeline* pPipeline) = 0;
 
-  virtual std::shared_ptr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) = 0;
+  virtual ezSharedPtr<Pipeline> CreateRayTracingPipeline(const RayTracingPipelineDesc& desc) = 0;
   virtual void DestroyRayTracingPipeline(Pipeline* pPipeline) = 0;
 
   virtual ezSharedPtr<Resource> CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset) = 0;
   virtual void DestroyAccelerationStructure(Resource* pAccelerationStructure) = 0;
 
-  virtual std::shared_ptr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) = 0;
+  virtual ezSharedPtr<QueryHeap> CreateQueryHeap(QueryHeapType type, ezUInt32 count) = 0;
   virtual void DestroyQueryHeap(QueryHeap* pQueryHeap) = 0;
 
   virtual ezUInt32 GetTextureDataPitchAlignment() const = 0;

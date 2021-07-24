@@ -16,7 +16,7 @@ public:
     virtual void SetRasterizeState(const RasterizerDesc& desc) = 0;
     virtual void SetBlendState(const BlendDesc& desc) = 0;
     virtual void SetDepthStencilState(const DepthStencilDesc& desc) = 0;
-    virtual void UseProgram(const std::shared_ptr<Program>& program) = 0;
+    virtual void UseProgram(const ezSharedPtr<Program>& program) = 0;
     virtual void BeginRenderPass(const RenderPassBeginDesc& desc) = 0;
     virtual void EndRenderPass() = 0;
     virtual void BeginEvent(const ezString& name) = 0;

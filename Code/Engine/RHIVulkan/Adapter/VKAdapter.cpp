@@ -15,9 +15,9 @@ const ezString& VKAdapter::GetName() const
   return m_name;
 }
 
-std::shared_ptr<Device> VKAdapter::CreateDevice()
+ezSharedPtr<Device> VKAdapter::CreateDevice()
 {
-  return std::make_shared<VKDevice>(*this);
+  return EZ_DEFAULT_NEW(VKDevice, *this);
 }
 
 VKInstance& VKAdapter::GetInstance()

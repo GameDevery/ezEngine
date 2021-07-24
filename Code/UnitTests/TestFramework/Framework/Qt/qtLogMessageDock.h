@@ -62,7 +62,7 @@ private:
   const ezTestResultData* pCurrentTestSelection;
   const ezTestFrameworkResult* m_pTestResult;
   std::vector<ezUInt32> m_VisibleEntries;
-  ezDynamicArray<ezUInt8> m_VisibleEntriesIndention;
+  std::vector<ezUInt8> m_VisibleEntriesIndention;
 };
 
 #endif

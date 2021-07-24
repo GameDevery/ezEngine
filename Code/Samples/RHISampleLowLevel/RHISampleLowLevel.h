@@ -29,9 +29,9 @@ public:
   void OnResize(ezUInt32 width, ezUInt32 height);
 
 private:
-  std::shared_ptr<Instance> m_pInstance;
-  std::shared_ptr<Adapter> m_pAdapter;
-  std::shared_ptr<Device> m_pDevice;
+  ezSharedPtr<Instance> m_pInstance;
+  ezSharedPtr<Adapter> m_pAdapter;
+  ezSharedPtr<Device> m_pDevice;
   ezRHISampleWindow* m_pWindow = nullptr;
   ezSharedPtr<Swapchain> m_pSwapchain = nullptr;
   ezSharedPtr<Fence> m_pFence = nullptr;
@@ -39,16 +39,16 @@ private:
   ezSharedPtr<CommandQueue> m_pCommandQueue = nullptr;
   std::array<ezUInt64, FRAME_COUNT> m_FenceValues = {};
   //std::vector<std::shared_ptr<CommandList>> command_lists;
-  //std::vector<std::shared_ptr<Framebuffer>> framebuffers;
-  std::shared_ptr<Pipeline> m_pPipeline;
+  //std::vector<ezSharedPtr<Framebuffer>> framebuffers;
+  ezSharedPtr<Pipeline> m_pPipeline;
   ezSharedPtr<RenderPass> m_pRenderPass;
-  std::shared_ptr<Program> m_pProgram;
+  ezSharedPtr<Program> m_pProgram;
   ezSharedPtr<View> m_pConstantBufferView;
   ezSharedPtr<Resource> m_pConstantBuffer;
   ezSharedPtr<Resource> m_pIndexBuffer;
   ezSharedPtr<Resource> m_pVertexBuffer;
-  std::shared_ptr<Shader> m_pVertexShader;
-  std::shared_ptr<Shader> m_pPixelShader;
+  ezSharedPtr<Shader> m_pVertexShader;
+  ezSharedPtr<Shader> m_pPixelShader;
   ezSharedPtr<BindingSetLayout> m_pLayout;
   ezSharedPtr<BindingSet> m_pBindingSet;
   ezUInt32 m_FrameIndex = 0;

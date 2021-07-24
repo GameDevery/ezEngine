@@ -112,7 +112,7 @@ struct EZ_RHI_DLL ShaderFeatureInfo
   bool sampler_descriptor_heap_indexing = false;
 };
 
-class EZ_RHI_DLL ShaderReflection : public QueryInterface
+class EZ_RHI_DLL ShaderReflection : public ezRefCounted
 {
 public:
   virtual ~ShaderReflection() = default;

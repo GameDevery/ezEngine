@@ -516,34 +516,34 @@ ezSharedPtr<RenderPass> VKDevice::CreateRenderPass(const RenderPassDesc& desc)
   return EZ_DEFAULT_NEW(VKRenderPass, *this, desc);
 }
 
-std::shared_ptr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& desc)
+ezSharedPtr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& desc)
 {
-  return std::make_shared<VKFramebuffer>(*this, desc);
+  return EZ_DEFAULT_NEW(VKFramebuffer, *this, desc);
 }
 
-std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
+ezSharedPtr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection)
 {
-  return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kSPIRV);
+  return EZ_DEFAULT_NEW(ShaderBase, desc, byteCode, reflection, ShaderBlobType::kSPIRV);
 }
 
-std::shared_ptr<Program> VKDevice::CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders)
+ezSharedPtr<Program> VKDevice::CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders)
 {
-  return std::make_shared<VKProgram>(*this, shaders);
+  return EZ_DEFAULT_NEW(VKProgram, *this, shaders);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
+ezSharedPtr<Pipeline> VKDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
 {
-  return std::make_shared<VKGraphicsPipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(VKGraphicsPipeline, *this, desc);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
+ezSharedPtr<Pipeline> VKDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
 {
-  return std::make_shared<VKComputePipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(VKComputePipeline, *this, desc);
 }
 
-std::shared_ptr<Pipeline> VKDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
+ezSharedPtr<Pipeline> VKDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
 {
-  return std::make_shared<VKRayTracingPipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(VKRayTracingPipeline, *this, desc);
 }
 
 vk::AccelerationStructureGeometryKHR VKDevice::FillRaytracingGeometryTriangles(const BufferDesc& vertex, const BufferDesc& index, RaytracingGeometryFlags flags) const
@@ -638,9 +638,9 @@ ezSharedPtr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructur
   return res;
 }
 
-std::shared_ptr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
+ezSharedPtr<QueryHeap> VKDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
 {
-  return std::make_shared<VKQueryHeap>(*this, type, count);
+  return EZ_DEFAULT_NEW(VKQueryHeap, *this, type, count);
 }
 
 ezUInt32 VKDevice::GetTextureDataPitchAlignment() const

@@ -29,8 +29,8 @@ public:
     ezSharedPtr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) override;
     ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) override;
     ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
-    std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
-    std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;
+    ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) override;
+    ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) override;
     bool IsDxrSupported() const override;
     bool IsRayQuerySupported() const override;
     bool IsVariableRateShadingSupported() const override;
@@ -57,9 +57,9 @@ private:
     ezUInt32 m_frame_index = 0;
     int m_width = 0;
     int m_height = 0;
-    std::shared_ptr<Instance> m_instance;
-    std::shared_ptr<Adapter> m_adapter;
-    std::shared_ptr<Device> m_device;
+    ezSharedPtr<Instance> m_instance;
+    ezSharedPtr<Adapter> m_adapter;
+    ezSharedPtr<Device> m_device;
     ezSharedPtr<CommandQueue> m_command_queue;
     ezSharedPtr<Swapchain> m_Swapchain;
     std::vector<ezSharedPtr<CommandList>> m_BarrierCommandLists;

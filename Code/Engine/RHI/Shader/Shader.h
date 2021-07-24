@@ -6,7 +6,7 @@
 #include <RHI/ShaderReflection/ShaderReflection.h>
 #include <memory>
 
-class EZ_RHI_DLL Shader : public QueryInterface
+class EZ_RHI_DLL Shader : public ezRefCounted
 {
 public:
   virtual ~Shader() = default;
@@ -19,5 +19,5 @@ public:
   virtual const std::vector<InputLayoutDesc>& GetInputLayouts() const = 0;
   virtual ezUInt32 GetInputLayoutLocation(const ezString& semantic_name) const = 0;
   virtual const std::vector<BindKey>& GetBindings() const = 0;
-  virtual const std::shared_ptr<ShaderReflection>& GetReflection() const = 0;
+  virtual const ezSharedPtr<ShaderReflection>& GetReflection() const = 0;
 };

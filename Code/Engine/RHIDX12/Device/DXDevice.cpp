@@ -339,34 +339,34 @@ ezSharedPtr<RenderPass> DXDevice::CreateRenderPass(const RenderPassDesc& desc)
   return EZ_DEFAULT_NEW(DXRenderPass, *this, desc);
 }
 
-std::shared_ptr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& desc)
+ezSharedPtr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& desc)
 {
-  return std::make_shared<DXFramebuffer>(desc);
+  return EZ_DEFAULT_NEW(DXFramebuffer, desc);
 }
 
-std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
+ezSharedPtr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection)
 {
-  return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kDXIL);
+  return EZ_DEFAULT_NEW(ShaderBase, desc, byteCode, reflection, ShaderBlobType::kDXIL);
 }
 
-std::shared_ptr<Program> DXDevice::CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders)
+ezSharedPtr<Program> DXDevice::CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders)
 {
-  return std::make_shared<DXProgram>(*this, shaders);
+  return EZ_DEFAULT_NEW(DXProgram, *this, shaders);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
+ezSharedPtr<Pipeline> DXDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
 {
-  return std::make_shared<DXGraphicsPipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(DXGraphicsPipeline, *this, desc);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
+ezSharedPtr<Pipeline> DXDevice::CreateComputePipeline(const ComputePipelineDesc& desc)
 {
-  return std::make_shared<DXComputePipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(DXComputePipeline, *this, desc);
 }
 
-std::shared_ptr<Pipeline> DXDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
+ezSharedPtr<Pipeline> DXDevice::CreateRayTracingPipeline(const RayTracingPipelineDesc& desc)
 {
-  return std::make_shared<DXRayTracingPipeline>(*this, desc);
+  return EZ_DEFAULT_NEW(DXRayTracingPipeline, *this, desc);
 }
 
 ezSharedPtr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset)
@@ -378,11 +378,11 @@ ezSharedPtr<Resource> DXDevice::CreateAccelerationStructure(AccelerationStructur
   return res;
 }
 
-std::shared_ptr<QueryHeap> DXDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
+ezSharedPtr<QueryHeap> DXDevice::CreateQueryHeap(QueryHeapType type, ezUInt32 count)
 {
   if (type == QueryHeapType::kAccelerationStructureCompactedSize)
   {
-    return std::make_shared<DXRayTracingQueryHeap>(*this, type, count);
+    return EZ_DEFAULT_NEW(DXRayTracingQueryHeap, *this, type, count);
   }
   return {};
 }

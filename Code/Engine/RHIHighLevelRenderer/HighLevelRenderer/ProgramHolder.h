@@ -178,7 +178,7 @@ public:
         CompileShaders();
     }
 
-    operator std::shared_ptr<Program>& ()
+    operator ezSharedPtr<Program>& ()
     {
         return m_program;
     }
@@ -212,5 +212,5 @@ private:
     }
 
     RenderDevice& m_device;
-    std::shared_ptr<Program> m_program;
+    ezSharedPtr<Program> m_program;
 };

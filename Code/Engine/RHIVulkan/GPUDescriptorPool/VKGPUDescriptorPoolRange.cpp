@@ -13,7 +13,7 @@ VKGPUDescriptorPoolRange::VKGPUDescriptorPoolRange(VKGPUBindlessDescriptorPoolTy
     , m_offset(offset)
     , m_size(size)
     , m_type(type)
-    //, m_callback(this, [m_offset = m_offset, m_size = m_size, m_pool = m_pool](auto) { m_pool.get().OnRangeDestroy(m_offset, m_size); })
+    //, m_Callback(this, [m_offset = m_offset, m_size = m_size, m_pool = m_pool](auto) { m_pool.get().OnRangeDestroy(m_offset, m_size); })
 {
 }
 

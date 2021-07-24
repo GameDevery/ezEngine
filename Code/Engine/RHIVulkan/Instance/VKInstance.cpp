@@ -6,9 +6,9 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
-std::shared_ptr<Instance> CreateVKInstance()
+ezSharedPtr<Instance> CreateVKInstance()
 {
-  return std::make_shared<VKInstance>();
+  return EZ_DEFAULT_NEW(VKInstance);
 }
 
 // clang-format off
@@ -90,7 +90,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
 
 VKInstance::VKInstance()
 {
-  PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+  PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
 
   auto layers = vk::enumerateInstanceLayerProperties();
@@ -138,8 +138,8 @@ VKInstance::VKInstance()
   create_info.enabledExtensionCount = found_extension.GetCount();
   create_info.ppEnabledExtensionNames = found_extension.GetData();
 
-  m_instance = vk::createInstanceUnique(create_info);
-  VULKAN_HPP_DEFAULT_DISPATCHER.init(m_instance.get());
+  m_Instance = vk::createInstanceUnique(create_info);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance.get());
   if (debug_enabled)
   {
     vk::DebugReportCallbackCreateInfoEXT callback_create_info = {};
@@ -149,14 +149,14 @@ VKInstance::VKInstance()
                                  vk::DebugReportFlagBitsEXT::eDebug;
     callback_create_info.pfnCallback = &DebugReportCallback;
     callback_create_info.pUserData = this;
-    m_callback = m_instance->createDebugReportCallbackEXTUnique(callback_create_info);
+    m_Callback = m_Instance->createDebugReportCallbackEXTUnique(callback_create_info);
   }
 }
 
-std::vector<std::shared_ptr<Adapter>> VKInstance::EnumerateAdapters()
+ezDynamicArray<ezSharedPtr<Adapter>> VKInstance::EnumerateAdapters()
 {
-  std::vector<std::shared_ptr<Adapter>> adapters;
-  auto devices = m_instance->enumeratePhysicalDevices();
+  ezDynamicArray<ezSharedPtr<Adapter>> adapters;
+  auto devices = m_Instance->enumeratePhysicalDevices();
   for (const auto& device : devices)
   {
     vk::PhysicalDeviceProperties device_properties = device.getProperties();
@@ -164,7 +164,7 @@ std::vector<std::shared_ptr<Adapter>> VKInstance::EnumerateAdapters()
     if (device_properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu ||
         device_properties.deviceType == vk::PhysicalDeviceType::eIntegratedGpu)
     {
-      adapters.emplace_back(std::make_shared<VKAdapter>(*this, device));
+      adapters.PushBack(EZ_DEFAULT_NEW(VKAdapter, *this, device));
     }
   }
   return adapters;
@@ -172,5 +172,5 @@ std::vector<std::shared_ptr<Adapter>> VKInstance::EnumerateAdapters()
 
 vk::Instance& VKInstance::GetInstance()
 {
-  return m_instance.get();
+  return m_Instance.get();
 }

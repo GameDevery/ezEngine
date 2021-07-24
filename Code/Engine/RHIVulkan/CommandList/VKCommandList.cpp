@@ -34,7 +34,7 @@ void VKCommandList::Reset()
   vk::CommandBufferBeginInfo begin_info = {};
   m_command_list->begin(begin_info);
   m_closed = false;
-  m_state.reset();
+  m_state.Clear();
   m_binding_set.Clear();
 }
 
@@ -62,11 +62,11 @@ vk::PipelineBindPoint GetPipelineBindPoint(PipelineType type)
   return {};
 }
 
-void VKCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
+void VKCommandList::BindPipeline(const ezSharedPtr<Pipeline>& state)
 {
   if (state == m_state)
     return;
-  m_state = std::static_pointer_cast<VKPipeline>(state);
+  m_state = state.Downcast<VKPipeline>();
   m_command_list->bindPipeline(GetPipelineBindPoint(m_state->GetPipelineType()), m_state->GetPipeline());
 }
 
@@ -82,14 +82,14 @@ void VKCommandList::BindBindingSet(const ezSharedPtr<BindingSet>& binding_set)
   m_command_list->bindDescriptorSets(GetPipelineBindPoint(m_state->GetPipelineType()), m_state->GetPipelineLayout(), 0, descriptor_sets.GetCount(), descriptor_sets.GetData(), 0, nullptr);
 }
 
-void VKCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& renderPass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clearDesc)
+void VKCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& renderPass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clearDesc)
 {
-  decltype(auto) vkFramebuffer = framebuffer->As<VKFramebuffer>();
+  decltype(auto) vkFramebuffer = framebuffer.Downcast<VKFramebuffer>();
   decltype(auto) vkRenderPass = renderPass.Downcast<VKRenderPass>();
   vk::RenderPassBeginInfo renderPassInfo = {};
   renderPassInfo.renderPass = vkRenderPass->GetRenderPass();
-  renderPassInfo.framebuffer = vkFramebuffer.GetFramebuffer();
-  renderPassInfo.renderArea.extent = vkFramebuffer.GetExtent();
+  renderPassInfo.framebuffer = vkFramebuffer->GetFramebuffer();
+  renderPassInfo.renderArea.extent = vkFramebuffer->GetExtent();
   ezDynamicArray<vk::ClearValue> clearValues;
   for (size_t i = 0; i < clearDesc.colors.size(); ++i)
   {
@@ -736,7 +736,7 @@ void VKCommandList::CopyTexture(const ezSharedPtr<Resource>& src_texture, const 
 
 void VKCommandList::WriteAccelerationStructuresProperties(
   const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
-  const std::shared_ptr<QueryHeap>& query_heap,
+  const ezSharedPtr<QueryHeap>& query_heap,
   ezUInt32 first_query)
 {
   std::vector<vk::AccelerationStructureKHR> vk_acceleration_structures;
@@ -745,30 +745,30 @@ void VKCommandList::WriteAccelerationStructuresProperties(
   {
     vk_acceleration_structures.emplace_back(acceleration_structure.Downcast<VKResource>()->acceleration_structure_handle.get());
   }
-  decltype(auto) vk_query_heap = query_heap->As<VKQueryHeap>();
-  auto query_type = vk_query_heap.GetQueryType();
+  decltype(auto) vk_query_heap = query_heap.Downcast<VKQueryHeap>();
+  auto query_type = vk_query_heap->GetQueryType();
   assert(query_type == vk::QueryType::eAccelerationStructureCompactedSizeKHR);
-  m_command_list->resetQueryPool(vk_query_heap.GetQueryPool(), first_query, (ezUInt32)acceleration_structures.size());
+  m_command_list->resetQueryPool(vk_query_heap->GetQueryPool(), first_query, (ezUInt32)acceleration_structures.size());
   m_command_list->writeAccelerationStructuresPropertiesKHR(
     (ezUInt32)vk_acceleration_structures.size(),
     vk_acceleration_structures.data(),
     query_type,
-    vk_query_heap.GetQueryPool(),
+    vk_query_heap->GetQueryPool(),
     first_query);
 }
 
 void VKCommandList::ResolveQueryData(
-  const std::shared_ptr<QueryHeap>& query_heap,
+  const ezSharedPtr<QueryHeap>& query_heap,
   ezUInt32 first_query,
   ezUInt32 query_count,
   const ezSharedPtr<Resource>& dst_buffer,
   ezUInt64 dst_offset)
 {
-  decltype(auto) vk_query_heap = query_heap->As<VKQueryHeap>();
-  auto query_type = vk_query_heap.GetQueryType();
+  decltype(auto) vk_query_heap = query_heap.Downcast<VKQueryHeap>();
+  auto query_type = vk_query_heap->GetQueryType();
   assert(query_type == vk::QueryType::eAccelerationStructureCompactedSizeKHR);
   m_command_list->copyQueryPoolResults(
-    vk_query_heap.GetQueryPool(),
+    vk_query_heap->GetQueryPool(),
     first_query,
     query_count,
     dst_buffer.Downcast<VKResource>()->buffer.res.get(),

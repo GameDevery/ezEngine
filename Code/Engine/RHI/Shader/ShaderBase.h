@@ -9,7 +9,7 @@
 class EZ_RHI_DLL ShaderBase : public Shader
 {
 public:
-  ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection, ShaderBlobType blob_type);
+  ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection, ShaderBlobType blob_type);
   ShaderType GetType() const override;
   const ezDynamicArray<ezUInt8>& GetBlob() const override;
   ezUInt64 GetId(const ezString& entry_point) const override;
@@ -19,7 +19,7 @@ public:
   const std::vector<InputLayoutDesc>& GetInputLayouts() const override;
   ezUInt32 GetInputLayoutLocation(const ezString& semantic_name) const override;
   const std::vector<BindKey>& GetBindings() const override;
-  const std::shared_ptr<ShaderReflection>& GetReflection() const override;
+  const ezSharedPtr<ShaderReflection>& GetReflection() const override;
 
 protected:
   ShaderType m_shader_type;
@@ -32,5 +32,5 @@ protected:
   std::map<ezString, BindKey> m_bind_keys;
   std::vector<InputLayoutDesc> m_input_layout_descs;
   std::map<ezString, ezUInt32> m_locations;
-  std::shared_ptr<ShaderReflection> m_reflection;
+  ezSharedPtr<ShaderReflection> m_reflection;
 };

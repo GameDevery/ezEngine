@@ -15,9 +15,9 @@ public:
   DXCommandList(DXDevice& device, CommandListType type);
   void Reset() override;
   void Close() override;
-  void BindPipeline(const std::shared_ptr<Pipeline>& state) override;
+  void BindPipeline(const ezSharedPtr<Pipeline>& state) override;
   void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) override;
-  void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
+  void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
   void EndRenderPass() override;
   void BeginEvent(const ezString& name) override;
   void EndEvent() override;
@@ -75,10 +75,10 @@ public:
     const std::vector<TextureCopyRegion>& regions) override;
   void WriteAccelerationStructuresProperties(
     const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
-    const std::shared_ptr<QueryHeap>& query_heap,
+    const ezSharedPtr<QueryHeap>& query_heap,
     ezUInt32 first_query) override;
   void ResolveQueryData(
-    const std::shared_ptr<QueryHeap>& query_heap,
+    const ezSharedPtr<QueryHeap>& query_heap,
     ezUInt32 first_query,
     ezUInt32 query_count,
     const ezSharedPtr<Resource>& dst_buffer,
@@ -96,8 +96,8 @@ private:
     ezUInt32 max_draw_count,
     ezUInt32 stride);
 
-  void BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
-  void OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
+  void BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
+  void OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
   void IASetVertexBufferImpl(ezUInt32 slot, const ezSharedPtr<Resource>& resource, ezUInt32 stride);
   void BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const ezSharedPtr<Resource>& scratch, ezUInt64 scratch_offset);
 
@@ -109,7 +109,7 @@ private:
   ComPtr<ID3D12GraphicsCommandList6> m_command_list6;
   bool m_closed = false;
   ezDynamicArray<ComPtr<ID3D12DescriptorHeap>> m_Heaps;
-  std::shared_ptr<DXPipeline> m_state;
+  ezSharedPtr<DXPipeline> m_state;
   ezSharedPtr<BindingSet> m_binding_set;
   ezMap<ezUInt32, ezSharedPtr<Resource>> m_lazy_vertex;
   ezSharedPtr<View> m_shading_rate_image_view;

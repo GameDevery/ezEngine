@@ -5,7 +5,7 @@ ObjectCache::ObjectCache(Device& device)
 {
 }
 
-std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const GraphicsPipelineDesc& desc)
+ezSharedPtr<Pipeline> ObjectCache::GetPipeline(const GraphicsPipelineDesc& desc)
 {
   auto it = m_graphics_object_cache.find(desc);
   if (it == m_graphics_object_cache.end())
@@ -19,7 +19,7 @@ std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const GraphicsPipelineDesc& d
   return it->second;
 }
 
-std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const ComputePipelineDesc& desc)
+ezSharedPtr<Pipeline> ObjectCache::GetPipeline(const ComputePipelineDesc& desc)
 {
   auto it = m_compute_object_cache.find(desc);
   if (it == m_compute_object_cache.end())
@@ -33,7 +33,7 @@ std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const ComputePipelineDesc& de
   return it->second;
 }
 
-std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const RayTracingPipelineDesc& desc)
+ezSharedPtr<Pipeline> ObjectCache::GetPipeline(const RayTracingPipelineDesc& desc)
 {
   auto it = m_ray_tracing_object_cache.find(desc);
   if (it == m_ray_tracing_object_cache.end())
@@ -90,7 +90,7 @@ ezSharedPtr<BindingSet> ObjectCache::GetBindingSet(const ezSharedPtr<BindingSetL
   return it->second;
 }
 
-std::shared_ptr<Framebuffer> ObjectCache::GetFramebuffer(const FramebufferDesc& desc)
+ezSharedPtr<Framebuffer> ObjectCache::GetFramebuffer(const FramebufferDesc& desc)
 {
   for (const auto& view : desc.colors)
   {
@@ -172,7 +172,7 @@ ViewDimension GetViewDimension(const ezSharedPtr<Resource>& resource)
   }
 }
 
-ezSharedPtr<View> ObjectCache::GetView(const std::shared_ptr<Program>& program, const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
+ezSharedPtr<View> ObjectCache::GetView(const ezSharedPtr<Program>& program, const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
 {
   auto it = m_views.find({program, bind_key, resource, view_desc});
   if (it != m_views.end())

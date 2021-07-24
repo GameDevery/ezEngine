@@ -5,10 +5,10 @@
 #include <RHI/Instance/QueryInterface.h>
 #include <memory>
 
-class EZ_RHI_DLL Adapter : public QueryInterface
+class EZ_RHI_DLL Adapter : public ezRefCounted
 {
 public:
   virtual ~Adapter() = default;
   virtual const ezString& GetName() const = 0;
-  virtual std::shared_ptr<Device> CreateDevice() = 0;
+  virtual ezSharedPtr<Device> CreateDevice() = 0;
 };

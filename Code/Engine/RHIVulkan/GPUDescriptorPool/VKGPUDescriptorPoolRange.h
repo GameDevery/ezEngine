@@ -24,5 +24,5 @@ private:
   ezUInt32 m_offset;
   ezUInt32 m_size;
   vk::DescriptorType m_type;
-  //std::unique_ptr<VKGPUDescriptorPoolRange, std::function<void(VKGPUDescriptorPoolRange*)>> m_callback;
+  //std::unique_ptr<VKGPUDescriptorPoolRange, std::function<void(VKGPUDescriptorPoolRange*)>> m_Callback;
 };

@@ -12,9 +12,9 @@ public:
     VKCommandList(VKDevice& device, CommandListType type);
     void Reset() override;
     void Close() override;
-    void BindPipeline(const std::shared_ptr<Pipeline>& state) override;
+    void BindPipeline(const ezSharedPtr<Pipeline>& state) override;
     void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) override;
-    void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
+    void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
     void EndRenderPass() override;
     void BeginEvent(const ezString& name) override;
     void EndEvent() override;
@@ -72,10 +72,10 @@ public:
                      const std::vector<TextureCopyRegion>& regions) override;
     void WriteAccelerationStructuresProperties(
         const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
-        const std::shared_ptr<QueryHeap>& query_heap,
+        const ezSharedPtr<QueryHeap>& query_heap,
         ezUInt32 first_query) override;
     void ResolveQueryData(
-        const std::shared_ptr<QueryHeap>& query_heap,
+        const ezSharedPtr<QueryHeap>& query_heap,
         ezUInt32 first_query,
         ezUInt32 query_count,
         const ezSharedPtr<Resource>& dst_buffer,
@@ -89,6 +89,6 @@ private:
     VKDevice& m_device;
     vk::UniqueCommandBuffer m_command_list;
     bool m_closed = false;
-    std::shared_ptr<VKPipeline> m_state;
+    ezSharedPtr<VKPipeline> m_state;
     ezSharedPtr<BindingSet> m_binding_set;
 };

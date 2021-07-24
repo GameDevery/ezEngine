@@ -193,10 +193,10 @@ DXGraphicsPipeline::DXGraphicsPipeline(DXDevice& device, const GraphicsPipelineD
 {
   DXStateBuilder graphics_state_builder;
 
-  decltype(auto) dxProgram = m_desc.program->As<DXProgram>();
+  decltype(auto) dxProgram = m_desc.program.Downcast<DXProgram>();
   ezSharedPtr<DXBindingSetLayout> dxLayout = m_desc.layout.Downcast<DXBindingSetLayout>();
   m_root_signature = dxLayout->GetRootSignature();
-  for (const auto& shader : dxProgram.GetShaders())
+  for (const auto& shader : dxProgram->GetShaders())
   {
     D3D12_SHADER_BYTECODE ShaderBytecode = {};
     decltype(auto) blob = shader->GetBlob();
@@ -242,7 +242,7 @@ DXGraphicsPipeline::DXGraphicsPipeline(DXDevice& device, const GraphicsPipelineD
   EZ_ASSERT_ALWAYS(device2->CreatePipelineState(&psDesc, IID_PPV_ARGS(&m_pipeline_state)) == S_OK, "");
 }
 
-void DXGraphicsPipeline::ParseInputLayout(const std::shared_ptr<Shader>& shader)
+void DXGraphicsPipeline::ParseInputLayout(const ezSharedPtr<Shader>& shader)
 {
   for (auto& vertex : m_desc.input)
   {

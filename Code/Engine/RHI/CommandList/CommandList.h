@@ -19,9 +19,9 @@ public:
   virtual ~CommandList() = default;
   virtual void Reset() = 0;
   virtual void Close() = 0;
-  virtual void BindPipeline(const std::shared_ptr<Pipeline>& state) = 0;
+  virtual void BindPipeline(const ezSharedPtr<Pipeline>& state) = 0;
   virtual void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) = 0;
-  virtual void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) = 0;
+  virtual void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const ezSharedPtr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) = 0;
   virtual void EndRenderPass() = 0;
   virtual void BeginEvent(const ezString& name) = 0;
   virtual void EndEvent() = 0;
@@ -79,10 +79,10 @@ public:
     const std::vector<TextureCopyRegion>& regions) = 0;
   virtual void WriteAccelerationStructuresProperties(
     const std::vector<ezSharedPtr<Resource>>& acceleration_structures,
-    const std::shared_ptr<QueryHeap>& query_heap,
+    const ezSharedPtr<QueryHeap>& query_heap,
     ezUInt32 first_query) = 0;
   virtual void ResolveQueryData(
-    const std::shared_ptr<QueryHeap>& query_heap,
+    const ezSharedPtr<QueryHeap>& query_heap,
     ezUInt32 first_query,
     ezUInt32 query_count,
     const ezSharedPtr<Resource>& dst_buffer,

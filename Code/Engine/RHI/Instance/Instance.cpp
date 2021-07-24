@@ -29,7 +29,7 @@ CreatorFuncInfo* GetCreatorFuncInfo(ApiType type)
   return pFuncInfo;
 }
 
-std::shared_ptr<Instance> InstanceFactory::CreateInstance(ApiType type)
+ezSharedPtr<Instance> InstanceFactory::CreateInstance(ApiType type)
 {
   if (auto pFuncInfo = GetCreatorFuncInfo(type))
   {
