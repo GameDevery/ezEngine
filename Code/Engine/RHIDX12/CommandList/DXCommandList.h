@@ -112,5 +112,5 @@ private:
   std::shared_ptr<DXPipeline> m_state;
   std::shared_ptr<BindingSet> m_binding_set;
   ezMap<ezUInt32, ezSharedPtr<Resource>> m_lazy_vertex;
-  std::shared_ptr<View> m_shading_rate_image_view;
+  ezSharedPtr<View> m_shading_rate_image_view;
 };

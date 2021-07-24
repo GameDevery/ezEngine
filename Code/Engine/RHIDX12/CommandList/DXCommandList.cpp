@@ -52,7 +52,7 @@ void DXCommandList::Reset()
   m_state.reset();
   m_binding_set.reset();
   m_lazy_vertex.Clear();
-  m_shading_rate_image_view.reset();
+  m_shading_rate_image_view.Clear();
 }
 
 void DXCommandList::Close()
@@ -171,11 +171,11 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
   auto& rtvs = dx_framebuffer.GetDesc().colors;
   auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
 
-  auto get_handle = [](const std::shared_ptr<View>& view) {
+  auto get_handle = [](const ezSharedPtr<View>& view) {
     if (!view)
       return D3D12_CPU_DESCRIPTOR_HANDLE{};
-    decltype(auto) dx_view = view->As<DXView>();
-    return dx_view.GetHandle();
+    decltype(auto) dx_view = view.Downcast<DXView>();
+    return dx_view->GetHandle();
   };
 
   std::vector<D3D12_RENDER_PASS_RENDER_TARGET_DESC> om_rtv;
@@ -222,11 +222,11 @@ void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_p
   auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
 
   std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> om_rtv(rtvs.size());
-  auto get_handle = [](const std::shared_ptr<View>& view) {
+  auto get_handle = [](const ezSharedPtr<View>& view) {
     if (!view)
       return D3D12_CPU_DESCRIPTOR_HANDLE{};
-    decltype(auto) dx_view = view->As<DXView>();
-    return dx_view.GetHandle();
+    decltype(auto) dx_view = view.Downcast<DXView>();
+    return dx_view->GetHandle();
   };
   for (ezUInt32 slot = 0; slot < rtvs.size(); ++slot)
   {

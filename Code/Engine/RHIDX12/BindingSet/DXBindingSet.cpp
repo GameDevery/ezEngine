@@ -26,7 +26,7 @@ void DXBindingSet::WriteBindings(const std::vector<BindingDesc>& bindings)
     }
     decltype(auto) binding_layout = *m_layout->GetLayout().GetValue(binding.bind_key);
     std::shared_ptr<DXGPUDescriptorPoolRange> heap_range = m_descriptor_ranges[binding_layout.heap_type];
-    decltype(auto) src_cpu_handle = binding.view->As<DXView>().GetHandle();
+    decltype(auto) src_cpu_handle = binding.view.Downcast<DXView>()->GetHandle();
     heap_range->CopyCpuHandle(binding_layout.heap_offset, src_cpu_handle);
   }
 }

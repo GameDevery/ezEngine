@@ -84,9 +84,9 @@ ezSharedPtr<Resource> RenderDeviceImpl::CreateTopLevelAS(ezUInt32 instance_count
   return m_device->CreateAccelerationStructure(AccelerationStructureType::kTopLevel, memory, 0);
 }
 
-std::shared_ptr<View> RenderDeviceImpl::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
+ezSharedPtr<View> RenderDeviceImpl::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc)
 {
-  return m_device->CreateView(resource, view_desc);
+  return m_device->CreateView(resource, viewDesc);
 }
 
 std::shared_ptr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)

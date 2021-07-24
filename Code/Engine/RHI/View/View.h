@@ -7,7 +7,7 @@
 
 class Resource;
 
-class EZ_RHI_DLL View : public QueryInterface
+class EZ_RHI_DLL View : public ezRefCounted
 {
 public:
   virtual ~View() = default;

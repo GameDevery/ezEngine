@@ -12,7 +12,7 @@ public:
     virtual void Close() = 0;
     virtual void Attach(const BindKey& bind_key, const ezSharedPtr<Resource>& resource = {}, const LazyViewDesc& view_desc = {}) = 0;
     virtual void Attach(const BindKey& bind_key, const std::shared_ptr<DeferredView>& view) = 0;
-    virtual void Attach(const BindKey& bind_key, const std::shared_ptr<View>& view) = 0;
+    virtual void Attach(const BindKey& bind_key, const ezSharedPtr<View>& view) = 0;
     virtual void SetRasterizeState(const RasterizerDesc& desc) = 0;
     virtual void SetBlendState(const BlendDesc& desc) = 0;
     virtual void SetDepthStencilState(const DepthStencilDesc& desc) = 0;
@@ -47,7 +47,7 @@ public:
     virtual void SetScissorRect(int32_t left, int32_t top, ezUInt32 right, ezUInt32 bottom) = 0;
     virtual void IASetIndexBuffer(const ezSharedPtr<Resource>& resource, ezRHIResourceFormat::Enum format) = 0;
     virtual void IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>& resource) = 0;
-    virtual void RSSetShadingRateImage(const std::shared_ptr<View>& view) = 0;
+    virtual void RSSetShadingRateImage(const ezSharedPtr<View>& view) = 0;
     virtual void BuildBottomLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) = 0;
     virtual void BuildTopLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<std::pair<ezSharedPtr<Resource>, ezMat4>>& geometry, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) = 0;
     virtual void CopyAccelerationStructure(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, CopyAccelerationStructureMode mode) = 0;

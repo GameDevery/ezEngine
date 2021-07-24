@@ -33,7 +33,7 @@ public:
   ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) override;
   void DestroySampler(Resource* pSampler) override {}
 
-  std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) override;
+  ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) override;
   void DestroyView(View* pView) override {}
 
   std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;

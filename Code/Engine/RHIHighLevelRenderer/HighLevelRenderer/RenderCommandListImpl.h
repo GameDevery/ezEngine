@@ -29,7 +29,7 @@ public:
   void Close() override;
   void Attach(const BindKey& bind_key, const ezSharedPtr<Resource>& resource = {}, const LazyViewDesc& view_desc = {}) override;
   void Attach(const BindKey& bind_key, const std::shared_ptr<DeferredView>& view) override;
-  void Attach(const BindKey& bind_key, const std::shared_ptr<View>& view) override;
+  void Attach(const BindKey& bind_key, const ezSharedPtr<View>& view) override;
   void SetRasterizeState(const RasterizerDesc& desc) override;
   void SetBlendState(const BlendDesc& desc) override;
   void SetDepthStencilState(const DepthStencilDesc& desc) override;
@@ -64,7 +64,7 @@ public:
   void SetScissorRect(int32_t left, int32_t top, ezUInt32 right, ezUInt32 bottom) override;
   void IASetIndexBuffer(const ezSharedPtr<Resource>& resource, ezRHIResourceFormat::Enum format) override;
   void IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<Resource>& resource) override;
-  void RSSetShadingRateImage(const std::shared_ptr<View>& view) override;
+  void RSSetShadingRateImage(const ezSharedPtr<View>& view) override;
   void BuildBottomLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
   void BuildTopLevelAS(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const std::vector<std::pair<ezSharedPtr<Resource>, ezMat4>>& geometry, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
   void CopyAccelerationStructure(const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, CopyAccelerationStructureMode mode) override;
@@ -79,11 +79,11 @@ public:
 
 private:
   void BufferBarrier(const ezSharedPtr<Resource>& resource, ResourceState state);
-  void ViewBarrier(const std::shared_ptr<View>& view, ResourceState state);
+  void ViewBarrier(const ezSharedPtr<View>& view, ResourceState state);
   void ImageBarrier(const ezSharedPtr<Resource>& resource, ezUInt32 base_mip_level, ezUInt32 level_count, ezUInt32 base_array_layer, ezUInt32 layer_count, ResourceState state);
-  void OnAttachSRV(const BindKey& bind_key, const std::shared_ptr<View>& view);
-  void OnAttachUAV(const BindKey& bind_key, const std::shared_ptr<View>& view);
-  void SetBinding(const BindKey& bind_key, const std::shared_ptr<View>& view);
+  void OnAttachSRV(const BindKey& bind_key, const ezSharedPtr<View>& view);
+  void OnAttachUAV(const BindKey& bind_key, const ezSharedPtr<View>& view);
+  void SetBinding(const BindKey& bind_key, const ezSharedPtr<View>& view);
   void UpdateDefaultSubresource(const ezSharedPtr<Resource>& resource, ezUInt32 subresource, const void* data, ezUInt32 row_pitch, ezUInt32 depth_pitch);
   void Apply();
   void ApplyPipeline();
@@ -98,7 +98,7 @@ private:
   ezUInt32 m_viewport_width = 0;
   ezUInt32 m_viewport_height = 0;
 
-  std::map<BindKey, std::shared_ptr<View>> m_bound_resources;
+  std::map<BindKey, ezSharedPtr<View>> m_bound_resources;
   std::map<BindKey, std::shared_ptr<DeferredView>> m_bound_deferred_view;
   std::vector<std::shared_ptr<ResourceLazyViewDesc>> m_resource_lazy_view_descs;
 
@@ -120,6 +120,6 @@ private:
   ezSharedPtr<Resource> m_shader_table;
   PipelineType m_pipeline_type = PipelineType::kGraphics;
   std::shared_ptr<Pipeline> m_pipeline;
-  std::shared_ptr<View> m_shading_rate_image;
+  ezSharedPtr<View> m_shading_rate_image;
   ShadingRateCombiner m_shading_rate_combiner = ShadingRateCombiner::kPassthrough;
 };

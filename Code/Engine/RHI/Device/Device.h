@@ -49,7 +49,7 @@ public:
   virtual ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) = 0;
   virtual void DestroySampler(Resource* pSampler) = 0;
 
-  virtual std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) = 0;
+  virtual ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) = 0;
   virtual void DestroyView(View* pView) = 0;
 
   virtual std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) = 0;

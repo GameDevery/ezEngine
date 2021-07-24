@@ -172,7 +172,7 @@ ViewDimension GetViewDimension(const ezSharedPtr<Resource>& resource)
   }
 }
 
-std::shared_ptr<View> ObjectCache::GetView(const std::shared_ptr<Program>& program, const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
+ezSharedPtr<View> ObjectCache::GetView(const std::shared_ptr<Program>& program, const BindKey& bind_key, const ezSharedPtr<Resource>& resource, const LazyViewDesc& view_desc)
 {
   auto it = m_views.find({program, bind_key, resource, view_desc});
   if (it != m_views.end())

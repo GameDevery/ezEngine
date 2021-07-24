@@ -43,7 +43,7 @@ private:
   std::shared_ptr<Pipeline> m_pPipeline;
   std::shared_ptr<RenderPass> m_pRenderPass;
   std::shared_ptr<Program> m_pProgram;
-  std::shared_ptr<View> m_pConstantBufferView;
+  ezSharedPtr<View> m_pConstantBufferView;
   ezSharedPtr<Resource> m_pConstantBuffer;
   ezSharedPtr<Resource> m_pIndexBuffer;
   ezSharedPtr<Resource> m_pVertexBuffer;

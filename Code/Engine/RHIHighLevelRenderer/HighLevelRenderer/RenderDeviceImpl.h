@@ -28,7 +28,7 @@ public:
     ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) override;
     ezSharedPtr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) override;
     ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) override;
-    std::shared_ptr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
+    ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
     std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
     std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;
     bool IsDxrSupported() const override;

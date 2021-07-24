@@ -12,15 +12,15 @@ VKFramebuffer::VKFramebuffer(VKDevice& device, const FramebufferDesc& desc)
     vk::FramebufferCreateInfo framebuffer_info = {};
     std::vector<vk::ImageView> attachment_views;
     framebuffer_info.layers = 1;
-    auto add_view = [&](const std::shared_ptr<View>& view)
+    auto add_view = [&](const ezSharedPtr<View>& view)
     {
         if (!view)
             return;
-        decltype(auto) vk_view = view->As<VKView>();
-        decltype(auto) resource = vk_view.GetResource();
+        decltype(auto) vk_view = view.Downcast<VKView>();
+        decltype(auto) resource = vk_view->GetResource();
         if (!resource)
             return;
-        attachment_views.emplace_back(vk_view.GetImageView());
+        attachment_views.emplace_back(vk_view->GetImageView());
 
         decltype(auto) vk_resource = resource.Downcast<VKResource>();
         framebuffer_info.layers = ezMath::Max(framebuffer_info.layers, vk_resource->image.array_layers);

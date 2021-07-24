@@ -319,9 +319,9 @@ ezSharedPtr<Resource> DXDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> DXDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
+ezSharedPtr<View> DXDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
 {
-  return std::make_shared<DXView>(*this, resource.Downcast<DXResource>(), view_desc);
+  return EZ_DEFAULT_NEW(DXView, *this, resource.Downcast<DXResource>(), view_desc);
 }
 
 std::shared_ptr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)

@@ -313,7 +313,7 @@ ezSharedPtr<Fence> VKDevice::CreateFence(ezUInt64 initialValue)
 
 ezSharedPtr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)
 {
-  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource, *this);
   res->format = format;
   res->resource_type = ResourceType::kTexture;
   res->image.size.height = height;
@@ -386,7 +386,7 @@ ezSharedPtr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer
   if (buffer_size == 0)
     return {};
 
-  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource, *this);
   res->resource_type = ResourceType::kBuffer;
   res->buffer.size = buffer_size;
 
@@ -429,7 +429,7 @@ ezSharedPtr<Resource> VKDevice::CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer
 
 ezSharedPtr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
 {
-  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource, *this);
 
   vk::SamplerCreateInfo samplerInfo = {};
   samplerInfo.magFilter = vk::Filter::eLinear;
@@ -496,9 +496,9 @@ ezSharedPtr<Resource> VKDevice::CreateSampler(const SamplerDesc& desc)
   return res;
 }
 
-std::shared_ptr<View> VKDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
+ezSharedPtr<View> VKDevice::CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc)
 {
-  return std::make_shared<VKView>(*this, resource.Downcast<VKResource>(), view_desc);
+  return EZ_DEFAULT_NEW(VKView, *this, resource.Downcast<VKResource>(), view_desc);
 }
 
 std::shared_ptr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
@@ -624,7 +624,7 @@ vk::AccelerationStructureTypeKHR Convert(AccelerationStructureType type)
 
 ezSharedPtr<Resource> VKDevice::CreateAccelerationStructure(AccelerationStructureType type, const ezSharedPtr<Resource>& resource, ezUInt64 offset)
 {
-  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource,*this);
+  ezSharedPtr<VKResource> res = EZ_DEFAULT_NEW(VKResource, *this);
   res->resource_type = ResourceType::kAccelerationStructure;
   res->acceleration_structures_memory = resource;
 

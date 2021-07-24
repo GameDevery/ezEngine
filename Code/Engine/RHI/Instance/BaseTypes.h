@@ -397,9 +397,9 @@ struct FramebufferDesc
   std::shared_ptr<RenderPass> render_pass;
   ezUInt32 width;
   ezUInt32 height;
-  std::vector<std::shared_ptr<View>> colors;
-  std::shared_ptr<View> depth_stencil;
-  std::shared_ptr<View> shading_rate_image;
+  std::vector<ezSharedPtr<View>> colors;
+  ezSharedPtr<View> depth_stencil;
+  ezSharedPtr<View> shading_rate_image;
 
   auto MakeTie() const
   {
@@ -509,7 +509,7 @@ struct BindKey
 struct BindingDesc
 {
   BindKey bind_key;
-  std::shared_ptr<View> view;
+  ezSharedPtr<View> view;
 
   auto MakeTie() const
   {

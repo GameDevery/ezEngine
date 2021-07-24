@@ -23,7 +23,7 @@ void RenderCommandListImpl::Reset()
   m_bound_deferred_view.clear();
   m_binding_sets.clear();
   m_resource_lazy_view_descs.clear();
-  m_shading_rate_image.reset();
+  m_shading_rate_image.Clear();
   m_CommandList->Reset();
 
   m_graphic_pipeline_desc = {};
@@ -158,7 +158,7 @@ void RenderCommandListImpl::IASetVertexBuffer(ezUInt32 slot, const ezSharedPtr<R
   m_CommandList->IASetVertexBuffer(slot, resource);
 }
 
-void RenderCommandListImpl::RSSetShadingRateImage(const std::shared_ptr<View>& view)
+void RenderCommandListImpl::RSSetShadingRateImage(const ezSharedPtr<View>& view)
 {
   ViewBarrier(view, ResourceState::kShadingRateSource);
   m_shading_rate_image = view;
@@ -273,7 +273,7 @@ void RenderCommandListImpl::BufferBarrier(const ezSharedPtr<Resource>& resource,
   LazyResourceBarrier({barrier});
 }
 
-void RenderCommandListImpl::ViewBarrier(const std::shared_ptr<View>& view, ResourceState state)
+void RenderCommandListImpl::ViewBarrier(const ezSharedPtr<View>& view, ResourceState state)
 {
   if (!view || !view->GetResource())
     return;
@@ -525,7 +525,7 @@ void RenderCommandListImpl::ApplyBindingSet()
   m_binding_sets.emplace_back(binding_set);
 }
 
-void RenderCommandListImpl::SetBinding(const BindKey& bind_key, const std::shared_ptr<View>& view)
+void RenderCommandListImpl::SetBinding(const BindKey& bind_key, const ezSharedPtr<View>& view)
 {
   auto it = m_bound_resources.find(bind_key);
   if (it == m_bound_resources.end())
@@ -572,7 +572,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
     render_pass_desc.shading_rate_format = ezRHIResourceFormat::UNKNOWN;
   }
 
-  std::vector<std::shared_ptr<View>> rtvs;
+  std::vector<ezSharedPtr<View>> rtvs;
   for (ezUInt32 i = 0; i < (ezUInt32)desc.colors.size(); ++i)
   {
     auto& view = rtvs.emplace_back();
@@ -586,7 +586,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
     ViewBarrier(view, ResourceState::kRenderTarget);
   }
 
-  std::shared_ptr<View> dsv;
+  ezSharedPtr<View> dsv;
   if (desc.depth_stencil.texture)
   {
     BindKey bind_key = {ShaderType::kPixel, ViewType::kDepthStencil, 0, 0};
@@ -637,7 +637,7 @@ void RenderCommandListImpl::Attach(const BindKey& bind_key, const ezSharedPtr<Re
   Attach(bind_key, m_object_cache.GetView(m_program, bind_key, resource, view_desc));
 }
 
-void RenderCommandListImpl::Attach(const BindKey& bind_key, const std::shared_ptr<View>& view)
+void RenderCommandListImpl::Attach(const BindKey& bind_key, const ezSharedPtr<View>& view)
 {
   SetBinding(bind_key, view);
   switch (bind_key.view_type)
@@ -674,7 +674,7 @@ void RenderCommandListImpl::SetDepthStencilState(const DepthStencilDesc& desc)
   m_graphic_pipeline_desc.depth_stencil_desc = desc;
 }
 
-void RenderCommandListImpl::OnAttachSRV(const BindKey& bind_key, const std::shared_ptr<View>& view)
+void RenderCommandListImpl::OnAttachSRV(const BindKey& bind_key, const ezSharedPtr<View>& view)
 {
   if (bind_key.shader_type == ShaderType::kPixel)
     ViewBarrier(view, ResourceState::kPixelShaderResource);
@@ -682,7 +682,7 @@ void RenderCommandListImpl::OnAttachSRV(const BindKey& bind_key, const std::shar
     ViewBarrier(view, ResourceState::kNonPixelShaderResource);
 }
 
-void RenderCommandListImpl::OnAttachUAV(const BindKey& bind_key, const std::shared_ptr<View>& view)
+void RenderCommandListImpl::OnAttachUAV(const BindKey& bind_key, const ezSharedPtr<View>& view)
 {
   ViewBarrier(view, ResourceState::kUnorderedAccess);
 }
