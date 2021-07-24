@@ -10,10 +10,10 @@ class VKDevice;
 class VKPipeline : public Pipeline
 {
 public:
-  VKPipeline(VKDevice& device, const std::shared_ptr<Program>& program, const std::shared_ptr<BindingSetLayout>& layout);
+  VKPipeline(VKDevice& device, const std::shared_ptr<Program>& program, const ezSharedPtr<BindingSetLayout>& layout);
   vk::PipelineLayout GetPipelineLayout() const;
   vk::Pipeline GetPipeline() const;
-  std::vector<ezUInt8> GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const override;
+  ezDynamicArray<ezUInt8> GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const override;
 
 protected:
   VKDevice& m_device;

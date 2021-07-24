@@ -47,7 +47,7 @@ std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const RayTracingPipelineDesc&
   return it->second;
 }
 
-std::shared_ptr<RenderPass> ObjectCache::GetRenderPass(const RenderPassDesc& desc)
+ezSharedPtr<RenderPass> ObjectCache::GetRenderPass(const RenderPassDesc& desc)
 {
   auto it = m_render_pass_cache.find(desc);
   if (it == m_render_pass_cache.end())
@@ -61,7 +61,7 @@ std::shared_ptr<RenderPass> ObjectCache::GetRenderPass(const RenderPassDesc& des
   return it->second;
 }
 
-std::shared_ptr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::vector<BindKey>& keys)
+ezSharedPtr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::vector<BindKey>& keys)
 {
   auto it = m_layout_cache.find(keys);
   if (it == m_layout_cache.end())
@@ -75,7 +75,7 @@ std::shared_ptr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::ve
   return it->second;
 }
 
-std::shared_ptr<BindingSet> ObjectCache::GetBindingSet(const std::shared_ptr<BindingSetLayout>& layout, const std::vector<BindingDesc>& bindings)
+ezSharedPtr<BindingSet> ObjectCache::GetBindingSet(const ezSharedPtr<BindingSetLayout>& layout, const std::vector<BindingDesc>& bindings)
 {
   auto it = m_binding_set_cache.find({layout, bindings});
   if (it == m_binding_set_cache.end())

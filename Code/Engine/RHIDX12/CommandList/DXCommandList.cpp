@@ -48,9 +48,9 @@ void DXCommandList::Reset()
   EZ_ASSERT_ALWAYS(m_command_allocator->Reset() == S_OK, "");
   EZ_ASSERT_ALWAYS(m_command_list->Reset(m_command_allocator.Get(), nullptr) == S_OK, "");
   m_closed = false;
-  m_heaps.clear();
+  m_Heaps.Clear();
   m_state.reset();
-  m_binding_set.reset();
+  m_binding_set.Clear();
   m_lazy_vertex.Clear();
   m_shading_rate_image_view.Clear();
 }
@@ -98,17 +98,17 @@ void DXCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
   }
 }
 
-void DXCommandList::BindBindingSet(const std::shared_ptr<BindingSet>& binding_set)
+void DXCommandList::BindBindingSet(const ezSharedPtr<BindingSet>& binding_set)
 {
   if (binding_set == m_binding_set)
     return;
-  decltype(auto) dx_binding_set = binding_set->As<DXBindingSet>();
-  decltype(auto) new_heaps = dx_binding_set.Apply(m_command_list);
-  m_heaps.insert(m_heaps.end(), new_heaps.begin(), new_heaps.end());
+  decltype(auto) dx_binding_set = binding_set.Downcast<DXBindingSet>();
+  decltype(auto) new_heaps = dx_binding_set->Apply(m_command_list);
+  m_Heaps.PushBackRange(new_heaps);
   m_binding_set = binding_set;
 }
 
-void DXCommandList::BeginRenderPass(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
 {
   if (m_device.IsRenderPassesSupported())
   {
@@ -164,9 +164,9 @@ D3D12_RENDER_PASS_ENDING_ACCESS_TYPE Convert(RenderPassStoreOp op)
   return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
 }
 
-void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
 {
-  decltype(auto) dx_render_pass = render_pass->As<DXRenderPass>();
+  decltype(auto) dx_render_pass = render_pass.Downcast<DXRenderPass>();
   decltype(auto) dx_framebuffer = framebuffer->As<DXFramebuffer>();
   auto& rtvs = dx_framebuffer.GetDesc().colors;
   auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
@@ -184,7 +184,7 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
     auto handle = get_handle(rtvs[slot]);
     if (!handle.ptr)
       continue;
-    D3D12_RENDER_PASS_BEGINNING_ACCESS begin = {Convert(dx_render_pass.GetDesc().colors[slot].load_op), {}};
+    D3D12_RENDER_PASS_BEGINNING_ACCESS begin = {Convert(dx_render_pass->GetDesc().colors[slot].load_op), {}};
     if (slot < clear_desc.colors.size())
     {
       begin.Clear.ClearValue.Color[0] = clear_desc.colors[slot].r;
@@ -192,7 +192,7 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
       begin.Clear.ClearValue.Color[2] = clear_desc.colors[slot].b;
       begin.Clear.ClearValue.Color[3] = clear_desc.colors[slot].a;
     }
-    D3D12_RENDER_PASS_ENDING_ACCESS end = {Convert(dx_render_pass.GetDesc().colors[slot].store_op), {}};
+    D3D12_RENDER_PASS_ENDING_ACCESS end = {Convert(dx_render_pass->GetDesc().colors[slot].store_op), {}};
     om_rtv.push_back({handle, begin, end});
   }
 
@@ -201,10 +201,10 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
   D3D12_CPU_DESCRIPTOR_HANDLE om_dsv_handle = get_handle(dsv);
   if (om_dsv_handle.ptr)
   {
-    D3D12_RENDER_PASS_BEGINNING_ACCESS depth_begin = {Convert(dx_render_pass.GetDesc().depth_stencil.depth_load_op), {}};
-    D3D12_RENDER_PASS_ENDING_ACCESS depth_end = {Convert(dx_render_pass.GetDesc().depth_stencil.depth_store_op), {}};
-    D3D12_RENDER_PASS_BEGINNING_ACCESS stencil_begin = {Convert(dx_render_pass.GetDesc().depth_stencil.stencil_load_op), {}};
-    D3D12_RENDER_PASS_ENDING_ACCESS stencil_end = {Convert(dx_render_pass.GetDesc().depth_stencil.stencil_store_op), {}};
+    D3D12_RENDER_PASS_BEGINNING_ACCESS depth_begin = {Convert(dx_render_pass->GetDesc().depth_stencil.depth_load_op), {}};
+    D3D12_RENDER_PASS_ENDING_ACCESS depth_end = {Convert(dx_render_pass->GetDesc().depth_stencil.depth_store_op), {}};
+    D3D12_RENDER_PASS_BEGINNING_ACCESS stencil_begin = {Convert(dx_render_pass->GetDesc().depth_stencil.stencil_load_op), {}};
+    D3D12_RENDER_PASS_ENDING_ACCESS stencil_end = {Convert(dx_render_pass->GetDesc().depth_stencil.stencil_store_op), {}};
     depth_begin.Clear.ClearValue.DepthStencil.Depth = clear_desc.depth;
     stencil_begin.Clear.ClearValue.DepthStencil.Stencil = clear_desc.stencil;
     om_dsv = {om_dsv_handle, depth_begin, stencil_begin, depth_end, stencil_end};
@@ -214,9 +214,9 @@ void DXCommandList::BeginRenderPassImpl(const std::shared_ptr<RenderPass>& rende
   m_command_list4->BeginRenderPass(static_cast<ezUInt32>(om_rtv.size()), om_rtv.data(), om_dsv_ptr, D3D12_RENDER_PASS_FLAG_NONE);
 }
 
-void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void DXCommandList::OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
 {
-  decltype(auto) dx_render_pass = render_pass->As<DXRenderPass>();
+  decltype(auto) dx_render_pass = render_pass.Downcast<DXRenderPass>();
   decltype(auto) dx_framebuffer = framebuffer->As<DXFramebuffer>();
   auto& rtvs = dx_framebuffer.GetDesc().colors;
   auto& dsv = dx_framebuffer.GetDesc().depth_stencil;
@@ -231,7 +231,7 @@ void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_p
   for (ezUInt32 slot = 0; slot < rtvs.size(); ++slot)
   {
     om_rtv[slot] = get_handle(rtvs[slot]);
-    if (dx_render_pass.GetDesc().colors[slot].load_op == RenderPassLoadOp::kClear)
+    if (dx_render_pass->GetDesc().colors[slot].load_op == RenderPassLoadOp::kClear)
       m_command_list->ClearRenderTargetView(om_rtv[slot], &clear_desc.colors[slot].a, 0, nullptr);
   }
   while (!om_rtv.empty() && om_rtv.back().ptr == 0)
@@ -240,9 +240,9 @@ void DXCommandList::OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_p
   }
   D3D12_CPU_DESCRIPTOR_HANDLE om_dsv = get_handle(dsv);
   D3D12_CLEAR_FLAGS clear_flags = {};
-  if (dx_render_pass.GetDesc().depth_stencil.depth_load_op == RenderPassLoadOp::kClear)
+  if (dx_render_pass->GetDesc().depth_stencil.depth_load_op == RenderPassLoadOp::kClear)
     clear_flags |= D3D12_CLEAR_FLAG_DEPTH;
-  if (dx_render_pass.GetDesc().depth_stencil.stencil_load_op == RenderPassLoadOp::kClear)
+  if (dx_render_pass->GetDesc().depth_stencil.stencil_load_op == RenderPassLoadOp::kClear)
     clear_flags |= D3D12_CLEAR_FLAG_STENCIL;
   if (om_dsv.ptr && clear_flags)
     m_command_list->ClearDepthStencilView(om_dsv, clear_flags, clear_desc.depth, clear_desc.stencil, 0, nullptr);

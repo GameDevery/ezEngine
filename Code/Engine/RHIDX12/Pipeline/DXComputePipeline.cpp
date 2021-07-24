@@ -9,35 +9,35 @@
 #include <directx/d3dx12.h>
 
 DXComputePipeline::DXComputePipeline(DXDevice& device, const ComputePipelineDesc& desc)
-    : m_device(device)
-    , m_desc(desc)
+    : m_Device(device)
+    , m_Desc(desc)
 {
-    DXStateBuilder compute_state_builder;
+    DXStateBuilder computeStateBuilder;
 
-    decltype(auto) dx_program = m_desc.program->As<DXProgram>();
-    decltype(auto) dx_layout = m_desc.layout->As<DXBindingSetLayout>();
-    m_root_signature = dx_layout.GetRootSignature();
-    for (const auto& shader : dx_program.GetShaders())
+    decltype(auto) dxProgram = m_Desc.program->As<DXProgram>();
+    ezSharedPtr<DXBindingSetLayout> dxLayout = m_Desc.layout.Downcast<DXBindingSetLayout>();
+    m_RootSignature = dxLayout->GetRootSignature();
+    for (const auto& shader : dxProgram.GetShaders())
     {
-        D3D12_SHADER_BYTECODE ShaderBytecode = {};
+        D3D12_SHADER_BYTECODE shaderBytecode = {};
         decltype(auto) blob = shader->GetBlob();
-        ShaderBytecode.pShaderBytecode = blob.data();
-        ShaderBytecode.BytecodeLength = blob.size();
+        shaderBytecode.pShaderBytecode = blob.GetData();
+        shaderBytecode.BytecodeLength = blob.GetCount();
         switch (shader->GetType())
         {
         case ShaderType::kCompute:
         {
-            compute_state_builder.AddState<CD3DX12_PIPELINE_STATE_STREAM_CS>(ShaderBytecode);
+            computeStateBuilder.AddState<CD3DX12_PIPELINE_STATE_STREAM_CS>(shaderBytecode);
             break;
         }
         }
     }
-    compute_state_builder.AddState<CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE>(m_root_signature.Get());
+    computeStateBuilder.AddState<CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE>(m_RootSignature.Get());
 
     ComPtr<ID3D12Device2> device2;
-    m_device.GetDevice().As(&device2);
-    auto psDesc = compute_state_builder.GetDesc();
-    EZ_ASSERT_ALWAYS(device2->CreatePipelineState(&psDesc, IID_PPV_ARGS(&m_pipeline_state)) == S_OK, "");
+    m_Device.GetDevice().As(&device2);
+    auto psDesc = computeStateBuilder.GetDesc();
+    EZ_ASSERT_ALWAYS(device2->CreatePipelineState(&psDesc, IID_PPV_ARGS(&m_PipelineState)) == S_OK, "");
 }
 
 PipelineType DXComputePipeline::GetPipelineType() const
@@ -47,15 +47,15 @@ PipelineType DXComputePipeline::GetPipelineType() const
 
 const ComputePipelineDesc& DXComputePipeline::GetDesc() const
 {
-    return m_desc;
+    return m_Desc;
 }
 
 const ComPtr<ID3D12PipelineState>& DXComputePipeline::GetPipeline() const
 {
-    return m_pipeline_state;
+    return m_PipelineState;
 }
 
 const ComPtr<ID3D12RootSignature>& DXComputePipeline::GetRootSignature() const
 {
-    return m_root_signature;
+    return m_RootSignature;
 }

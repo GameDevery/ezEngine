@@ -89,7 +89,7 @@ ezSharedPtr<View> RenderDeviceImpl::CreateView(const ezSharedPtr<Resource>& reso
   return m_device->CreateView(resource, viewDesc);
 }
 
-std::shared_ptr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return m_device->CreateShader(desc, byteCode, reflection);
 }

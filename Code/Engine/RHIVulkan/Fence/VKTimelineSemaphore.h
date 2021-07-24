@@ -8,7 +8,7 @@ class VKDevice;
 class VKTimelineSemaphore : public Fence
 {
 public:
-    VKTimelineSemaphore(VKDevice& device, ezUInt64 initial_value);
+    VKTimelineSemaphore(VKDevice& device, ezUInt64 initialValue);
     ezUInt64 GetCompletedValue() override;
     void Wait(ezUInt64 value) override;
     void Signal(ezUInt64 value) override;
@@ -16,6 +16,6 @@ public:
     const vk::Semaphore& GetFence() const;
 
 private:
-    VKDevice& m_device;
-    vk::UniqueSemaphore m_timeline_semaphore;
+    VKDevice& m_Device;
+    vk::UniqueSemaphore m_TimelineSemaphore;
 };

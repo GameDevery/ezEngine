@@ -6,23 +6,23 @@
 #include <RHIVulkan/Device/VKDevice.h>
 #include <RHIVulkan/View/VKView.h>
 
-VKBindingSet::VKBindingSet(VKDevice& device, const std::shared_ptr<VKBindingSetLayout>& layout)
-  : m_device(device)
-  , m_layout(layout)
+VKBindingSet::VKBindingSet(VKDevice& device, const ezSharedPtr<VKBindingSetLayout>& layout)
+  : m_Device(device)
+  , m_Layout(layout)
 {
-  decltype(auto) bindless_type = m_layout->GetBindlessType();
-  decltype(auto) descriptor_set_layouts = m_layout->GetDescriptorSetLayouts();
-  decltype(auto) descriptor_count_by_set = m_layout->GetDescriptorCountBySet();
+  decltype(auto) bindless_type = m_Layout->GetBindlessType();
+  decltype(auto) descriptor_set_layouts = m_Layout->GetDescriptorSetLayouts();
+  decltype(auto) descriptor_count_by_set = m_Layout->GetDescriptorCountBySet();
   for (ezUInt32 i = 0; i < (ezUInt32)descriptor_set_layouts.size(); ++i)
   {
     if (bindless_type.Contains(i))
     {
-      m_descriptor_sets.emplace_back(m_device.GetGPUBindlessDescriptorPool(bindless_type.Find(i).Value())->GetDescriptorSet());
+      m_DescriptorSets.PushBack(m_Device.GetGPUBindlessDescriptorPool(bindless_type.Find(i).Value())->GetDescriptorSet());
     }
     else
     {
-      m_descriptors.emplace_back(m_device.GetGPUDescriptorPool().AllocateDescriptorSet(descriptor_set_layouts[i].get(), descriptor_count_by_set[i]));
-      m_descriptor_sets.emplace_back(m_descriptors.back().set.get());
+      m_Descriptors.PushBack(m_Device.GetGPUDescriptorPool().AllocateDescriptorSet(descriptor_set_layouts[i].get(), descriptor_count_by_set[i]));
+      m_DescriptorSets.PushBack(m_Descriptors.PeekBack().set.get());
     }
   }
 }
@@ -35,7 +35,7 @@ void VKBindingSet::WriteBindings(const std::vector<BindingDesc>& bindings)
     decltype(auto) vk_view = binding.view.Downcast<VKView>();
     vk::WriteDescriptorSet descriptor = vk_view->GetDescriptor();
     descriptor.descriptorType = GetDescriptorType(binding.bind_key.view_type);
-    descriptor.dstSet = m_descriptor_sets[binding.bind_key.space];
+    descriptor.dstSet = m_DescriptorSets[binding.bind_key.space];
     descriptor.dstBinding = binding.bind_key.slot;
     descriptor.dstArrayElement = 0;
     descriptor.descriptorCount = 1;
@@ -47,11 +47,11 @@ void VKBindingSet::WriteBindings(const std::vector<BindingDesc>& bindings)
 
   if (!descriptors.empty())
   {
-    m_device.GetDevice().updateDescriptorSets((ezUInt32)descriptors.size(), descriptors.data(), 0, nullptr);
+    m_Device.GetDevice().updateDescriptorSets((ezUInt32)descriptors.size(), descriptors.data(), 0, nullptr);
   }
 }
 
-const std::vector<vk::DescriptorSet>& VKBindingSet::GetDescriptorSets() const
+const ezDynamicArray<vk::DescriptorSet>& VKBindingSet::GetDescriptorSets() const
 {
-  return m_descriptor_sets;
+  return m_DescriptorSets;
 }

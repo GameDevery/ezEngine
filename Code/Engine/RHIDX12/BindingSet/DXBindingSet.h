@@ -10,17 +10,17 @@ class DXBindingSetLayout;
 class DXGPUDescriptorPoolRange;
 
 class DXBindingSet
-    : public BindingSet
+  : public BindingSet
 {
 public:
-    DXBindingSet(DXDevice& device, const std::shared_ptr<DXBindingSetLayout>& layout);
+  DXBindingSet(DXDevice& device, const ezSharedPtr<DXBindingSetLayout>& layout);
 
-    void WriteBindings(const std::vector<BindingDesc>& bindings) override;
+  void WriteBindings(const std::vector<BindingDesc>& bindings) override;
 
-    std::vector<ComPtr<ID3D12DescriptorHeap>> Apply(const ComPtr<ID3D12GraphicsCommandList>& command_list);
+  ezDynamicArray<ComPtr<ID3D12DescriptorHeap>> Apply(const ComPtr<ID3D12GraphicsCommandList>& commandList);
 
 private:
-    DXDevice& m_device;
-    std::shared_ptr<DXBindingSetLayout> m_layout;
-    ezMap<D3D12_DESCRIPTOR_HEAP_TYPE, std::shared_ptr<DXGPUDescriptorPoolRange>> m_descriptor_ranges;
+  DXDevice& m_Device;
+  ezSharedPtr<DXBindingSetLayout> m_Layout;
+  ezMap<D3D12_DESCRIPTOR_HEAP_TYPE, ezSharedPtr<DXGPUDescriptorPoolRange>> m_DescriptorRanges;
 };

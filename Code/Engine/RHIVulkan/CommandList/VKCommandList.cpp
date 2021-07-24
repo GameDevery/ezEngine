@@ -13,6 +13,8 @@
 #include <RHIVulkan/Utilities/VKUtility.h>
 #include <RHIVulkan/View/VKView.h>
 
+EZ_DEFINE_AS_POD_TYPE(vk::ClearValue);
+
 VKCommandList::VKCommandList(VKDevice& device, CommandListType type)
   : m_device(device)
 {
@@ -33,7 +35,7 @@ void VKCommandList::Reset()
   m_command_list->begin(begin_info);
   m_closed = false;
   m_state.reset();
-  m_binding_set.reset();
+  m_binding_set.Clear();
 }
 
 void VKCommandList::Close()
@@ -68,46 +70,46 @@ void VKCommandList::BindPipeline(const std::shared_ptr<Pipeline>& state)
   m_command_list->bindPipeline(GetPipelineBindPoint(m_state->GetPipelineType()), m_state->GetPipeline());
 }
 
-void VKCommandList::BindBindingSet(const std::shared_ptr<BindingSet>& binding_set)
+void VKCommandList::BindBindingSet(const ezSharedPtr<BindingSet>& binding_set)
 {
   if (binding_set == m_binding_set)
     return;
   m_binding_set = binding_set;
-  decltype(auto) vk_binding_set = binding_set->As<VKBindingSet>();
-  decltype(auto) descriptor_sets = vk_binding_set.GetDescriptorSets();
-  if (descriptor_sets.empty())
+  decltype(auto) vk_binding_set = binding_set.Downcast<VKBindingSet>();
+  decltype(auto) descriptor_sets = vk_binding_set->GetDescriptorSets();
+  if (descriptor_sets.IsEmpty())
     return;
-  m_command_list->bindDescriptorSets(GetPipelineBindPoint(m_state->GetPipelineType()), m_state->GetPipelineLayout(), 0, (ezUInt32)descriptor_sets.size(), descriptor_sets.data(), 0, nullptr);
+  m_command_list->bindDescriptorSets(GetPipelineBindPoint(m_state->GetPipelineType()), m_state->GetPipelineLayout(), 0, descriptor_sets.GetCount(), descriptor_sets.GetData(), 0, nullptr);
 }
 
-void VKCommandList::BeginRenderPass(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc)
+void VKCommandList::BeginRenderPass(const ezSharedPtr<RenderPass>& renderPass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clearDesc)
 {
-  decltype(auto) vk_framebuffer = framebuffer->As<VKFramebuffer>();
-  decltype(auto) vk_render_pass = render_pass->As<VKRenderPass>();
-  vk::RenderPassBeginInfo render_pass_info = {};
-  render_pass_info.renderPass = vk_render_pass.GetRenderPass();
-  render_pass_info.framebuffer = vk_framebuffer.GetFramebuffer();
-  render_pass_info.renderArea.extent = vk_framebuffer.GetExtent();
-  std::vector<vk::ClearValue> clear_values;
-  for (size_t i = 0; i < clear_desc.colors.size(); ++i)
+  decltype(auto) vkFramebuffer = framebuffer->As<VKFramebuffer>();
+  decltype(auto) vkRenderPass = renderPass.Downcast<VKRenderPass>();
+  vk::RenderPassBeginInfo renderPassInfo = {};
+  renderPassInfo.renderPass = vkRenderPass->GetRenderPass();
+  renderPassInfo.framebuffer = vkFramebuffer.GetFramebuffer();
+  renderPassInfo.renderArea.extent = vkFramebuffer.GetExtent();
+  ezDynamicArray<vk::ClearValue> clearValues;
+  for (size_t i = 0; i < clearDesc.colors.size(); ++i)
   {
-    auto& clear_value = clear_values.emplace_back();
-    clear_value.color.float32[0] = clear_desc.colors[i].r;
-    clear_value.color.float32[1] = clear_desc.colors[i].g;
-    clear_value.color.float32[2] = clear_desc.colors[i].b;
-    clear_value.color.float32[3] = clear_desc.colors[i].a;
+    auto& clear_value = clearValues.ExpandAndGetRef();
+    clear_value.color.float32[0] = clearDesc.colors[i].r;
+    clear_value.color.float32[1] = clearDesc.colors[i].g;
+    clear_value.color.float32[2] = clearDesc.colors[i].b;
+    clear_value.color.float32[3] = clearDesc.colors[i].a;
   }
-  clear_values.resize(vk_render_pass.GetDesc().colors.size());
-  if (vk_render_pass.GetDesc().depth_stencil.format != ezRHIResourceFormat::UNKNOWN)
+  clearValues.SetCountUninitialized((ezUInt32)vkRenderPass->GetDesc().colors.size());
+  if (vkRenderPass->GetDesc().depth_stencil.format != ezRHIResourceFormat::UNKNOWN)
   {
     vk::ClearValue clear_value = {};
-    clear_value.depthStencil.depth = clear_desc.depth;
-    clear_value.depthStencil.stencil = clear_desc.stencil;
-    clear_values.emplace_back(clear_value);
+    clear_value.depthStencil.depth = clearDesc.depth;
+    clear_value.depthStencil.stencil = clearDesc.stencil;
+    clearValues.PushBack(clear_value);
   }
-  render_pass_info.clearValueCount = (ezUInt32)clear_values.size();
-  render_pass_info.pClearValues = clear_values.data();
-  m_command_list->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+  renderPassInfo.clearValueCount = clearValues.GetCount();
+  renderPassInfo.pClearValues = clearValues.GetData();
+  m_command_list->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
 void VKCommandList::EndRenderPass()

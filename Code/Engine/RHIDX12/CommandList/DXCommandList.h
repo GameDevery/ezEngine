@@ -16,8 +16,8 @@ public:
   void Reset() override;
   void Close() override;
   void BindPipeline(const std::shared_ptr<Pipeline>& state) override;
-  void BindBindingSet(const std::shared_ptr<BindingSet>& binding_set) override;
-  void BeginRenderPass(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
+  void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) override;
+  void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
   void EndRenderPass() override;
   void BeginEvent(const ezString& name) override;
   void EndEvent() override;
@@ -96,8 +96,8 @@ private:
     ezUInt32 max_draw_count,
     ezUInt32 stride);
 
-  void BeginRenderPassImpl(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
-  void OMSetFramebuffer(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
+  void BeginRenderPassImpl(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
+  void OMSetFramebuffer(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc);
   void IASetVertexBufferImpl(ezUInt32 slot, const ezSharedPtr<Resource>& resource, ezUInt32 stride);
   void BuildAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs, const ezSharedPtr<Resource>& src, const ezSharedPtr<Resource>& dst, const ezSharedPtr<Resource>& scratch, ezUInt64 scratch_offset);
 
@@ -108,9 +108,9 @@ private:
   ComPtr<ID3D12GraphicsCommandList5> m_command_list5;
   ComPtr<ID3D12GraphicsCommandList6> m_command_list6;
   bool m_closed = false;
-  std::vector<ComPtr<ID3D12DescriptorHeap>> m_heaps;
+  ezDynamicArray<ComPtr<ID3D12DescriptorHeap>> m_Heaps;
   std::shared_ptr<DXPipeline> m_state;
-  std::shared_ptr<BindingSet> m_binding_set;
+  ezSharedPtr<BindingSet> m_binding_set;
   ezMap<ezUInt32, ezSharedPtr<Resource>> m_lazy_vertex;
   ezSharedPtr<View> m_shading_rate_image_view;
 };

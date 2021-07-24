@@ -11,7 +11,7 @@ class EZ_RHI_DLL Shader : public QueryInterface
 public:
   virtual ~Shader() = default;
   virtual ShaderType GetType() const = 0;
-  virtual const std::vector<ezUInt8>& GetBlob() const = 0;
+  virtual const ezDynamicArray<ezUInt8>& GetBlob() const = 0;
   virtual ezUInt64 GetId(const ezString& entry_point) const = 0;
   virtual const BindKey& GetBindKey(const ezString& name) const = 0;
   virtual const std::vector<ResourceBindingDesc>& GetResourceBindings() const = 0;

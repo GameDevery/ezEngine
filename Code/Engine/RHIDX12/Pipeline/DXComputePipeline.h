@@ -18,10 +18,10 @@ public:
     const ComPtr<ID3D12PipelineState>& GetPipeline() const;
 
 private:
-    DXDevice& m_device;
-    ComputePipelineDesc m_desc;
-    std::vector<D3D12_INPUT_ELEMENT_DESC> m_input_layout_desc;
-    ezMap<size_t, std::string> m_input_layout_desc_names;
-    ComPtr<ID3D12RootSignature> m_root_signature;
-    ComPtr<ID3D12PipelineState> m_pipeline_state;
+    DXDevice& m_Device;
+    ComputePipelineDesc m_Desc;
+    std::vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayoutDesc;
+    ezMap<size_t, std::string> m_InputLayoutDescNames;
+    ComPtr<ID3D12RootSignature> m_RootSignature;
+    ComPtr<ID3D12PipelineState> m_PipelineState;
 };

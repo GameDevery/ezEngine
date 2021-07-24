@@ -41,7 +41,7 @@ private:
   //std::vector<std::shared_ptr<CommandList>> command_lists;
   //std::vector<std::shared_ptr<Framebuffer>> framebuffers;
   std::shared_ptr<Pipeline> m_pPipeline;
-  std::shared_ptr<RenderPass> m_pRenderPass;
+  ezSharedPtr<RenderPass> m_pRenderPass;
   std::shared_ptr<Program> m_pProgram;
   ezSharedPtr<View> m_pConstantBufferView;
   ezSharedPtr<Resource> m_pConstantBuffer;
@@ -49,8 +49,8 @@ private:
   ezSharedPtr<Resource> m_pVertexBuffer;
   std::shared_ptr<Shader> m_pVertexShader;
   std::shared_ptr<Shader> m_pPixelShader;
-  std::shared_ptr<BindingSetLayout> m_pLayout;
-  std::shared_ptr<BindingSet> m_pBindingSet;
+  ezSharedPtr<BindingSetLayout> m_pLayout;
+  ezSharedPtr<BindingSet> m_pBindingSet;
   ezUInt32 m_FrameIndex = 0;
   RenderDeviceDesc renderDeviceDesc;
 };

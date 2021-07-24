@@ -14,17 +14,17 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
   , m_desc(desc)
 {
   decltype(auto) shaders = m_desc.program->GetShaders();
-  decltype(auto) dx_layout = m_desc.layout->As<DXBindingSetLayout>();
-  m_root_signature = dx_layout.GetRootSignature();
+  ezSharedPtr<DXBindingSetLayout> dxLayout = m_desc.layout.Downcast<DXBindingSetLayout>();
+  m_root_signature = dxLayout->GetRootSignature();
 
   CD3DX12_STATE_OBJECT_DESC subobjects(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
-  decltype(auto) entry_points = m_desc.program->GetEntryPoints();
+  decltype(auto) entryPoints = m_desc.program->GetEntryPoints();
   for (const auto& shader : shaders)
   {
     decltype(auto) library = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
     decltype(auto) blob = shader->GetBlob();
-    D3D12_SHADER_BYTECODE byte = {blob.data(), blob.size()};
+    D3D12_SHADER_BYTECODE byte = {blob.GetData(), blob.GetCount()};
     library->SetDXILLibrary(&byte);
     for (const auto& entry_point : shader->GetReflection()->GetEntryPoints())
     {
@@ -89,10 +89,10 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
 
   ezUInt32 max_payload_size = 0;
   ezUInt32 max_attribute_size = 0;
-  for (size_t i = 0; i < entry_points.size(); ++i)
+  for (size_t i = 0; i < entryPoints.size(); ++i)
   {
-    max_payload_size = ezMath::Max(max_payload_size, entry_points[i].payload_size);
-    max_attribute_size = ezMath::Max(max_payload_size, entry_points[i].attribute_size);
+    max_payload_size = ezMath::Max(max_payload_size, entryPoints[i].payload_size);
+    max_attribute_size = ezMath::Max(max_payload_size, entryPoints[i].attribute_size);
   }
   shader_config->Config(max_payload_size, max_attribute_size);
 
@@ -136,12 +136,13 @@ const ComPtr<ID3D12RootSignature>& DXRayTracingPipeline::GetRootSignature() cons
   return m_root_signature;
 }
 
-std::vector<ezUInt8> DXRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
+ezDynamicArray<ezUInt8> DXRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
-  std::vector<ezUInt8> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
+  ezDynamicArray<ezUInt8> shader_handles_storage;
+  shader_handles_storage.SetCountUninitialized(group_count * m_device.GetShaderGroupHandleSize());
   for (ezUInt32 i = 0; i < group_count; ++i)
   {
-    memcpy(shader_handles_storage.data() + i * m_device.GetShaderGroupHandleSize(), m_state_ojbect_props->GetShaderIdentifier(ezStringWChar((*m_group_names.GetValue(i + first_group))).GetData()), m_device.GetShaderGroupHandleSize());
+    memcpy(shader_handles_storage.GetData() + i * m_device.GetShaderGroupHandleSize(), m_state_ojbect_props->GetShaderIdentifier(ezStringWChar((*m_group_names.GetValue(i + first_group))).GetData()), m_device.GetShaderGroupHandleSize());
   }
   return shader_handles_storage;
 }

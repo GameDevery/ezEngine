@@ -193,15 +193,15 @@ DXGraphicsPipeline::DXGraphicsPipeline(DXDevice& device, const GraphicsPipelineD
 {
   DXStateBuilder graphics_state_builder;
 
-  decltype(auto) dx_program = m_desc.program->As<DXProgram>();
-  decltype(auto) dx_layout = m_desc.layout->As<DXBindingSetLayout>();
-  m_root_signature = dx_layout.GetRootSignature();
-  for (const auto& shader : dx_program.GetShaders())
+  decltype(auto) dxProgram = m_desc.program->As<DXProgram>();
+  ezSharedPtr<DXBindingSetLayout> dxLayout = m_desc.layout.Downcast<DXBindingSetLayout>();
+  m_root_signature = dxLayout->GetRootSignature();
+  for (const auto& shader : dxProgram.GetShaders())
   {
     D3D12_SHADER_BYTECODE ShaderBytecode = {};
     decltype(auto) blob = shader->GetBlob();
-    ShaderBytecode.pShaderBytecode = blob.data();
-    ShaderBytecode.BytecodeLength = blob.size();
+    ShaderBytecode.pShaderBytecode = blob.GetData();
+    ShaderBytecode.BytecodeLength = blob.GetCount();
 
     switch (shader->GetType())
     {

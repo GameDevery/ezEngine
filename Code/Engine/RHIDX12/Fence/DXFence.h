@@ -10,7 +10,7 @@ class DXDevice;
 class DXFence : public Fence
 {
 public:
-    DXFence(DXDevice& device, ezUInt64 initial_value);
+    DXFence(DXDevice& device, ezUInt64 initialValue);
     ezUInt64 GetCompletedValue() override;
     void Wait(ezUInt64 value) override;
     void Signal(ezUInt64 value) override;
@@ -18,7 +18,7 @@ public:
     ComPtr<ID3D12Fence> GetFence();
 
 private:
-    DXDevice& m_device;
-    ComPtr<ID3D12Fence> m_fence;
-    HANDLE m_fence_event = nullptr;
+    DXDevice& m_Device;
+    ComPtr<ID3D12Fence> m_pFence;
+    HANDLE m_hFenceEvent = nullptr;
 };

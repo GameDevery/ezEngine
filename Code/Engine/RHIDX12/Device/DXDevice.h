@@ -38,19 +38,19 @@ public:
   ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
   void DestroyView(View* pView) override {}
 
-  std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;
+  ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;
   void DestroyBindingSetLayout(BindingSetLayout* pBindingSetLayout) override {}
 
-  std::shared_ptr<BindingSet> CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout) override;
+  ezSharedPtr<BindingSet> CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout) override;
   void DestroyBindingSet(BindingSet* pBindingSet) override {}
 
-  std::shared_ptr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) override;
+  ezSharedPtr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) override;
   void DestroyRenderPass(RenderPass* pRenderPass) override {}
 
   std::shared_ptr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) override;
   void DestroyFramebuffer(Framebuffer* pFramebuffer) override {}
 
-  std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
+  std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) override;
   void DestroyShader(Shader* pShader) override {}
 
   std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) override;

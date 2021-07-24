@@ -158,7 +158,7 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   vsShaderPath.MakeCleanPath();
   ShaderDesc vsDesc{vsShaderPath.GetData(), "main", ShaderType::kVertex, "6_0"};
   auto vsBlob = Compile(vsDesc, shaderBlobType);
-  auto vsReflection = CreateShaderReflection(shaderBlobType, vsBlob.data(), vsBlob.size());
+  auto vsReflection = CreateShaderReflection(shaderBlobType, vsBlob.GetData(), vsBlob.GetCount());
   m_pVertexShader = m_pDevice->CreateShader(vsDesc, vsBlob, vsReflection);
 
 
@@ -166,7 +166,7 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   psShaderPath.MakeCleanPath();
   ShaderDesc psDesc{psShaderPath.GetData(), "main", ShaderType::kPixel, "6_0"};
   auto psBlob = Compile(psDesc, shaderBlobType);
-  auto psReflection = CreateShaderReflection(shaderBlobType, psBlob.data(), psBlob.size());
+  auto psReflection = CreateShaderReflection(shaderBlobType, psBlob.GetData(), psBlob.GetCount());
   m_pPixelShader = m_pDevice->CreateShader(psDesc, psBlob, psReflection);
 
   m_pProgram = m_pDevice->CreateProgram({m_pVertexShader, m_pPixelShader});

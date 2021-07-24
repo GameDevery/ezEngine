@@ -501,19 +501,19 @@ ezSharedPtr<View> VKDevice::CreateView(const ezSharedPtr<Resource>& resource, co
   return EZ_DEFAULT_NEW(VKView, *this, resource.Downcast<VKResource>(), view_desc);
 }
 
-std::shared_ptr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+ezSharedPtr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
 {
-  return std::make_shared<VKBindingSetLayout>(*this, descs);
+  return EZ_DEFAULT_NEW(VKBindingSetLayout, *this, descs);
 }
 
-std::shared_ptr<BindingSet> VKDevice::CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout)
+ezSharedPtr<BindingSet> VKDevice::CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout)
 {
-  return std::make_shared<VKBindingSet>(*this, std::static_pointer_cast<VKBindingSetLayout>(layout));
+  return EZ_DEFAULT_NEW(VKBindingSet, *this, layout.Downcast<VKBindingSetLayout>());
 }
 
-std::shared_ptr<RenderPass> VKDevice::CreateRenderPass(const RenderPassDesc& desc)
+ezSharedPtr<RenderPass> VKDevice::CreateRenderPass(const RenderPassDesc& desc)
 {
-  return std::make_shared<VKRenderPass>(*this, desc);
+  return EZ_DEFAULT_NEW(VKRenderPass, *this, desc);
 }
 
 std::shared_ptr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& desc)
@@ -521,7 +521,7 @@ std::shared_ptr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& 
   return std::make_shared<VKFramebuffer>(*this, desc);
 }
 
-std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kSPIRV);
 }

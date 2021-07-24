@@ -65,9 +65,10 @@ PipelineType VKRayTracingPipeline::GetPipelineType() const
   return PipelineType::kRayTracing;
 }
 
-std::vector<ezUInt8> VKRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
+ezDynamicArray<ezUInt8> VKRayTracingPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
-  std::vector<ezUInt8> shader_handles_storage(group_count * m_device.GetShaderGroupHandleSize());
-  vk::Result res = m_device.GetDevice().getRayTracingShaderGroupHandlesKHR(m_pipeline.get(), first_group, group_count, (ezUInt32)shader_handles_storage.size(), shader_handles_storage.data());
+  ezDynamicArray<ezUInt8> shader_handles_storage;
+  shader_handles_storage.SetCountUninitialized(group_count * m_device.GetShaderGroupHandleSize());
+  vk::Result result = m_device.GetDevice().getRayTracingShaderGroupHandlesKHR(m_pipeline.get(), first_group, group_count, shader_handles_storage.GetCount(), shader_handles_storage.GetData());
   return shader_handles_storage;
 }

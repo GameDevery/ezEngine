@@ -5,7 +5,7 @@
 #include <RHI/Instance/QueryInterface.h>
 #include <memory>
 
-class EZ_RHI_DLL RenderPass : public QueryInterface
+class EZ_RHI_DLL RenderPass : public ezRefCounted
 {
 public:
   virtual ~RenderPass() = default;

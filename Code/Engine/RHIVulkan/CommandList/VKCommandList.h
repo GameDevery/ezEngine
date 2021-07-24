@@ -13,8 +13,8 @@ public:
     void Reset() override;
     void Close() override;
     void BindPipeline(const std::shared_ptr<Pipeline>& state) override;
-    void BindBindingSet(const std::shared_ptr<BindingSet>& binding_set) override;
-    void BeginRenderPass(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
+    void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) override;
+    void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) override;
     void EndRenderPass() override;
     void BeginEvent(const ezString& name) override;
     void EndEvent() override;
@@ -90,5 +90,5 @@ private:
     vk::UniqueCommandBuffer m_command_list;
     bool m_closed = false;
     std::shared_ptr<VKPipeline> m_state;
-    std::shared_ptr<BindingSet> m_binding_set;
+    ezSharedPtr<BindingSet> m_binding_set;
 };

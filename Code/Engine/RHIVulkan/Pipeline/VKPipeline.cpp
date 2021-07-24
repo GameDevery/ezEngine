@@ -37,19 +37,19 @@ vk::ShaderStageFlagBits ExecutionModel2Bit(ShaderKind kind)
     return {};
 }
 
-VKPipeline::VKPipeline(VKDevice& device, const std::shared_ptr<Program>& program, const std::shared_ptr<BindingSetLayout>& layout)
+VKPipeline::VKPipeline(VKDevice& device, const std::shared_ptr<Program>& program, const ezSharedPtr<BindingSetLayout>& layout)
     : m_device(device)
 {
-    decltype(auto) vk_layout = layout->As<VKBindingSetLayout>();
-    m_pipeline_layout = vk_layout.GetPipelineLayout();
+    decltype(auto) vk_layout = layout.Downcast<VKBindingSetLayout>();
+    m_pipeline_layout = vk_layout->GetPipelineLayout();
 
     decltype(auto) shaders = program->GetShaders();
     for (const auto& shader : shaders)
     {
         decltype(auto) blob = shader->GetBlob();
         vk::ShaderModuleCreateInfo shader_module_info = {};
-        shader_module_info.codeSize = blob.size();
-        shader_module_info.pCode = (ezUInt32*)blob.data();
+        shader_module_info.codeSize = blob.GetCount();
+        shader_module_info.pCode = (ezUInt32*)blob.GetData();
         m_shader_modules.emplace_back(m_device.GetDevice().createShaderModuleUnique(shader_module_info));
 
         decltype(auto) reflection = shader->GetReflection();
@@ -76,7 +76,7 @@ vk::PipelineLayout VKPipeline::GetPipelineLayout() const
     return m_pipeline_layout;
 }
 
-std::vector<ezUInt8> VKPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
+ezDynamicArray<ezUInt8> VKPipeline::GetRayTracingShaderGroupHandles(ezUInt32 first_group, ezUInt32 group_count) const
 {
     return {};
 }

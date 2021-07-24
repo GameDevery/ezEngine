@@ -212,7 +212,7 @@ PipelineType VKGraphicsPipeline::GetPipelineType() const
 
 vk::RenderPass VKGraphicsPipeline::GetRenderPass() const
 {
-  return m_desc.render_pass->As<VKRenderPass>().GetRenderPass();
+  return m_desc.render_pass.Downcast<VKRenderPass>()->GetRenderPass();
 }
 
 void VKGraphicsPipeline::CreateInputLayout(std::vector<vk::VertexInputBindingDescription>& m_binding_desc, std::vector<vk::VertexInputAttributeDescription>& m_attribute_desc)

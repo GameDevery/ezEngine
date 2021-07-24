@@ -148,7 +148,7 @@ DXDevice::DXDevice(DXAdapter& adapter)
     }
 
     /*ComPtr<ID3D12DebugDevice2> debug_device;
-        m_device.As(&debug_device);
+        m_Device.As(&debug_device);
         D3D12_DEBUG_FEATURE debug_feature = D3D12_DEBUG_FEATURE_CONSERVATIVE_RESOURCE_STATE_TRACKING;
         debug_device->SetDebugParameter(D3D12_DEBUG_DEVICE_PARAMETER_FEATURE_FLAGS, &debug_feature, sizeof(debug_feature));*/
   }
@@ -324,19 +324,19 @@ ezSharedPtr<View> DXDevice::CreateView(const ezSharedPtr<Resource>& resource, co
   return EZ_DEFAULT_NEW(DXView, *this, resource.Downcast<DXResource>(), view_desc);
 }
 
-std::shared_ptr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+ezSharedPtr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
 {
-  return std::make_shared<DXBindingSetLayout>(*this, descs);
+  return EZ_DEFAULT_NEW(DXBindingSetLayout, *this, descs);
 }
 
-std::shared_ptr<BindingSet> DXDevice::CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout)
+ezSharedPtr<BindingSet> DXDevice::CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout)
 {
-  return std::make_shared<DXBindingSet>(*this, std::static_pointer_cast<DXBindingSetLayout>(layout));
+  return EZ_DEFAULT_NEW(DXBindingSet, *this, layout.Downcast<DXBindingSetLayout>());
 }
 
-std::shared_ptr<RenderPass> DXDevice::CreateRenderPass(const RenderPassDesc& desc)
+ezSharedPtr<RenderPass> DXDevice::CreateRenderPass(const RenderPassDesc& desc)
 {
-  return std::make_shared<DXRenderPass>(*this, desc);
+  return EZ_DEFAULT_NEW(DXRenderPass, *this, desc);
 }
 
 std::shared_ptr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& desc)
@@ -344,7 +344,7 @@ std::shared_ptr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& 
   return std::make_shared<DXFramebuffer>(desc);
 }
 
-std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
+std::shared_ptr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection)
 {
   return std::make_shared<ShaderBase>(desc, byteCode, reflection, ShaderBlobType::kDXIL);
 }

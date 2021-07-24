@@ -20,8 +20,8 @@ public:
   virtual void Reset() = 0;
   virtual void Close() = 0;
   virtual void BindPipeline(const std::shared_ptr<Pipeline>& state) = 0;
-  virtual void BindBindingSet(const std::shared_ptr<BindingSet>& binding_set) = 0;
-  virtual void BeginRenderPass(const std::shared_ptr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) = 0;
+  virtual void BindBindingSet(const ezSharedPtr<BindingSet>& binding_set) = 0;
+  virtual void BeginRenderPass(const ezSharedPtr<RenderPass>& render_pass, const std::shared_ptr<Framebuffer>& framebuffer, const ClearDesc& clear_desc) = 0;
   virtual void EndRenderPass() = 0;
   virtual void BeginEvent(const ezString& name) = 0;
   virtual void EndEvent() = 0;

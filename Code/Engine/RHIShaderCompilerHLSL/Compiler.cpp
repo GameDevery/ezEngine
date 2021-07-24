@@ -2,6 +2,7 @@
 
 #include <RHIShaderCompilerHLSL/Compiler.h>
 #include <RHIShaderCompilerHLSL/DXCLoader.h>
+#include <Foundation/Logging/Log.h>
 #include <cassert>
 #include <d3dcompiler.h>
 #include <deque>
@@ -67,7 +68,7 @@ private:
   const std::wstring& m_base_path;
 };
 
-std::vector<uint8_t> Compile(const ShaderDesc& shader, ShaderBlobType blob_type)
+ezDynamicArray<ezUInt8> Compile(const ShaderDesc& shader, ShaderBlobType blob_type)
 {
   decltype(auto) dxc_support = GetDxcSupport(blob_type);
 
@@ -135,19 +136,20 @@ std::vector<uint8_t> Compile(const ShaderDesc& shader, ShaderBlobType blob_type)
 
   HRESULT hr = {};
   result->GetStatus(&hr);
-  std::vector<uint8_t> blob;
+  ezDynamicArray<ezUInt8> blob;
   if (SUCCEEDED(hr))
   {
     ComPtr<IDxcBlob> dxc_blob;
     EZ_ASSERT_ALWAYS(result->GetResult(&dxc_blob) == S_OK, "");
-    blob.assign((uint8_t*)dxc_blob->GetBufferPointer(), (uint8_t*)dxc_blob->GetBufferPointer() + dxc_blob->GetBufferSize());
+    blob.SetCountUninitialized((ezUInt32)dxc_blob->GetBufferSize());
+    ezMemoryUtils::Copy(blob.GetData(), (ezUInt8*)dxc_blob->GetBufferPointer(), blob.GetCount());
+    //blob.assign((ezUInt8*)dxc_blob->GetBufferPointer(), (ezUInt8*)dxc_blob->GetBufferPointer() + dxc_blob->GetBufferSize());
   }
   else
   {
     ComPtr<IDxcBlobEncoding> errors;
     result->GetErrorBuffer(&errors);
-    OutputDebugStringA(reinterpret_cast<char*>(errors->GetBufferPointer()));
-    std::cout << reinterpret_cast<char*>(errors->GetBufferPointer()) << std::endl;
+    ezLog::Error(reinterpret_cast<char*>(errors->GetBufferPointer()));
   }
   return blob;
 }

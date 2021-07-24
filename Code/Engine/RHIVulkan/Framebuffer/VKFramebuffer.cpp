@@ -34,7 +34,7 @@ VKFramebuffer::VKFramebuffer(VKDevice& device, const FramebufferDesc& desc)
 
     framebuffer_info.width = m_extent.width;
     framebuffer_info.height = m_extent.height;
-    framebuffer_info.renderPass = desc.render_pass->As<VKRenderPass>().GetRenderPass();
+    framebuffer_info.renderPass = desc.render_pass.Downcast<VKRenderPass>()->GetRenderPass();
     framebuffer_info.attachmentCount = (ezUInt32)attachment_views.size();
     framebuffer_info.pAttachments = attachment_views.data();
     m_framebuffer = device.GetDevice().createFramebufferUnique(framebuffer_info);

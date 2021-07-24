@@ -1,48 +1,48 @@
 #pragma once
-#include <RHIHighLevelRenderer/RHIHighLevelRendererDLL.h>
 #include <RHIHighLevelRenderer/HighLevelRenderer/RenderDevice.h>
+#include <RHIHighLevelRenderer/RHIHighLevelRendererDLL.h>
 
 struct EZ_RHIHIGHLEVELRENDERER_DLL BufferLayout
 {
-    size_t dst_buffer_size;
-    std::vector<size_t> data_size;
-    std::vector<size_t> src_offset;
-    std::vector<size_t> dst_offset;
+  ezUInt32 dst_buffer_size;
+  std::vector<ezUInt32> data_size;
+  std::vector<ezUInt32> src_offset;
+  std::vector<ezUInt32> dst_offset;
 };
 
 class EZ_RHIHIGHLEVELRENDERER_DLL ViewProvider : public DeferredView
 {
 public:
-    ViewProvider(RenderDevice& device, const ezUInt8* src_data, BufferLayout& layout);
-    std::shared_ptr<ResourceLazyViewDesc> GetView(RenderCommandList& command_list) override;
-    void OnDestroy(ResourceLazyViewDesc& view_desc) override;
+  ViewProvider(RenderDevice& device, const ezUInt8* src_data, BufferLayout& layout);
+  std::shared_ptr<ResourceLazyViewDesc> GetView(RenderCommandList& command_list) override;
+  void OnDestroy(ResourceLazyViewDesc& view_desc) override;
 
 private:
-    bool SyncData();
+  bool SyncData();
 
-    RenderDevice& m_device;
-    const ezUInt8* m_src_data;
-    BufferLayout& m_layout;
-    std::vector<ezUInt8> m_dst_data;
-    std::vector<ezSharedPtr<Resource>> m_free_resources;
-    std::shared_ptr<ResourceLazyViewDesc> m_last_view;
+  RenderDevice& m_device;
+  const ezUInt8* m_src_data;
+  BufferLayout& m_layout;
+  ezDynamicArray<ezUInt8> m_dst_data;
+  std::vector<ezSharedPtr<Resource>> m_free_resources;
+  std::shared_ptr<ResourceLazyViewDesc> m_last_view;
 };
 
-template<typename T>
+template <typename T>
 class ConstantBuffer : public T
 {
 public:
-    ConstantBuffer(RenderDevice& device, BufferLayout& layout)
-    {
-        T& data = static_cast<T&>(*this);
-        m_view_provider = std::make_shared<ViewProvider>(device, reinterpret_cast<const ezUInt8*>(&data), layout);
-    }
+  ConstantBuffer(RenderDevice& device, BufferLayout& layout)
+  {
+    T& data = static_cast<T&>(*this);
+    m_view_provider = std::make_shared<ViewProvider>(device, reinterpret_cast<const ezUInt8*>(&data), layout);
+  }
 
-    operator std::shared_ptr<DeferredView>& ()
-    {
-        return m_view_provider;
-    }
+  operator std::shared_ptr<DeferredView>&()
+  {
+    return m_view_provider;
+  }
 
 private:
-    std::shared_ptr<DeferredView> m_view_provider;
+  std::shared_ptr<DeferredView> m_view_provider;
 };

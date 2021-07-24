@@ -103,7 +103,7 @@ private:
   std::vector<std::shared_ptr<ResourceLazyViewDesc>> m_resource_lazy_view_descs;
 
   std::shared_ptr<Program> m_program;
-  std::vector<std::shared_ptr<BindingSet>> m_binding_sets;
+  std::vector<ezSharedPtr<BindingSet>> m_binding_sets;
 
   ComputePipelineDesc m_compute_pipeline_desc = {};
   RayTracingPipelineDesc m_ray_tracing_pipeline_desc = {};
@@ -114,7 +114,7 @@ private:
   std::map<ezSharedPtr<Resource>, ResourceStateTracker> m_resource_state_tracker;
   std::vector<ResourceBarrierDesc> m_lazy_barriers;
   ezUInt64 m_fence_value = 0;
-  std::shared_ptr<BindingSetLayout> m_layout;
+  ezSharedPtr<BindingSetLayout> m_layout;
 
   RayTracingShaderTables m_shader_tables = {};
   ezSharedPtr<Resource> m_shader_table;

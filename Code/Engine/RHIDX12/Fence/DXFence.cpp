@@ -4,33 +4,33 @@
 #include <dxgi1_6.h>
 #include <directx/d3d12.h>
 
-DXFence::DXFence(DXDevice& device, ezUInt64 initial_value)
-  : m_device(device)
+DXFence::DXFence(DXDevice& device, ezUInt64 initialValue)
+  : m_Device(device)
 {
-  EZ_ASSERT_ALWAYS(device.GetDevice()->CreateFence(initial_value, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)) == S_OK, "");
-  m_fence_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+  EZ_ASSERT_ALWAYS(device.GetDevice()->CreateFence(initialValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_pFence)) == S_OK, "");
+  m_hFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
 ezUInt64 DXFence::GetCompletedValue()
 {
-  return m_fence->GetCompletedValue();
+  return m_pFence->GetCompletedValue();
 }
 
 void DXFence::Wait(ezUInt64 value)
 {
   if (GetCompletedValue() < value)
   {
-    EZ_ASSERT_ALWAYS(m_fence->SetEventOnCompletion(value, m_fence_event) == S_OK, "");
-    WaitForSingleObjectEx(m_fence_event, INFINITE, FALSE);
+    EZ_ASSERT_ALWAYS(m_pFence->SetEventOnCompletion(value, m_hFenceEvent) == S_OK, "");
+    WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE);
   }
 }
 
 void DXFence::Signal(ezUInt64 value)
 {
-  m_fence->Signal(value);
+  m_pFence->Signal(value);
 }
 
 ComPtr<ID3D12Fence> DXFence::GetFence()
 {
-  return m_fence;
+  return m_pFence;
 }

@@ -451,21 +451,21 @@ void RenderCommandListImpl::CreateShaderTable(std::shared_ptr<Pipeline> pipeline
       switch (entry_point.kind)
       {
         case ShaderKind::kRayGeneration:
-          m_shader_table->UpdateUploadBuffer(m_shader_tables.raygen.offset + raygen_offset, shader_handles.data() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
+          m_shader_table->UpdateUploadBuffer(m_shader_tables.raygen.offset + raygen_offset, shader_handles.GetData() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
           raygen_offset += m_device.GetShaderTableAlignment();
           break;
         case ShaderKind::kMiss:
-          m_shader_table->UpdateUploadBuffer(m_shader_tables.miss.offset + miss_offset, shader_handles.data() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
+          m_shader_table->UpdateUploadBuffer(m_shader_tables.miss.offset + miss_offset, shader_handles.GetData() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
           miss_offset += m_device.GetShaderTableAlignment();
           break;
         case ShaderKind::kCallable:
-          m_shader_table->UpdateUploadBuffer(m_shader_tables.callable.offset + callable_offset, shader_handles.data() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
+          m_shader_table->UpdateUploadBuffer(m_shader_tables.callable.offset + callable_offset, shader_handles.GetData() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
           callable_offset += m_device.GetShaderTableAlignment();
           break;
         case ShaderKind::kAnyHit:
         case ShaderKind::kClosestHit:
         case ShaderKind::kIntersection:
-          m_shader_table->UpdateUploadBuffer(m_shader_tables.hit.offset + hit_offset, shader_handles.data() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
+          m_shader_table->UpdateUploadBuffer(m_shader_tables.hit.offset + hit_offset, shader_handles.GetData() + m_device.GetShaderGroupHandleSize() * group_id, m_device.GetShaderGroupHandleSize());
           hit_offset += m_device.GetShaderTableAlignment();
           break;
       }
@@ -520,7 +520,7 @@ void RenderCommandListImpl::ApplyBindingSet()
     desc.view = x.second;
   }
 
-  std::shared_ptr<BindingSet> binding_set = m_object_cache.GetBindingSet(m_layout, descs);
+  ezSharedPtr<BindingSet> binding_set = m_object_cache.GetBindingSet(m_layout, descs);
   m_CommandList->BindBindingSet(binding_set);
   m_binding_sets.emplace_back(binding_set);
 }
@@ -594,7 +594,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
     ViewBarrier(dsv, ResourceState::kDepthStencilWrite);
   }
 
-  std::shared_ptr<RenderPass> render_pass = m_object_cache.GetRenderPass(render_pass_desc);
+  ezSharedPtr<RenderPass> render_pass = m_object_cache.GetRenderPass(render_pass_desc);
   m_graphic_pipeline_desc.render_pass = render_pass;
 
   FramebufferDesc framebuffer_desc = {};

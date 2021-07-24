@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-class EZ_RHI_DLL BindingSet : public QueryInterface
+class EZ_RHI_DLL BindingSet : public ezRefCounted
 {
 public:
   virtual ~BindingSet() = default;

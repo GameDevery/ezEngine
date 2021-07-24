@@ -30,7 +30,7 @@ public:
     virtual ezSharedPtr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) = 0;
     virtual ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) = 0;
     virtual ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) = 0;
-    virtual std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) = 0;
+    virtual std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) = 0;
     virtual std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) = 0;
     virtual bool IsDxrSupported() const = 0;
     virtual bool IsRayQuerySupported() const = 0;

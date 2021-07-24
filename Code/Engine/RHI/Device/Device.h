@@ -52,19 +52,19 @@ public:
   virtual ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) = 0;
   virtual void DestroyView(View* pView) = 0;
 
-  virtual std::shared_ptr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) = 0;
+  virtual ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) = 0;
   virtual void DestroyBindingSetLayout(BindingSetLayout* pBindingSetLayout) = 0;
 
-  virtual std::shared_ptr<BindingSet> CreateBindingSet(const std::shared_ptr<BindingSetLayout>& layout) = 0;
+  virtual ezSharedPtr<BindingSet> CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout) = 0;
   virtual void DestroyBindingSet(BindingSet* pBindingSet) = 0;
 
-  virtual std::shared_ptr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) = 0;
+  virtual ezSharedPtr<RenderPass> CreateRenderPass(const RenderPassDesc& desc) = 0;
   virtual void DestroyRenderPass(RenderPass* pRenderPass) = 0;
 
   virtual std::shared_ptr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) = 0;
   virtual void DestroyFramebuffer(Framebuffer* pFramebuffer) = 0;
 
-  virtual std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, std::vector<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) = 0;
+  virtual std::shared_ptr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, std::shared_ptr<ShaderReflection> reflection) = 0;
   virtual void DestroyShader(Shader* pShader) = 0;
 
   virtual std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) = 0;
