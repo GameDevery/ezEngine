@@ -301,9 +301,9 @@ ezSharedPtr<Swapchain> VKDevice::CreateSwapchain(Window window, ezUInt32 width, 
   return EZ_DEFAULT_NEW(VKSwapchain, *m_CommandQueues[CommandListType::kGraphics], window, width, height, frameCount, vsync);
 }
 
-std::shared_ptr<CommandList> VKDevice::CreateCommandList(CommandListType type)
+ezSharedPtr<CommandList> VKDevice::CreateCommandList(CommandListType type)
 {
-  return std::make_shared<VKCommandList>(*this, type);
+  return EZ_DEFAULT_NEW(VKCommandList, *this, type);
 }
 
 std::shared_ptr<Fence> VKDevice::CreateFence(ezUInt64 initial_value)

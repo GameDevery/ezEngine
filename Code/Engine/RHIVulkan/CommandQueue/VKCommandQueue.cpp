@@ -5,75 +5,75 @@
 #include <RHIVulkan/Fence/VKTimelineSemaphore.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
-VKCommandQueue::VKCommandQueue(VKDevice& device, CommandListType type, ezUInt32 queue_family_index)
-    : m_device(device)
-    , m_queue_family_index(queue_family_index)
+VKCommandQueue::VKCommandQueue(VKDevice& device, CommandListType type, ezUInt32 queueFamilyIndex)
+    : m_Device(device)
+    , m_QueueFamilyIndex(queueFamilyIndex)
 {
-    m_queue = m_device.GetDevice().getQueue(m_queue_family_index, 0);
+    m_Queue = m_Device.GetDevice().getQueue(m_QueueFamilyIndex, 0);
 }
 
 void VKCommandQueue::Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
-    decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
-    vk::TimelineSemaphoreSubmitInfo timeline_info = {};
-    timeline_info.waitSemaphoreValueCount = 1;
-    timeline_info.pWaitSemaphoreValues = &value;
+    decltype(auto) vkFence = fence->As<VKTimelineSemaphore>();
+    vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
+    timelineInfo.waitSemaphoreValueCount = 1;
+    timelineInfo.pWaitSemaphoreValues = &value;
 
-    vk::SubmitInfo signal_submit_info = {};
-    signal_submit_info.pNext = &timeline_info;
-    signal_submit_info.waitSemaphoreCount = 1;
-    signal_submit_info.pWaitSemaphores = &vk_fence.GetFence();
-    vk::PipelineStageFlags wait_dst_stage_mask = vk::PipelineStageFlagBits::eAllCommands;
-    signal_submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
-    vk::Result res = m_queue.submit(1, &signal_submit_info, {});
+    vk::SubmitInfo signalSubmitInfo = {};
+    signalSubmitInfo.pNext = &timelineInfo;
+    signalSubmitInfo.waitSemaphoreCount = 1;
+    signalSubmitInfo.pWaitSemaphores = &vkFence.GetFence();
+    vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eAllCommands;
+    signalSubmitInfo.pWaitDstStageMask = &waitDstStageMask;
+    vk::Result res = m_Queue.submit(1, &signalSubmitInfo, {});
 }
 
 void VKCommandQueue::Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
     decltype(auto) vk_fence = fence->As<VKTimelineSemaphore>();
-    vk::TimelineSemaphoreSubmitInfo timeline_info = {};
-    timeline_info.signalSemaphoreValueCount = 1;
-    timeline_info.pSignalSemaphoreValues = &value;
+    vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
+    timelineInfo.signalSemaphoreValueCount = 1;
+    timelineInfo.pSignalSemaphoreValues = &value;
 
-    vk::SubmitInfo signal_submit_info = {};
-    signal_submit_info.pNext = &timeline_info;
-    signal_submit_info.signalSemaphoreCount = 1;
-    signal_submit_info.pSignalSemaphores = &vk_fence.GetFence();
-    vk::Result res = m_queue.submit(1, &signal_submit_info, {});
+    vk::SubmitInfo signalSubmitInfo = {};
+    signalSubmitInfo.pNext = &timelineInfo;
+    signalSubmitInfo.signalSemaphoreCount = 1;
+    signalSubmitInfo.pSignalSemaphores = &vk_fence.GetFence();
+    vk::Result result = m_Queue.submit(1, &signalSubmitInfo, {});
 }
 
-void VKCommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<CommandList>>& command_lists)
+void VKCommandQueue::ExecuteCommandLists(const std::vector<ezSharedPtr<CommandList>>& commandLists)
 {
-    std::vector<vk::CommandBuffer> vk_command_lists;
-    for (auto& command_list : command_lists)
+    ezDynamicArray<vk::CommandBuffer> vkCommandLists;
+    for (auto& commandList : commandLists)
     {
-        if (!command_list)
+        if (!commandList)
             continue;
-        decltype(auto) vk_command_list = command_list->As<VKCommandList>();
-        vk_command_lists.emplace_back(vk_command_list.GetCommandList());
+        ezSharedPtr<VKCommandList> vkCommandList = commandList.Downcast<VKCommandList>();
+        vkCommandLists.PushBack(vkCommandList->GetCommandList());
     }
 
-    vk::SubmitInfo submit_info = {};
-    submit_info.commandBufferCount = (ezUInt32)vk_command_lists.size();
-    submit_info.pCommandBuffers = vk_command_lists.data();
+    vk::SubmitInfo submitInfo = {};
+    submitInfo.commandBufferCount = vkCommandLists.GetCount();
+    submitInfo.pCommandBuffers = vkCommandLists.GetData();
 
-    vk::PipelineStageFlags wait_dst_stage_mask = vk::PipelineStageFlagBits::eAllCommands;
-    submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
+    vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eAllCommands;
+    submitInfo.pWaitDstStageMask = &waitDstStageMask;
 
-    vk::Result res = m_queue.submit(1, &submit_info, {});
+    vk::Result result = m_Queue.submit(1, &submitInfo, {});
 }
 
 VKDevice& VKCommandQueue::GetDevice()
 {
-    return m_device;
+    return m_Device;
 }
 
 ezUInt32 VKCommandQueue::GetQueueFamilyIndex()
 {
-    return m_queue_family_index;
+    return m_QueueFamilyIndex;
 }
 
 vk::Queue VKCommandQueue::GetQueue()
 {
-    return m_queue;
+    return m_Queue;
 }

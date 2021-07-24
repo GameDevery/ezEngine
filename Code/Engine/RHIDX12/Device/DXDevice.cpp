@@ -169,9 +169,9 @@ ezSharedPtr<Swapchain> DXDevice::CreateSwapchain(Window window, ezUInt32 width, 
   return EZ_DEFAULT_NEW(DXSwapchain, *m_command_queues[CommandListType::kGraphics], window, width, height, frameCount, vsync);
 }
 
-std::shared_ptr<CommandList> DXDevice::CreateCommandList(CommandListType type)
+ezSharedPtr<CommandList> DXDevice::CreateCommandList(CommandListType type)
 {
-  return std::make_shared<DXCommandList>(*this, type);
+  return EZ_DEFAULT_NEW(DXCommandList, *this, type);
 }
 
 std::shared_ptr<Fence> DXDevice::CreateFence(ezUInt64 initialValue)

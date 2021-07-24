@@ -62,11 +62,11 @@ private:
     std::shared_ptr<Device> m_device;
     ezSharedPtr<CommandQueue> m_command_queue;
     ezSharedPtr<Swapchain> m_Swapchain;
-    std::vector<std::shared_ptr<CommandList>> m_barrier_command_lists;
+    std::vector<ezSharedPtr<CommandList>> m_BarrierCommandLists;
     std::vector<ezUInt64> m_frame_fence_values;
     ezUInt64 m_fence_value = 0;
     std::shared_ptr<Fence> m_fence;
-    std::vector<std::shared_ptr<CommandList>> m_command_list_pool;
+    std::vector<ezSharedPtr<CommandList>> m_CommandListPool;
     std::deque<std::pair<ezUInt64 /*fence_value*/, size_t /*offset*/>> m_fence_value_by_cmd;
     std::unique_ptr<ObjectCache> m_object_cache;
 };

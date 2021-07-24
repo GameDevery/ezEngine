@@ -34,7 +34,7 @@ public:
   virtual ezSharedPtr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync) = 0;
   virtual void DestroySwapchain(Swapchain* pSwapChain) = 0;
 
-  virtual std::shared_ptr<CommandList> CreateCommandList(CommandListType type) = 0;
+  virtual ezSharedPtr<CommandList> CreateCommandList(CommandListType type) = 0;
   virtual void DestroyCommandList(CommandList* pCommandList) = 0;
 
   virtual std::shared_ptr<Fence> CreateFence(ezUInt64 initialValue) = 0;

@@ -284,14 +284,14 @@ void DXCommandList::DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, e
 
 void DXCommandList::ExecuteIndirect(
   D3D12_INDIRECT_ARGUMENT_TYPE type,
-  const std::shared_ptr<Resource>& argument_buffer,
+  const std::shared_ptr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
   ezUInt32 max_draw_count,
   ezUInt32 stride)
 {
-  decltype(auto) dx_argument_buffer = argument_buffer->As<DXResource>();
+  decltype(auto) dx_argument_buffer = pArgumentBuffer->As<DXResource>();
   ID3D12Resource* dx_count_buffer = nullptr;
   if (count_buffer)
   {
@@ -310,18 +310,18 @@ void DXCommandList::ExecuteIndirect(
     count_buffer_offset);
 }
 
-void DXCommandList::DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DrawIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
-  DrawIndirectCount(argument_buffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndirectCommand));
+  DrawIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndirectCommand));
 }
 
-void DXCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DrawIndexedIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
-  DrawIndexedIndirectCount(argument_buffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndexedIndirectCommand));
+  DrawIndexedIndirectCount(pArgumentBuffer, argument_buffer_offset, {}, 0, 1, sizeof(DrawIndexedIndirectCommand));
 }
 
 void DXCommandList::DrawIndirectCount(
-  const std::shared_ptr<Resource>& argument_buffer,
+  const std::shared_ptr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
@@ -330,7 +330,7 @@ void DXCommandList::DrawIndirectCount(
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DRAW,
-    argument_buffer,
+    pArgumentBuffer,
     argument_buffer_offset,
     count_buffer,
     count_buffer_offset,
@@ -339,7 +339,7 @@ void DXCommandList::DrawIndirectCount(
 }
 
 void DXCommandList::DrawIndexedIndirectCount(
-  const std::shared_ptr<Resource>& argument_buffer,
+  const std::shared_ptr<Resource>& pArgumentBuffer,
   ezUInt64 argument_buffer_offset,
   const std::shared_ptr<Resource>& count_buffer,
   ezUInt64 count_buffer_offset,
@@ -348,7 +348,7 @@ void DXCommandList::DrawIndexedIndirectCount(
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED,
-    argument_buffer,
+    pArgumentBuffer,
     argument_buffer_offset,
     count_buffer,
     count_buffer_offset,
@@ -361,11 +361,11 @@ void DXCommandList::Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_grou
   m_command_list->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
-void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset)
+void DXCommandList::DispatchIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset)
 {
   ExecuteIndirect(
     D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH,
-    argument_buffer,
+    pArgumentBuffer,
     argument_buffer_offset,
     {},
     0,

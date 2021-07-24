@@ -31,6 +31,6 @@ private:
   ezUInt32 m_FrameIndex = 0;
   vk::UniqueSemaphore m_ImageAvailableSemaphore;
   vk::UniqueSemaphore m_RenderingFinishedSemaphore;
-  std::shared_ptr<CommandList> m_CommandList;
+  ezSharedPtr<CommandList> m_CommandList;
   std::shared_ptr<Fence> m_Fence;
 };

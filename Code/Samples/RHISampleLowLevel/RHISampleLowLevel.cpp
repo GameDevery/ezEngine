@@ -133,20 +133,20 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
     FRAME_COUNT, renderDeviceDesc.vsync);
   m_pFence = m_pDevice->CreateFence(m_FenceValue);
 
-  std::vector<ezUInt32> index_data = {0, 1, 2};
-  m_pIndexBuffer = m_pDevice->CreateBuffer(BindFlag::kIndexBuffer | BindFlag::kCopyDest, (ezUInt32)(sizeof(ezUInt32) * index_data.size()));
+  std::vector<ezUInt32> indexData = {0, 1, 2};
+  m_pIndexBuffer = m_pDevice->CreateBuffer(BindFlag::kIndexBuffer | BindFlag::kCopyDest, (ezUInt32)(sizeof(ezUInt32) * indexData.size()));
   m_pIndexBuffer->CommitMemory(MemoryType::kUpload);
-  m_pIndexBuffer->UpdateUploadBuffer(0, index_data.data(), sizeof(index_data.front()) * index_data.size());
+  m_pIndexBuffer->UpdateUploadBuffer(0, indexData.data(), sizeof(indexData.front()) * indexData.size());
 
-  std::vector<ezVec3> vertex_data = {ezVec3(-0.5, -0.5, 0.0), ezVec3(0.0, 0.5, 0.0), ezVec3(0.5, -0.5, 0.0)};
-  m_pVertexBuffer = m_pDevice->CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kCopyDest, (ezUInt32)(sizeof(vertex_data.front()) * vertex_data.size()));
+  std::vector<ezVec3> vertexData = {ezVec3(-0.5, -0.5, 0.0), ezVec3(0.0, 0.5, 0.0), ezVec3(0.5, -0.5, 0.0)};
+  m_pVertexBuffer = m_pDevice->CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kCopyDest, (ezUInt32)(sizeof(vertexData.front()) * vertexData.size()));
   m_pVertexBuffer->CommitMemory(MemoryType::kUpload);
-  m_pVertexBuffer->UpdateUploadBuffer(0, vertex_data.data(), sizeof(vertex_data.front()) * vertex_data.size());
+  m_pVertexBuffer->UpdateUploadBuffer(0, vertexData.data(), sizeof(vertexData.front()) * vertexData.size());
 
-  ezVec4 constant_data = ezVec4(1, 0, 0, 1);
-  m_pConstantBuffer = m_pDevice->CreateBuffer(BindFlag::kConstantBuffer | BindFlag::kCopyDest, sizeof(constant_data));
+  ezVec4 constantData = ezVec4(1, 0, 0, 1);
+  m_pConstantBuffer = m_pDevice->CreateBuffer(BindFlag::kConstantBuffer | BindFlag::kCopyDest, sizeof(constantData));
   m_pConstantBuffer->CommitMemory(MemoryType::kUpload);
-  m_pConstantBuffer->UpdateUploadBuffer(0, &constant_data, sizeof(constant_data));
+  m_pConstantBuffer->UpdateUploadBuffer(0, &constantData, sizeof(constantData));
 
   ezStringBuilder projectDirAbsolutePath;
   if (!ezFileSystem::ResolveSpecialDirectory(">project", projectDirAbsolutePath).Succeeded())
@@ -176,23 +176,23 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   constantBufferViewDesc.dimension = ViewDimension::kBuffer;
   m_pConstantBufferView = m_pDevice->CreateView(m_pConstantBuffer, constantBufferViewDesc);
 
-  BindKey settings_key = {ShaderType::kPixel, ViewType::kConstantBuffer, 0, 0, 1};
-  m_pLayout = m_pDevice->CreateBindingSetLayout({settings_key});
+  BindKey settingsKey = {ShaderType::kPixel, ViewType::kConstantBuffer, 0, 0, 1};
+  m_pLayout = m_pDevice->CreateBindingSetLayout({settingsKey});
   m_pBindingSet = m_pDevice->CreateBindingSet(m_pLayout);
-  m_pBindingSet->WriteBindings({{settings_key, m_pConstantBufferView}});
+  m_pBindingSet->WriteBindings({{settingsKey, m_pConstantBufferView}});
 
-  RenderPassDesc render_pass_desc = {
+  RenderPassDesc renderPassDesc = {
     {{m_pSwapchain->GetFormat(), RenderPassLoadOp::kClear, RenderPassStoreOp::kStore}},
   };
-  m_pRenderPass = m_pDevice->CreateRenderPass(render_pass_desc);
+  m_pRenderPass = m_pDevice->CreateRenderPass(renderPassDesc);
 
 
-  GraphicsPipelineDesc pipeline_desc = {
+  GraphicsPipelineDesc pipelineDesc = {
     m_pProgram,
     m_pLayout,
-    {{0, "POSITION", ezRHIResourceFormat::R32G32B32_FLOAT, sizeof(vertex_data.front())}},
+    {{0, "POSITION", ezRHIResourceFormat::R32G32B32_FLOAT, sizeof(vertexData.front())}},
     m_pRenderPass};
-  m_pPipeline = m_pDevice->CreateGraphicsPipeline(pipeline_desc);
+  m_pPipeline = m_pDevice->CreateGraphicsPipeline(pipelineDesc);
 
   //for (ezUInt32 i = 0; i < FRAME_COUNT; ++i)
   //{
@@ -277,7 +277,7 @@ ezApplication::Execution ezRHISampleApp::Run()
     framebufferDesc.height = m_pWindow->GetClientAreaSize().height;
     framebufferDesc.colors = {backBufferView};
     std::shared_ptr<Framebuffer> framebuffer = m_pDevice->CreateFramebuffer(framebufferDesc);
-    std::shared_ptr<CommandList> commandList = m_pDevice->CreateCommandList(CommandListType::kGraphics);
+    ezSharedPtr<CommandList> commandList = m_pDevice->CreateCommandList(CommandListType::kGraphics);
     commandList->BindPipeline(m_pPipeline);
     commandList->BindBindingSet(m_pBindingSet);
     commandList->SetViewport(0, 0, (float)m_pWindow->GetClientAreaSize().width, (float)m_pWindow->GetClientAreaSize().height);

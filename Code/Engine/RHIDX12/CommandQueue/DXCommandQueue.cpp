@@ -38,22 +38,22 @@ void DXCommandQueue::Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 
 void DXCommandQueue::Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value)
 {
-  decltype(auto) dx_fence = fence->As<DXFence>();
-  EZ_ASSERT_ALWAYS(m_command_queue->Signal(dx_fence.GetFence().Get(), value) == S_OK, "");
+  decltype(auto) dxFence = fence->As<DXFence>();
+  EZ_ASSERT_ALWAYS(m_command_queue->Signal(dxFence.GetFence().Get(), value) == S_OK, "");
 }
 
-void DXCommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<CommandList>>& command_lists)
+void DXCommandQueue::ExecuteCommandLists(const std::vector<ezSharedPtr<CommandList>>& commandLists)
 {
-  std::vector<ID3D12CommandList*> dx_command_lists;
-  for (auto& command_list : command_lists)
+  ezDynamicArray<ID3D12CommandList*> dxCommandLists;
+  for (auto& commandList : commandLists)
   {
-    if (!command_list)
+    if (!commandList)
       continue;
-    decltype(auto) dx_command_list = command_list->As<DXCommandList>();
-    dx_command_lists.emplace_back(dx_command_list.GetCommandList().Get());
+    ezSharedPtr<DXCommandList> dxCommandList = commandList.Downcast<DXCommandList>();
+    dxCommandLists.PushBack(dxCommandList->GetCommandList().Get());
   }
-  if (!dx_command_lists.empty())
-    m_command_queue->ExecuteCommandLists((ezUInt32)dx_command_lists.size(), dx_command_lists.data());
+  if (!dxCommandLists.IsEmpty())
+    m_command_queue->ExecuteCommandLists(dxCommandLists.GetCount(), dxCommandLists.GetData());
 }
 
 DXDevice& DXCommandQueue::GetDevice()

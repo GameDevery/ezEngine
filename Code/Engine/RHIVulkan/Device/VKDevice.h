@@ -18,7 +18,7 @@ public:
   ezSharedPtr<Swapchain> CreateSwapchain(Window window, ezUInt32 width, ezUInt32 height, ezUInt32 frameCount, bool vsync) override;
   void DestroySwapchain(Swapchain* pSwapChain) override {}
 
-  std::shared_ptr<CommandList> CreateCommandList(CommandListType type) override;
+  ezSharedPtr<CommandList> CreateCommandList(CommandListType type) override;
   void DestroyCommandList(CommandList* pCommandList) override {}
 
   std::shared_ptr<Fence> CreateFence(ezUInt64 initial_value) override;

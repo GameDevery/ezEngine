@@ -22,14 +22,14 @@ RenderDeviceImpl::RenderDeviceImpl(const RenderDeviceDesc& settings, ezWindowBas
   m_fence = m_device->CreateFence(m_fence_value);
   for (ezUInt32 i = 0; i < m_FrameCount; ++i)
   {
-    m_barrier_command_lists.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
+    m_BarrierCommandLists.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
     m_frame_fence_values.emplace_back(0);
   }
 }
 
 RenderDeviceImpl::~RenderDeviceImpl()
 {
-  m_command_list_pool.clear();
+  m_CommandListPool.clear();
   WaitForIdle();
 }
 
@@ -141,7 +141,7 @@ const ezString& RenderDeviceImpl::GetGpuName() const
 
 void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists)
 {
-  std::vector<std::shared_ptr<CommandList>> raw_command_lists;
+  std::vector<ezSharedPtr<CommandList>> rawCommandLists;
   size_t patch_cmds = 0;
   for (size_t c = 0; c < command_lists.size(); ++c)
   {
@@ -183,7 +183,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
 
     if (!new_barriers.empty())
     {
-      std::shared_ptr<CommandList> tmp_cmd;
+      ezSharedPtr<CommandList> tmp_cmd;
       if (c != 0 && kUseFakeClose)
       {
         tmp_cmd = command_lists[c - 1]->As<RenderCommandListImpl>().GetCommandList();
@@ -196,7 +196,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
           if (m_fence->GetCompletedValue() >= desc.first)
           {
             m_fence->Wait(desc.first);
-            tmp_cmd = m_command_list_pool[desc.second];
+            tmp_cmd = m_CommandListPool[desc.second];
             tmp_cmd->Reset();
             m_fence_value_by_cmd.pop_front();
             m_fence_value_by_cmd.emplace_back(m_fence_value + 1, desc.second);
@@ -204,10 +204,10 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         }
         if (!tmp_cmd)
         {
-          tmp_cmd = m_command_list_pool.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
-          m_fence_value_by_cmd.emplace_back(m_fence_value + 1, m_command_list_pool.size() - 1);
+          tmp_cmd = m_CommandListPool.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
+          m_fence_value_by_cmd.emplace_back(m_fence_value + 1, m_CommandListPool.size() - 1);
         }
-        raw_command_lists.emplace_back(tmp_cmd);
+        rawCommandLists.emplace_back(tmp_cmd);
       }
 
       tmp_cmd->ResourceBarrier(new_barriers);
@@ -226,14 +226,14 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
       global_state_tracker.Merge(state_tracker);
     }
 
-    raw_command_lists.emplace_back(command_list_impl.GetCommandList());
+    rawCommandLists.emplace_back(command_list_impl.GetCommandList());
   }
   if (kUseFakeClose)
   {
-    for (auto& cmd : raw_command_lists)
+    for (auto& cmd : rawCommandLists)
       cmd->Close();
   }
-  m_command_queue->ExecuteCommandLists(raw_command_lists);
+  m_command_queue->ExecuteCommandLists(rawCommandLists);
   if (patch_cmds)
   {
     m_command_queue->Signal(m_fence, ++m_fence_value);
@@ -265,7 +265,7 @@ void RenderDeviceImpl::InsertPresentBarrier()
   barrier.resource = back_buffer;
   barrier.state_before = global_state_tracker.GetSubresourceState(0, 0);
   barrier.state_after = ResourceState::kPresent;
-  decltype(auto) command_list = m_barrier_command_lists[m_frame_index];
+  decltype(auto) command_list = m_BarrierCommandLists[m_frame_index];
   command_list->Reset();
   command_list->ResourceBarrier({barrier});
   command_list->Close();

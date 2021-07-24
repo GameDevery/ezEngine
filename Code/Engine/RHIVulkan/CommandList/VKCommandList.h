@@ -20,24 +20,24 @@ public:
     void EndEvent() override;
     void Draw(ezUInt32 vertex_count, ezUInt32 instance_count, ezUInt32 first_vertex, ezUInt32 first_instance) override;
     void DrawIndexed(ezUInt32 index_count, ezUInt32 instance_count, ezUInt32 first_index, ezInt32 vertex_offset, ezUInt32 first_instance) override;
-    void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) override;
-    void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) override;
+    void DrawIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset) override;
+    void DrawIndexedIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset) override;
     void DrawIndirectCount(
-        const std::shared_ptr<Resource>& argument_buffer,
+        const std::shared_ptr<Resource>& pArgumentBuffer,
         ezUInt64 argument_buffer_offset,
         const std::shared_ptr<Resource>& count_buffer,
         ezUInt64 count_buffer_offset,
         ezUInt32 max_draw_count,
         ezUInt32 stride) override;
     void DrawIndexedIndirectCount(
-        const std::shared_ptr<Resource>& argument_buffer,
+        const std::shared_ptr<Resource>& pArgumentBuffer,
         ezUInt64 argument_buffer_offset,
         const std::shared_ptr<Resource>& count_buffer,
         ezUInt64 count_buffer_offset,
         ezUInt32 max_draw_count,
         ezUInt32 stride) override;
     void Dispatch(ezUInt32 thread_group_count_x, ezUInt32 thread_group_count_y, ezUInt32 thread_group_count_z) override;
-    void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, ezUInt64 argument_buffer_offset) override;
+    void DispatchIndirect(const std::shared_ptr<Resource>& pArgumentBuffer, ezUInt64 argument_buffer_offset) override;
     void DispatchMesh(ezUInt32 thread_group_count_x) override;
     void DispatchRays(const RayTracingShaderTables& shader_tables, ezUInt32 width, ezUInt32 height, ezUInt32 depth) override;
     void ResourceBarrier(const std::vector<ResourceBarrierDesc>& barriers) override;
