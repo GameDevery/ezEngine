@@ -306,9 +306,9 @@ ezSharedPtr<CommandList> VKDevice::CreateCommandList(CommandListType type)
   return EZ_DEFAULT_NEW(VKCommandList, *this, type);
 }
 
-std::shared_ptr<Fence> VKDevice::CreateFence(ezUInt64 initial_value)
+ezSharedPtr<Fence> VKDevice::CreateFence(ezUInt64 initialValue)
 {
-  return std::make_shared<VKTimelineSemaphore>(*this, initial_value);
+  return EZ_DEFAULT_NEW(VKTimelineSemaphore, *this, initialValue);
 }
 
 std::shared_ptr<Resource> VKDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)

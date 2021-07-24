@@ -133,11 +133,11 @@ std::shared_ptr<Resource> VKSwapchain::GetBackBuffer(ezUInt32 buffer)
   return m_BackBuffers[buffer];
 }
 
-ezUInt32 VKSwapchain::NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signalValue)
+ezUInt32 VKSwapchain::NextImage(const ezSharedPtr<Fence>& fence, ezUInt64 signalValue)
 {
   vk::Result result = m_Device.GetDevice().acquireNextImageKHR(m_Swapchain.get(), UINT64_MAX, m_ImageAvailableSemaphore.get(), nullptr, &m_FrameIndex);
 
-  VKTimelineSemaphore& vkFence = fence->As<VKTimelineSemaphore>();
+  ezSharedPtr<VKTimelineSemaphore> vkFence = fence.Downcast<VKTimelineSemaphore>();
   constexpr ezUInt64 tmp = ezMath::MaxValue<ezUInt64>();
   vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
   timelineInfo.waitSemaphoreValueCount = 1;
@@ -151,15 +151,15 @@ ezUInt32 VKSwapchain::NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 si
   vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
   signalSubmitInfo.pWaitDstStageMask = &waitDstStageMask;
   signalSubmitInfo.signalSemaphoreCount = 1;
-  signalSubmitInfo.pSignalSemaphores = &vkFence.GetFence();
+  signalSubmitInfo.pSignalSemaphores = &vkFence->GetFence();
   result = m_CommandQueue.GetQueue().submit(1, &signalSubmitInfo, {});
 
   return m_FrameIndex;
 }
 
-void VKSwapchain::Present(const std::shared_ptr<Fence>& fence, ezUInt64 waitValue)
+void VKSwapchain::Present(const ezSharedPtr<Fence>& fence, ezUInt64 waitValue)
 {
-  decltype(auto) vkFence = fence->As<VKTimelineSemaphore>();
+  ezSharedPtr<VKTimelineSemaphore> vkFence = fence.Downcast<VKTimelineSemaphore>();
   constexpr ezUInt64 tmp = ezMath::MaxValue<ezUInt64>();
   vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
   timelineInfo.waitSemaphoreValueCount = 1;
@@ -169,7 +169,7 @@ void VKSwapchain::Present(const std::shared_ptr<Fence>& fence, ezUInt64 waitValu
   vk::SubmitInfo signalSubmitInfo = {};
   signalSubmitInfo.pNext = &timelineInfo;
   signalSubmitInfo.waitSemaphoreCount = 1;
-  signalSubmitInfo.pWaitSemaphores = &vkFence.GetFence();
+  signalSubmitInfo.pWaitSemaphores = &vkFence->GetFence();
   vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eTransfer;
   signalSubmitInfo.pWaitDstStageMask = &waitDstStageMask;
   signalSubmitInfo.signalSemaphoreCount = 1;

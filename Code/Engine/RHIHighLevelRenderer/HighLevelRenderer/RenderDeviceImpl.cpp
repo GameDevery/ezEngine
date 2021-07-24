@@ -19,7 +19,7 @@ RenderDeviceImpl::RenderDeviceImpl(const RenderDeviceDesc& settings, ezWindowBas
   m_height = m_window->GetClientAreaSize().height;
 
   m_Swapchain = m_device->CreateSwapchain(m_window->GetNativeWindowHandle(), m_width, m_height, m_FrameCount, settings.vsync);
-  m_fence = m_device->CreateFence(m_fence_value);
+  m_pFence = m_device->CreateFence(m_FenceValue);
   for (ezUInt32 i = 0; i < m_FrameCount; ++i)
   {
     m_BarrierCommandLists.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
@@ -128,10 +128,10 @@ void RenderDeviceImpl::ExecuteCommandLists(const std::vector<std::shared_ptr<Ren
 {
   for (auto& command_list : command_lists)
   {
-    command_list->GetFenceValue() = m_fence_value + 1;
+    command_list->GetFenceValue() = m_FenceValue + 1;
   }
   ExecuteCommandListsImpl(command_lists);
-  m_command_queue->Signal(m_fence, ++m_fence_value);
+  m_command_queue->Signal(m_pFence, ++m_FenceValue);
 }
 
 const ezString& RenderDeviceImpl::GetGpuName() const
@@ -193,19 +193,19 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         if (!m_fence_value_by_cmd.empty())
         {
           auto& desc = m_fence_value_by_cmd.front();
-          if (m_fence->GetCompletedValue() >= desc.first)
+          if (m_pFence->GetCompletedValue() >= desc.first)
           {
-            m_fence->Wait(desc.first);
+            m_pFence->Wait(desc.first);
             tmp_cmd = m_CommandListPool[desc.second];
             tmp_cmd->Reset();
             m_fence_value_by_cmd.pop_front();
-            m_fence_value_by_cmd.emplace_back(m_fence_value + 1, desc.second);
+            m_fence_value_by_cmd.emplace_back(m_FenceValue + 1, desc.second);
           }
         }
         if (!tmp_cmd)
         {
           tmp_cmd = m_CommandListPool.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
-          m_fence_value_by_cmd.emplace_back(m_fence_value + 1, m_CommandListPool.size() - 1);
+          m_fence_value_by_cmd.emplace_back(m_FenceValue + 1, m_CommandListPool.size() - 1);
         }
         rawCommandLists.emplace_back(tmp_cmd);
       }
@@ -236,14 +236,14 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
   m_command_queue->ExecuteCommandLists(rawCommandLists);
   if (patch_cmds)
   {
-    m_command_queue->Signal(m_fence, ++m_fence_value);
+    m_command_queue->Signal(m_pFence, ++m_FenceValue);
   }
 }
 
 void RenderDeviceImpl::WaitForIdle()
 {
-  m_command_queue->Signal(m_fence, ++m_fence_value);
-  m_fence->Wait(m_fence_value);
+  m_command_queue->Signal(m_pFence, ++m_FenceValue);
+  m_pFence->Wait(m_FenceValue);
 }
 
 void RenderDeviceImpl::Resize(ezUInt32 width, ezUInt32 height)
@@ -277,17 +277,17 @@ void RenderDeviceImpl::InsertPresentBarrier()
 void RenderDeviceImpl::Present()
 {
   InsertPresentBarrier();
-  m_Swapchain->NextImage(m_fence, ++m_fence_value);
-  m_command_queue->Wait(m_fence, m_fence_value);
-  m_command_queue->Signal(m_fence, m_frame_fence_values[m_frame_index] = ++m_fence_value);
-  m_Swapchain->Present(m_fence, m_fence_value);
+  m_Swapchain->NextImage(m_pFence, ++m_FenceValue);
+  m_command_queue->Wait(m_pFence, m_FenceValue);
+  m_command_queue->Signal(m_pFence, m_frame_fence_values[m_frame_index] = ++m_FenceValue);
+  m_Swapchain->Present(m_pFence, m_FenceValue);
   m_frame_index = (m_frame_index + 1) % m_FrameCount;
-  m_fence->Wait(m_frame_fence_values[m_frame_index]);
+  m_pFence->Wait(m_frame_fence_values[m_frame_index]);
 }
 
 void RenderDeviceImpl::Wait(ezUInt64 fence_value)
 {
-  m_fence->Wait(fence_value);
+  m_pFence->Wait(fence_value);
 }
 
 ezUInt32 RenderDeviceImpl::GetFrameIndex() const

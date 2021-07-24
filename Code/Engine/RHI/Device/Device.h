@@ -37,7 +37,7 @@ public:
   virtual ezSharedPtr<CommandList> CreateCommandList(CommandListType type) = 0;
   virtual void DestroyCommandList(CommandList* pCommandList) = 0;
 
-  virtual std::shared_ptr<Fence> CreateFence(ezUInt64 initialValue) = 0;
+  virtual ezSharedPtr<Fence> CreateFence(ezUInt64 initialValue) = 0;
   virtual void DestroyFence(Fence* pFence) = 0;
 
   virtual std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sampleCount, int width, int height, int depth, int mipLevels) = 0;

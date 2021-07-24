@@ -64,8 +64,8 @@ private:
     ezSharedPtr<Swapchain> m_Swapchain;
     std::vector<ezSharedPtr<CommandList>> m_BarrierCommandLists;
     std::vector<ezUInt64> m_frame_fence_values;
-    ezUInt64 m_fence_value = 0;
-    std::shared_ptr<Fence> m_fence;
+    ezUInt64 m_FenceValue = 0;
+    ezSharedPtr<Fence> m_pFence;
     std::vector<ezSharedPtr<CommandList>> m_CommandListPool;
     std::deque<std::pair<ezUInt64 /*fence_value*/, size_t /*offset*/>> m_fence_value_by_cmd;
     std::unique_ptr<ObjectCache> m_object_cache;

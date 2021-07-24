@@ -34,7 +34,7 @@ private:
   std::shared_ptr<Device> m_pDevice;
   ezRHISampleWindow* m_pWindow = nullptr;
   ezSharedPtr<Swapchain> m_pSwapchain = nullptr;
-  std::shared_ptr<Fence> m_pFence = nullptr;
+  ezSharedPtr<Fence> m_pFence = nullptr;
   ezUInt64 m_FenceValue = 0;
   ezSharedPtr<CommandQueue> m_pCommandQueue = nullptr;
   std::array<ezUInt64, FRAME_COUNT> m_FenceValues = {};

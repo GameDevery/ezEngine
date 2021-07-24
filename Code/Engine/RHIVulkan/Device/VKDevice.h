@@ -21,7 +21,7 @@ public:
   ezSharedPtr<CommandList> CreateCommandList(CommandListType type) override;
   void DestroyCommandList(CommandList* pCommandList) override {}
 
-  std::shared_ptr<Fence> CreateFence(ezUInt64 initial_value) override;
+  ezSharedPtr<Fence> CreateFence(ezUInt64 initial_value) override;
   void DestroyFence(Fence* pFence) override {}
 
   std::shared_ptr<Resource> CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels) override;

@@ -5,7 +5,7 @@
 #include <RHI/Instance/QueryInterface.h>
 #include <cstdint>
 
-class EZ_RHI_DLL Fence : public QueryInterface
+class EZ_RHI_DLL Fence : public ezRefCounted
 {
 public:
   virtual ~Fence() = default;

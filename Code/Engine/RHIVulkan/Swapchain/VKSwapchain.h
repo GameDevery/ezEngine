@@ -18,8 +18,8 @@ public:
   ~VKSwapchain();
   ezRHIResourceFormat::Enum GetFormat() const override;
   std::shared_ptr<Resource> GetBackBuffer(ezUInt32 buffer) override;
-  ezUInt32 NextImage(const std::shared_ptr<Fence>& fence, ezUInt64 signalValue) override;
-  void Present(const std::shared_ptr<Fence>& fence, ezUInt64 waitValue) override;
+  ezUInt32 NextImage(const ezSharedPtr<Fence>& fence, ezUInt64 signalValue) override;
+  void Present(const ezSharedPtr<Fence>& fence, ezUInt64 waitValue) override;
 
 private:
   VKCommandQueue& m_CommandQueue;
@@ -32,5 +32,5 @@ private:
   vk::UniqueSemaphore m_ImageAvailableSemaphore;
   vk::UniqueSemaphore m_RenderingFinishedSemaphore;
   ezSharedPtr<CommandList> m_CommandList;
-  std::shared_ptr<Fence> m_Fence;
+  ezSharedPtr<Fence> m_Fence;
 };

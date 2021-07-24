@@ -174,9 +174,9 @@ ezSharedPtr<CommandList> DXDevice::CreateCommandList(CommandListType type)
   return EZ_DEFAULT_NEW(DXCommandList, *this, type);
 }
 
-std::shared_ptr<Fence> DXDevice::CreateFence(ezUInt64 initialValue)
+ezSharedPtr<Fence> DXDevice::CreateFence(ezUInt64 initialValue)
 {
-  return std::make_shared<DXFence>(*this, initialValue);
+  return EZ_DEFAULT_NEW(DXFence, *this, initialValue);
 }
 
 std::shared_ptr<Resource> DXDevice::CreateTexture(TextureType type, ezUInt32 bindFlags, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mipLevels)

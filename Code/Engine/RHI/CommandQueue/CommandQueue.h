@@ -9,7 +9,7 @@ class EZ_RHI_DLL CommandQueue : public ezRefCounted
 {
 public:
   virtual ~CommandQueue() = default;
-  virtual void Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value) = 0;
-  virtual void Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value) = 0;
+  virtual void Wait(const ezSharedPtr<Fence>& fence, ezUInt64 value) = 0;
+  virtual void Signal(const ezSharedPtr<Fence>& fence, ezUInt64 value) = 0;
   virtual void ExecuteCommandLists(const std::vector<ezSharedPtr<CommandList>>& commandLists) = 0;
 };

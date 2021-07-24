@@ -9,8 +9,8 @@ class VKCommandQueue : public CommandQueue
 {
 public:
     VKCommandQueue(VKDevice& device, CommandListType type, ezUInt32 queueFamilyIndex);
-    void Wait(const std::shared_ptr<Fence>& fence, ezUInt64 value) override;
-    void Signal(const std::shared_ptr<Fence>& fence, ezUInt64 value) override;
+  void Wait(const ezSharedPtr<Fence>& fence, ezUInt64 value) override;
+    void Signal(const ezSharedPtr<Fence>& fence, ezUInt64 value) override;
     void ExecuteCommandLists(const std::vector<ezSharedPtr<CommandList>>& commandLists) override;
 
     VKDevice& GetDevice();
