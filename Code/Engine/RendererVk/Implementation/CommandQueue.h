@@ -5,14 +5,14 @@
 
 namespace ezInternal::Vk
 {
-  class CommandQueue
+  class CommandQueue : public ezRefCounted
   {
   public:
     CommandQueue(ezGALDeviceVk& device, CommandListType type, ezUInt32 queueFamilyIndex);
-    void Wait(ezGALFence* fence, ezUInt64 value);
-    void Signal(ezGALFence* fence, ezUInt64 value);
-    void ExecuteCommandList(CommandList* commandList);
-    void ExecuteCommandLists(const ezDynamicArray<CommandList*>& commandList);
+    void Wait(const ezGALFence* fence, ezUInt64 value) const;
+    void Signal(const ezGALFence* fence, ezUInt64 value) const;
+    void ExecuteCommandList(ezSharedPtr<CommandList> commandList);
+    void ExecuteCommandLists(const ezDynamicArray<ezSharedPtr<CommandList>>& commandList);
 
     ezGALDeviceVk& GetDevice();
     ezUInt32 GetQueueFamilyIndex();

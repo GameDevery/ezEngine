@@ -23,7 +23,7 @@
 #include <RendererVk/Implementation/Instance.h>
 #include <RendererVk/Implementation/Adapter.h>
 #include <RendererVk/Implementation/CommandQueue.h>
-#include "..\DeviceVk.h"
+#include <RendererVk/Implementation/CommandList.h>
 
 using namespace ezInternal::Vk;
 
@@ -529,7 +529,7 @@ void ezGALDeviceVk::DestroyUnorderedAccessViewPlatform(ezGALUnorderedAccessView*
 // Other rendering creation functions
 ezGALSwapChain* ezGALDeviceVk::CreateSwapChainPlatform(const ezGALSwapChainCreationDescription& Description)
 {
-  ezGALSwapChainVk* pSwapChain = EZ_NEW(&m_Allocator, ezGALSwapChainVk, Description);
+  ezGALSwapChainVk* pSwapChain = EZ_NEW(&m_Allocator, ezGALSwapChainVk, Description, *m_CommandQueues[ezInternal::Vk::CommandListType::Graphics]);
 
   if (!pSwapChain->InitPlatform(this).Succeeded())
   {
@@ -656,6 +656,11 @@ ezInternal::Vk::CommandListType ezGALDeviceVk::GetAvailableCommandListType(ezInt
 vk::CommandPool ezGALDeviceVk::GetCmdPool(ezInternal::Vk::CommandListType type) const
 {
   return (*m_CmdPools.GetValue(GetAvailableCommandListType(type))).get();
+}
+
+ezSharedPtr<ezInternal::Vk::CommandList> ezGALDeviceVk::CreateCommandList(ezInternal::Vk::CommandListType type)
+{
+  return EZ_DEFAULT_NEW(ezInternal::Vk::CommandList, *this, type);
 }
 
 EZ_STATICLINK_FILE(RendererVk, RendererVk_Device_Implementation_DeviceVk);

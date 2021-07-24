@@ -7,12 +7,12 @@ ezUInt64 ezGALFence::GetCompletedValue()
   return GetCompletedValuePlatform();
 }
 
-void ezGALFence::Wait(ezUInt64 value)
+void ezGALFence::Wait(ezUInt64 value) const
 {
   WaitPlatform(value);
 }
 
-void ezGALFence::Signal(ezUInt64 value)
+void ezGALFence::Signal(ezUInt64 value) const
 {
   SignalPlatform(value);
 }

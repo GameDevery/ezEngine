@@ -124,8 +124,14 @@ public:
     return m_VkDevice.get();
   }
 
+  EZ_ALWAYS_INLINE const ezSharedPtr<ezInternal::Vk::Adapter>& GetAdapter() const {
+    return m_pAdapter;
+  }
+
   ezInternal::Vk::CommandListType GetAvailableCommandListType(ezInternal::Vk::CommandListType type) const;
   vk::CommandPool GetCmdPool(ezInternal::Vk::CommandListType type) const;
+
+  ezSharedPtr<ezInternal::Vk::CommandList> CreateCommandList(ezInternal::Vk::CommandListType type);
 
 private:
   friend class ezGALCommandEncoderImplVk;
@@ -141,7 +147,7 @@ private:
   ezSharedPtr<ezInternal::Vk::Adapter> m_pAdapter;
   vk::UniqueDevice m_VkDevice;
   ezMap<ezInternal::Vk::CommandListType, vk::UniqueCommandPool> m_CmdPools;
-  ezMap<ezInternal::Vk::CommandListType, ezInternal::Vk::CommandQueue*> m_CommandQueues;
+  ezMap<ezInternal::Vk::CommandListType, ezSharedPtr<ezInternal::Vk::CommandQueue>> m_CommandQueues;
 
   ezUInt32 m_TextureDataPitchAlignment;
   bool m_IsDxrSupported;

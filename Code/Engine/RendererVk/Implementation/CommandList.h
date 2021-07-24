@@ -5,7 +5,7 @@
 
 namespace ezInternal::Vk
 {
-  class CommandList
+  class CommandList : public ezRefCounted
   {
   public:
     CommandList(ezGALDeviceVk& device, CommandListType type);

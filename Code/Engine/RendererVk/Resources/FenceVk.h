@@ -23,8 +23,8 @@ protected:
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) override;
 
   virtual ezUInt64 GetCompletedValuePlatform() override;
-  virtual void WaitPlatform(ezUInt64 value) override;
-  virtual void SignalPlatform(ezUInt64 value) override;
+  virtual void WaitPlatform(ezUInt64 value) const override;
+  virtual void SignalPlatform(ezUInt64 value) const override;
 
 private:
   ezGALDeviceVk* m_pDevice;

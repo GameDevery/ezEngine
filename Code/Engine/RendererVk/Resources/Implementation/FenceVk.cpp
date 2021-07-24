@@ -35,7 +35,7 @@ ezUInt64 ezGALFenceVk::GetCompletedValuePlatform()
   return m_pDevice->GetVkDevice().getSemaphoreCounterValueKHR(m_TimelineSemaphore.get());
 }
 
-void ezGALFenceVk::WaitPlatform(ezUInt64 value)
+void ezGALFenceVk::WaitPlatform(ezUInt64 value) const
 {
   vk::SemaphoreWaitInfo waitInfo = {};
   waitInfo.semaphoreCount = 1;
@@ -44,7 +44,7 @@ void ezGALFenceVk::WaitPlatform(ezUInt64 value)
   vk::Result result = m_pDevice->GetVkDevice().waitSemaphoresKHR(waitInfo, UINT64_MAX);
 }
 
-void ezGALFenceVk::SignalPlatform(ezUInt64 value)
+void ezGALFenceVk::SignalPlatform(ezUInt64 value) const
 {
   vk::SemaphoreSignalInfo signalInfo = {};
   signalInfo.semaphore = m_TimelineSemaphore.get();

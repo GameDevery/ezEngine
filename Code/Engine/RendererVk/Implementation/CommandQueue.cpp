@@ -14,9 +14,9 @@ namespace ezInternal::Vk
     m_Queue = m_Device.GetVkDevice().getQueue(m_QueueFamilyIndex, 0);
   }
 
-  void CommandQueue::Wait(ezGALFence* fence, ezUInt64 value)
+  void CommandQueue::Wait(const ezGALFence* fence, ezUInt64 value) const
   {
-    ezGALFenceVk* vkFence = static_cast<ezGALFenceVk*>(fence);
+    const ezGALFenceVk* vkFence = static_cast<const ezGALFenceVk*>(fence);
 
     vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
     timelineInfo.waitSemaphoreValueCount = 1;
@@ -31,9 +31,9 @@ namespace ezInternal::Vk
     vk::Result result = m_Queue.submit(1, &signalSubmitInfo, {});
   }
 
-  void CommandQueue::Signal(ezGALFence* fence, ezUInt64 value)
+  void CommandQueue::Signal(const ezGALFence* fence, ezUInt64 value) const
   {
-    ezGALFenceVk* vkFence = static_cast<ezGALFenceVk*>(fence);
+    const ezGALFenceVk* vkFence = static_cast<const ezGALFenceVk*>(fence);
 
     vk::TimelineSemaphoreSubmitInfo timelineInfo = {};
     timelineInfo.signalSemaphoreValueCount = 1;
@@ -46,14 +46,14 @@ namespace ezInternal::Vk
     vk::Result result = m_Queue.submit(1, &signalSubmitInfo, {});
   }
 
-  void CommandQueue::ExecuteCommandList(CommandList* commandList)
+  void CommandQueue::ExecuteCommandList(ezSharedPtr<CommandList> commandList)
   {
-    ezDynamicArray<CommandList*> commandLists;
+    ezDynamicArray<ezSharedPtr<CommandList>> commandLists;
     commandLists.PushBack(commandList);
     ExecuteCommandLists(commandLists);
   }
 
-  void CommandQueue::ExecuteCommandLists(const ezDynamicArray<CommandList*>& commandLists)
+  void CommandQueue::ExecuteCommandLists(const ezDynamicArray<ezSharedPtr<CommandList>>& commandLists)
   {
     ezDynamicArray<vk::CommandBuffer> vkCommandBuffers;
     for (auto& commandList : commandLists)

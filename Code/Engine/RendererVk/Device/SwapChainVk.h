@@ -4,17 +4,21 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/Device/SwapChain.h>
 #include <RendererVk/RendererVkDLL.h>
+#include <vulkan/vulkan.hpp>
 
 class ezGALSwapChainVk : public ezGALSwapChain
 {
 public:
-  //const VkExtent2D& GetVkSwapChainExtent() const;
+  ezGALResourceFormat::Enum GetFormat() const;
+  ezGALTextureHandle GetBackBuffer(ezUInt32 buffer) const;
+  ezUInt32 NextImage(const ezGALFence* pFence, ezUInt64 signalValue);
+  void Present(const ezGALFence* pFence, ezUInt64 waitValue);
 
 protected:
   friend class ezGALDeviceVk;
   friend class ezMemoryUtils;
 
-  ezGALSwapChainVk(const ezGALSwapChainCreationDescription& Description);
+  ezGALSwapChainVk(const ezGALSwapChainCreationDescription& Description, ezInternal::Vk::CommandQueue& commandQueue);
 
   virtual ~ezGALSwapChainVk();
 
@@ -23,19 +27,17 @@ protected:
   virtual ezResult DeInitPlatform(ezGALDevice* pDevice) override;
 
 private:
-  //VkQueue m_VkPresentQueue;
-  //VkSurfaceKHR m_VkSurface;
-  //VkSurfaceCapabilitiesKHR m_VkSurfaceCapabilities;
-  //ezDynamicArray<VkSurfaceFormatKHR> m_VkSurfaceFormats;
-  //ezDynamicArray<VkPresentModeKHR> m_VkPresentationModes;
-  //VkSwapchainKHR m_VkSwapChain;
-
-  //ezDynamicArray<VkImage> m_VkSwapChainImages;
-  //VkFormat m_VkSwapChainImageFormat;
-  //VkExtent2D m_VkSwapChainExtent;
-  //ezDynamicArray<VkImageView> m_VkSwapChainImageViews;
-
-  ezGALDeviceVk* m_pDeviceVk;
+  ezInternal::Vk::CommandQueue& m_CommandQueue;
+  ezGALDeviceVk* m_pDevice;
+  vk::UniqueSurfaceKHR m_Surface;
+  vk::Format m_SwapchainColorFormat = vk::Format::eB8G8R8Unorm;
+  vk::UniqueSwapchainKHR m_Swapchain;
+  ezDynamicArray<ezGALTextureHandle> m_BackBuffers;
+  ezUInt32 m_FrameIndex = 0;
+  vk::UniqueSemaphore m_ImageAvailableSemaphore;
+  vk::UniqueSemaphore m_RenderingFinishedSemaphore;
+  ezSharedPtr<ezInternal::Vk::CommandList> m_pCommandList;
+  ezGALFenceHandle m_hFence;
 };
 
 #include <RendererVk/Device/Implementation/SwapChainVk_inl.h>
