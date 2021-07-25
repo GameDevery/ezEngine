@@ -10,7 +10,7 @@ ProgramBase::ProgramBase(const ezDynamicArray<ezSharedPtr<Shader>>& shaders)
         decltype(auto) bindings = shader->GetBindings();
 
         // todo: add InsertRange to ezDynamicArray
-        ezDynamicArray tmp(m_bindings);
+        ezDynamicArray<BindKey> tmp(m_bindings);
         m_bindings = bindings;
         m_bindings.PushBackRange(tmp);
 

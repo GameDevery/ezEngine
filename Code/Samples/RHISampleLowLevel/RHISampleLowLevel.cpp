@@ -154,8 +154,6 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
     EZ_REPORT_FAILURE("Project directory could not be resolved.");
   }
 
-  ezDynamicArray<ezSharedPtr<Shader>> shaders;
-
   ezStringBuilder vsShaderPath(projectDirAbsolutePath, "/shaders/Triangle/VertexShader.hlsl");
   vsShaderPath.MakeCleanPath();
   ShaderDesc vsDesc{vsShaderPath.GetData(), "main", ShaderType::kVertex, "6_0"};
@@ -171,10 +169,14 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   auto psReflection = CreateShaderReflection(shaderBlobType, psBlob.GetData(), psBlob.GetCount());
   auto pixelShader = m_pDevice->CreateShader(psDesc, psBlob, psReflection);
 
-  shaders.PushBack(vertexShader);
-  shaders.PushBack(pixelShader);
+  m_Shaders.PushBack(vertexShader);
+  m_Shaders.PushBack(pixelShader);
 
-  m_pProgram = m_pDevice->CreateProgram(shaders);
+  m_pProgram = m_pDevice->CreateProgram(m_Shaders);
+
+  
+  vsReflection.Clear();
+  psReflection.Clear();
 
   ViewDesc constantBufferViewDesc = {};
   constantBufferViewDesc.view_type = ViewType::kConstantBuffer;

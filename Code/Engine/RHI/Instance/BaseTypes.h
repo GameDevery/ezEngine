@@ -10,6 +10,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <Foundation/Algorithm/HashableStruct.h>
 
 namespace enum_class
 {
@@ -485,13 +486,24 @@ struct RayTracingShaderTables
   RayTracingShaderTable callable;
 };
 
-struct BindKey
+struct BindKey : public ezHashableStruct<BindKey>
 {
   ShaderType shader_type = ShaderType::kUnknown;
   ViewType view_type = ViewType::kUnknown;
   ezUInt32 slot = 0;
   ezUInt32 space = 0;
   ezUInt32 count = 0;
+
+  BindKey() = default;
+  BindKey(ShaderType shader_type, ViewType view_type, ezUInt32 slot, ezUInt32 space, ezUInt32 count)
+    : shader_type{shader_type}
+    , view_type{view_type}
+    , slot{slot}
+    , space{space}
+    , count{count}
+  {
+
+  }
 
   auto MakeTie() const
   {
@@ -506,6 +518,13 @@ struct BindKey
            space == other.space &&
            count == other.count;
   }
+};
+
+template <>
+struct ezCompareHelper<BindKey>
+{
+  EZ_ALWAYS_INLINE bool Less(const BindKey& a, const BindKey& b) const { return a.CalculateHash() < b.CalculateHash(); }
+  EZ_ALWAYS_INLINE bool Equal(const BindKey& a, const BindKey& b) const { return a.CalculateHash() == b.CalculateHash(); }
 };
 
 struct BindingDesc

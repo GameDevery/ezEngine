@@ -81,7 +81,7 @@ enum class VariableType
   kBool,
 };
 
-struct EZ_RHI_DLL VariableLayout
+struct EZ_RHI_DLL VariableLayout : public ezHashableStruct<VariableLayout>
 {
   EZ_DECLARE_POD_TYPE();
   ezString name;
@@ -94,6 +94,13 @@ struct EZ_RHI_DLL VariableLayout
   ezDynamicArray<VariableLayout> members;
 };
 
+template <>
+struct ezCompareHelper<VariableLayout>
+{
+  EZ_ALWAYS_INLINE bool Less(const VariableLayout& a, const VariableLayout& b) const { return a.CalculateHash() < b.CalculateHash(); }
+  EZ_ALWAYS_INLINE bool Equal(const VariableLayout& a, const VariableLayout& b) const { return a.CalculateHash() == b.CalculateHash(); }
+};
+
 inline auto MakeTie(const VariableLayout& desc)
 {
   return std::tie(desc.name, desc.type, desc.offset, desc.size, desc.rows, desc.columns, desc.elements, desc.members);
@@ -101,40 +108,48 @@ inline auto MakeTie(const VariableLayout& desc)
 
 inline bool operator==(const VariableLayout& lhs, const VariableLayout& rhs)
 {
-  return MakeTie(lhs) == MakeTie(rhs);
+  ezCompareHelper<VariableLayout> comparer;
+  return comparer.Equal(lhs, rhs);
+  //return MakeTie(lhs) == MakeTie(rhs);
+  //return false;
 }
 
 inline bool operator<(const VariableLayout& lhs, const VariableLayout& rhs)
 {
-  return MakeTie(lhs) < MakeTie(rhs);
+  ezCompareHelper<VariableLayout> comparer;
+  return comparer.Less(lhs, rhs);
+  //return MakeTie(lhs) < MakeTie(rhs);
+  //return true;
 }
 
-inline bool operator==(const ezDynamicArray<VariableLayout>& lhs, const ezDynamicArray<VariableLayout>& rhs) {
-  if (lhs.GetCount() != rhs.GetCount())
-  {
-    return false;
-  }
 
-  for (ezUInt32 i = 0; i < lhs.GetCount(); i++)
-  {
-    if (!(lhs[i].members == rhs[i].members))
-    {
-      return false;
-    }
-  }
 
-  return true;
-}
-
-inline bool operator<(const ezDynamicArray<VariableLayout>& lhs, const ezDynamicArray<VariableLayout>& rhs)
-{
-  if ((lhs == rhs))
-  {
-    return false;
-  }
-
-  return lhs.GetCount() < rhs.GetCount();
-}
+//inline bool operator==(const ezDynamicArray<VariableLayout>& lhs, const ezDynamicArray<VariableLayout>& rhs) {
+//  if (lhs.GetCount() != rhs.GetCount())
+//  {
+//    return false;
+//  }
+//
+//  for (ezUInt32 i = 0; i < lhs.GetCount(); i++)
+//  {
+//    if (!(lhs[i].members == rhs[i].members))
+//    {
+//      return false;
+//    }
+//  }
+//
+//  return true;
+//}
+//
+//inline bool operator<(const ezDynamicArray<VariableLayout>& lhs, const ezDynamicArray<VariableLayout>& rhs)
+//{
+//  if ((lhs == rhs))
+//  {
+//    return false;
+//  }
+//
+//  return lhs.GetCount() < rhs.GetCount();
+//}
 
 struct EZ_RHI_DLL ShaderFeatureInfo
 {

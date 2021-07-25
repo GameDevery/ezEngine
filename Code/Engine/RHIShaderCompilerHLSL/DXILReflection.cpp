@@ -158,6 +158,11 @@ DXILReflection::DXILReflection(const void* data, size_t size)
   }
 }
 
+DXILReflection::~DXILReflection()
+{
+  m_layouts.Clear();
+}
+
 const ezDynamicArray<EntryPoint>& DXILReflection::GetEntryPoints() const
 {
   return m_entry_points;
@@ -386,12 +391,12 @@ ResourceBindingDesc GetBindingDesc(const D3D12_SHADER_INPUT_BIND_DESC& bind_desc
   return desc;
 }
 
-VariableLayout GetVariableLayout(const ezString& name, uint32_t offset, uint32_t size, ID3D12ShaderReflectionType* variable_type)
+VariableLayout GetVariableLayout(VariableLayout& layout, const ezString& name, uint32_t offset, uint32_t size, ID3D12ShaderReflectionType* variable_type)
 {
   D3D12_SHADER_TYPE_DESC type_desc = {};
   variable_type->GetDesc(&type_desc);
 
-  VariableLayout layout = {};
+  //VariableLayout layout = {};
   layout.name = name;
   layout.offset = offset + type_desc.Offset;
   layout.size = size;
@@ -420,7 +425,7 @@ VariableLayout GetVariableLayout(const ezString& name, uint32_t offset, uint32_t
 }
 
 template <typename ReflectionType>
-VariableLayout GetBufferLayout(const D3D12_SHADER_INPUT_BIND_DESC& bind_desc, ReflectionType* reflection)
+VariableLayout GetBufferLayout(VariableLayout& layout, const D3D12_SHADER_INPUT_BIND_DESC& bind_desc, ReflectionType* reflection)
 {
   if (bind_desc.Type != D3D_SIT_CBUFFER)
   {
@@ -436,7 +441,7 @@ VariableLayout GetBufferLayout(const D3D12_SHADER_INPUT_BIND_DESC& bind_desc, Re
   D3D12_SHADER_BUFFER_DESC cbuffer_desc = {};
   cbuffer->GetDesc(&cbuffer_desc);
 
-  VariableLayout layout = {};
+  //VariableLayout layout = {};
   layout.name = bind_desc.Name;
   layout.type = VariableType::kStruct;
   layout.offset = 0;
@@ -446,7 +451,9 @@ VariableLayout GetBufferLayout(const D3D12_SHADER_INPUT_BIND_DESC& bind_desc, Re
     ID3D12ShaderReflectionVariable* variable = cbuffer->GetVariableByIndex(i);
     D3D12_SHADER_VARIABLE_DESC variable_desc = {};
     variable->GetDesc(&variable_desc);
-    layout.members.PushBack(GetVariableLayout(variable_desc.Name, variable_desc.StartOffset, variable_desc.Size, variable->GetType()));
+    VariableLayout memberLayout;
+    GetVariableLayout(memberLayout, variable_desc.Name, variable_desc.StartOffset, variable_desc.Size, variable->GetType());
+    layout.members.PushBack(memberLayout);
   }
   return layout;
 }
@@ -466,17 +473,22 @@ ezDynamicArray<ResourceBindingDesc> ParseReflection(const T& desc, U* reflection
 }
 
 template <typename T, typename U>
-ezDynamicArray<VariableLayout> ParseLayout(const T& desc, U* reflection)
+void ParseLayout(ezDynamicArray<VariableLayout>& layouts, const T& desc, U* reflection)
 {
-  ezDynamicArray<VariableLayout> res;
-  res.Reserve(desc.BoundResources);
+  //ezDynamicArray<VariableLayout> res;
+  //res.Reserve(desc.BoundResources);
   for (uint32_t i = 0; i < desc.BoundResources; ++i)
   {
     D3D12_SHADER_INPUT_BIND_DESC bind_desc = {};
     EZ_ASSERT_ALWAYS(reflection->GetResourceBindingDesc(i, &bind_desc) == S_OK, "");
-    res.PushBack(GetBufferLayout(bind_desc, reflection));
+    //res.PushBack(GetBufferLayout(bind_desc, reflection));
+
+    VariableLayout variableLayout;
+    GetBufferLayout(variableLayout, bind_desc, reflection);
+
+    layouts.PushBack(variableLayout);
   }
-  return res;
+  //return res;
 }
 
 ezDynamicArray<InputParameterDesc> ParseInputParameters(const D3D12_SHADER_DESC& desc, ComPtr<ID3D12ShaderReflection> shader_reflection)
@@ -567,7 +579,7 @@ void DXILReflection::ParseShaderReflection(ComPtr<ID3D12ShaderReflection> shader
   hlsl::DXIL::ShaderKind kind = hlsl::GetVersionShaderType(desc.Version);
   m_entry_points.PushBack({"", ConvertShaderKind(kind)});
   m_bindings = ParseReflection(desc, shader_reflection.Get());
-  m_layouts = ParseLayout(desc, shader_reflection.Get());
+  ParseLayout(m_layouts, desc, shader_reflection.Get());
   assert(m_bindings.GetCount() == m_layouts.GetCount());
   m_input_parameters = ParseInputParameters(desc, shader_reflection);
   m_output_parameters = ParseOutputParameters(desc, shader_reflection);
@@ -584,7 +596,8 @@ void DXILReflection::ParseLibraryReflection(ComPtr<ID3D12LibraryReflection> libr
     D3D12_FUNCTION_DESC function_desc = {};
     EZ_ASSERT_ALWAYS(function_reflection->GetDesc(&function_desc) == S_OK, "");
     auto function_bindings = ParseReflection(function_desc, function_reflection);
-    auto function_layouts = ParseLayout(function_desc, function_reflection);
+    ezDynamicArray<VariableLayout> function_layouts;
+    ParseLayout(function_layouts, function_desc, function_reflection);
     assert(function_bindings.GetCount() == function_layouts.GetCount());
     for (ezUInt32 i = 0; i < function_bindings.GetCount(); ++i)
     {

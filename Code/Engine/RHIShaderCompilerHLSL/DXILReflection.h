@@ -9,6 +9,7 @@ class DXILReflection : public ShaderReflection
 {
 public:
   DXILReflection(const void* data, size_t size);
+  ~DXILReflection();
   const ezDynamicArray<EntryPoint>& GetEntryPoints() const override;
   const ezDynamicArray<ResourceBindingDesc>& GetBindings() const override;
   const ezDynamicArray<VariableLayout>& GetVariableLayouts() const override;

@@ -15,7 +15,12 @@ ShaderBase::ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode,
   m_bindings = m_reflection->GetBindings();
   for (ezUInt32 i = 0; i < m_bindings.GetCount(); ++i)
   {
-    BindKey bind_key = {m_shader_type, m_bindings[i].type, m_bindings[i].slot, m_bindings[i].space, m_bindings[i].count};
+    BindKey bind_key;
+    bind_key.shader_type = m_shader_type;
+    bind_key.view_type = m_bindings[i].type;
+    bind_key.slot = m_bindings[i].slot;
+    bind_key.space = m_bindings[i].space;
+    bind_key.count = m_bindings[i].count;
     m_bind_keys[m_bindings[i].name] = bind_key;
     m_mapping[bind_key] = i;
     m_binding_keys.PushBack(bind_key);
