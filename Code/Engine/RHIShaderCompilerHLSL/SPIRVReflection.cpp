@@ -340,11 +340,11 @@ VariableLayout GetBufferMemberLayout(const spirv_cross::CompilerHLSL& compiler, 
   return layout;
 }
 
-VariableLayout GetBufferLayout(ViewType view_type, const spirv_cross::CompilerHLSL& compiler, const spirv_cross::Resource& resource)
+void GetBufferLayout(ezDynamicArray<VariableLayout>& layouts, ViewType view_type, const spirv_cross::CompilerHLSL& compiler, const spirv_cross::Resource& resource)
 {
   if (view_type != ViewType::kConstantBuffer)
   {
-    return {};
+    return;
   }
 
   VariableLayout layout = {};
@@ -360,7 +360,7 @@ VariableLayout GetBufferLayout(ViewType view_type, const spirv_cross::CompilerHL
     member.offset = compiler.type_struct_member_offset(type, i);
     member.size = (ezUInt32)compiler.get_declared_struct_member_size(type, i);
   }
-  return layout;
+  layouts.PushBack(layout);
 }
 
 void ParseBindings(const spirv_cross::CompilerHLSL& compiler, ezDynamicArray<ResourceBindingDesc>& bindings, ezDynamicArray<VariableLayout>& layouts)
@@ -370,7 +370,7 @@ void ParseBindings(const spirv_cross::CompilerHLSL& compiler, ezDynamicArray<Res
     for (const auto& resource : resources)
     {
       bindings.PushBack(GetBindingDesc(compiler, resource));
-      layouts.PushBack(GetBufferLayout(bindings.PeekBack().type, compiler, resource));
+      GetBufferLayout(layouts, bindings.PeekBack().type, compiler, resource);
     }
   };
   enumerate_resources(resources.uniform_buffers);
