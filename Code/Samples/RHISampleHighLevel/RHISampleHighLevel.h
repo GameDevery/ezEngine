@@ -126,6 +126,8 @@ private:
   ShaderBlobType m_ShaderBlobType;
 };
 
+using ProgramHolderType = ProgramHolder<PixelShader, VertexShader>;
+
 class ezRHISampleApp : public ezApplication
 {
 public:
@@ -149,5 +151,5 @@ private:
   //std::vector<std::shared_ptr<RenderCommandList>> command_lists;
   ezSharedPtr<Resource> index;
   ezSharedPtr<Resource> pos;
-  std::shared_ptr<ProgramHolder<PixelShader, VertexShader>> m_program;
+  ezSharedPtr<ProgramHolderType> m_program;
 };

@@ -159,7 +159,7 @@ constexpr bool contains()
 template<typename T> class ShaderHolder : public ShaderHolderImpl<T::type, T> { using ShaderHolderImpl<T::type, T>::ShaderHolderImpl; };
 
 template<typename ... Args>
-class ProgramHolder : public ShaderHolder<Args>...
+class ProgramHolder : public ezRefCounted, public ShaderHolder<Args>...
 {
 public:
     ProgramHolder(RenderDevice& device, ShaderBlobType shaderBlobType)
