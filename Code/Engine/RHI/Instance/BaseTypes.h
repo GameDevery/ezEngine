@@ -1,6 +1,7 @@
 #pragma once
 #include <RHI/RHIDLL.h>
 
+#include <Foundation/Algorithm/HashableStruct.h>
 #include <RHI/Instance/EnumUtils.h>
 #include <array>
 #include <cassert>
@@ -10,7 +11,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <Foundation/Algorithm/HashableStruct.h>
 
 namespace enum_class
 {
@@ -495,14 +495,13 @@ struct BindKey : public ezHashableStruct<BindKey>
   ezUInt32 count = 0;
 
   BindKey() = default;
-  BindKey(ShaderType shader_type, ViewType view_type, ezUInt32 slot, ezUInt32 space, ezUInt32 count)
+  BindKey(ShaderType shader_type, ViewType view_type, ezUInt32 slot = 0, ezUInt32 space = 0, ezUInt32 count = 0)
     : shader_type{shader_type}
     , view_type{view_type}
     , slot{slot}
     , space{space}
     , count{count}
   {
-
   }
 
   auto MakeTie() const
@@ -525,6 +524,48 @@ struct ezCompareHelper<BindKey>
 {
   EZ_ALWAYS_INLINE bool Less(const BindKey& a, const BindKey& b) const { return a.CalculateHash() < b.CalculateHash(); }
   EZ_ALWAYS_INLINE bool Equal(const BindKey& a, const BindKey& b) const { return a.CalculateHash() == b.CalculateHash(); }
+};
+
+template <>
+struct ezCompareHelper<ezDynamicArray<BindKey>>
+{
+  EZ_ALWAYS_INLINE bool Less(const ezDynamicArray<BindKey>& a, const ezDynamicArray<BindKey>& b) const
+  {
+    if (Equal(a, b))
+    {
+      return false;
+    }
+
+    if (a.GetCount() == b.GetCount())
+    {
+      for (ezUInt32 i = 0; i < a.GetCount(); i++)
+      {
+        if (a[i].CalculateHash() < b[i].CalculateHash())
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    return a.GetCount() < b.GetCount();
+  }
+
+  EZ_ALWAYS_INLINE bool Equal(const ezDynamicArray<BindKey>& a, const ezDynamicArray<BindKey>& b) const
+  {
+    if (a.GetCount() != b.GetCount())
+    {
+      return false;
+    }
+    for (ezUInt32 i = 0; i < a.GetCount(); i++)
+    {
+      if (!(a[i] == b[i]))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 };
 
 struct BindingDesc
