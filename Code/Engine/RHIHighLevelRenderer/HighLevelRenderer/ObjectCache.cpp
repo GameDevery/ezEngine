@@ -61,18 +61,16 @@ ezSharedPtr<RenderPass> ObjectCache::GetRenderPass(const RenderPassDesc& desc)
   return it->second;
 }
 
-ezSharedPtr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::vector<BindKey>& keys)
+ezSharedPtr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const ezDynamicArray<BindKey>& keys)
 {
-  auto it = m_layout_cache.find(keys);
-  if (it == m_layout_cache.end())
+  auto it = m_layout_cache.Find(keys);
+  if (it == end(m_layout_cache))
   {
     auto layout = m_device.CreateBindingSetLayout(keys);
-    it = m_layout_cache.emplace(std::piecewise_construct,
-                         std::forward_as_tuple(keys),
-                         std::forward_as_tuple(layout))
-           .first;
+    it = m_layout_cache.Insert(keys, layout);
+           //.Key();
   }
-  return it->second;
+  return it.Value();
 }
 
 ezSharedPtr<BindingSet> ObjectCache::GetBindingSet(const ezSharedPtr<BindingSetLayout>& layout, const std::vector<BindingDesc>& bindings)

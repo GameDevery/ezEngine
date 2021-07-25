@@ -7,24 +7,24 @@ static ezUInt64 GenId()
 }
 
 ShaderBase::ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection, ShaderBlobType blob_type)
-    : m_shader_type(desc.type)
-    , m_blob_type(blob_type)
+  : m_shader_type(desc.type)
+  , m_blob_type(blob_type)
 {
   m_blob = byteCode;
   m_reflection = reflection;
   m_bindings = m_reflection->GetBindings();
-  for (ezUInt32 i = 0; i < m_bindings.size(); ++i)
+  for (ezUInt32 i = 0; i < m_bindings.GetCount(); ++i)
   {
     BindKey bind_key = {m_shader_type, m_bindings[i].type, m_bindings[i].slot, m_bindings[i].space, m_bindings[i].count};
     m_bind_keys[m_bindings[i].name] = bind_key;
     m_mapping[bind_key] = i;
-    m_binding_keys.emplace_back(bind_key);
+    m_binding_keys.PushBack(bind_key);
   }
 
   decltype(auto) input_parameters = m_reflection->GetInputParameters();
-  for (ezUInt32 i = 0; i < input_parameters.size(); ++i)
+  for (ezUInt32 i = 0; i < input_parameters.GetCount(); ++i)
   {
-    decltype(auto) layout = m_input_layout_descs.emplace_back();
+    decltype(auto) layout = m_input_layout_descs.ExpandAndGetRef();
     layout.slot = i;
     layout.semantic_name = input_parameters[i].semantic_name;
     layout.format = input_parameters[i].format;
@@ -40,50 +40,50 @@ ShaderBase::ShaderBase(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode,
 
 ShaderType ShaderBase::GetType() const
 {
-    return m_shader_type;
+  return m_shader_type;
 }
 
 const ezDynamicArray<ezUInt8>& ShaderBase::GetBlob() const
 {
-    return m_blob;
+  return m_blob;
 }
 
 ezUInt64 ShaderBase::GetId(const ezString& entry_point) const
 {
-    return m_ids.at(entry_point);
+  return m_ids.at(entry_point);
 }
 
 const BindKey& ShaderBase::GetBindKey(const ezString& name) const
 {
-    return m_bind_keys.at(name);
+  return m_bind_keys.at(name);
 }
 
-const std::vector<ResourceBindingDesc>& ShaderBase::GetResourceBindings() const
+const ezDynamicArray<ResourceBindingDesc>& ShaderBase::GetResourceBindings() const
 {
-    return m_bindings;
+  return m_bindings;
 }
 
 const ResourceBindingDesc& ShaderBase::GetResourceBinding(const BindKey& bind_key) const
 {
-    return m_bindings.at(m_mapping.at(bind_key));
+  return m_bindings[m_mapping.at(bind_key)];
 }
 
-const std::vector<InputLayoutDesc>& ShaderBase::GetInputLayouts() const
+const ezDynamicArray<InputLayoutDesc>& ShaderBase::GetInputLayouts() const
 {
-    return m_input_layout_descs;
+  return m_input_layout_descs;
 }
 
 ezUInt32 ShaderBase::GetInputLayoutLocation(const ezString& semantic_name) const
 {
-    return m_locations.at(semantic_name);
+  return m_locations.at(semantic_name);
 }
 
-const std::vector<BindKey>& ShaderBase::GetBindings() const
+const ezDynamicArray<BindKey>& ShaderBase::GetBindings() const
 {
-    return m_binding_keys;
+  return m_binding_keys;
 }
 
 const ezSharedPtr<ShaderReflection>& ShaderBase::GetReflection() const
 {
-    return m_reflection;
+  return m_reflection;
 }

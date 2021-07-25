@@ -27,7 +27,6 @@ class Fence;
 class Framebuffer;
 class FramebufferBase;
 class Instance;
-class QueryInterface;
 class Memory;
 class Pipeline;
 class Program;

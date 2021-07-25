@@ -126,6 +126,8 @@ private:
   ShaderBlobType m_ShaderBlobType;
 };
 
+using ProgramHolderType = ProgramHolder<PixelShader, VertexShader>;
+
 class ezRHISampleApp : public ezApplication
 {
 public:
@@ -144,10 +146,10 @@ public:
 private:
   ezRHISampleWindow* m_pWindow = nullptr;
   RenderDeviceDesc renderDeviceDesc;
-  std::shared_ptr<RenderDevice> device;
-  std::shared_ptr<RenderCommandList> upload_command_list;
+  ezSharedPtr<RenderDevice> device;
+  ezSharedPtr<RenderCommandList> upload_command_list;
   //std::vector<std::shared_ptr<RenderCommandList>> command_lists;
   ezSharedPtr<Resource> index;
   ezSharedPtr<Resource> pos;
-  std::shared_ptr<ProgramHolder<PixelShader, VertexShader>> m_program;
+  ezSharedPtr<ProgramHolder<PixelShader, VertexShader>> m_program;
 };

@@ -5,6 +5,8 @@
 #include <RHIVulkan/Program/VKProgram.h>
 #include <RHIVulkan/Utilities/VKUtility.h>
 
+EZ_DEFINE_AS_POD_TYPE(vk::DynamicState);
+
 vk::CompareOp Convert(ComparisonFunc func)
 {
   switch (func)
@@ -179,18 +181,18 @@ VKGraphicsPipeline::VKGraphicsPipeline(VKDevice& device, const GraphicsPipelineD
   depth_stencil.back = Convert(m_desc.depth_stencil_desc.back_face, m_desc.depth_stencil_desc.stencil_read_mask, m_desc.depth_stencil_desc.stencil_write_mask);
   depth_stencil.front = Convert(m_desc.depth_stencil_desc.front_face, m_desc.depth_stencil_desc.stencil_read_mask, m_desc.depth_stencil_desc.stencil_write_mask);
 
-  std::vector<vk::DynamicState> dynamic_state_enables = {
-    vk::DynamicState::eViewport,
-    vk::DynamicState::eScissor,
-    vk::DynamicState::eFragmentShadingRateKHR,
-  };
+  ezDynamicArray<vk::DynamicState> dynamic_state_enables;
+  dynamic_state_enables.PushBack(vk::DynamicState::eViewport);
+  dynamic_state_enables.PushBack(vk::DynamicState::eScissor);
+  dynamic_state_enables.PushBack(vk::DynamicState::eFragmentShadingRateKHR);
+
   vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
-  pipelineDynamicStateCreateInfo.pDynamicStates = dynamic_state_enables.data();
-  pipelineDynamicStateCreateInfo.dynamicStateCount = (ezUInt32)dynamic_state_enables.size();
+  pipelineDynamicStateCreateInfo.pDynamicStates = dynamic_state_enables.GetData();
+  pipelineDynamicStateCreateInfo.dynamicStateCount = dynamic_state_enables.GetCount();
 
   vk::GraphicsPipelineCreateInfo pipeline_info = {};
-  pipeline_info.stageCount = (ezUInt32)m_shader_stage_create_info.size();
-  pipeline_info.pStages = m_shader_stage_create_info.data();
+  pipeline_info.stageCount = m_shader_stage_create_info.GetCount();
+  pipeline_info.pStages = m_shader_stage_create_info.GetData();
   pipeline_info.pVertexInputState = &vertex_input_info;
   pipeline_info.pInputAssemblyState = &input_assembly;
   pipeline_info.pViewportState = &viewport_state;

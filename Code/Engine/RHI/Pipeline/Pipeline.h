@@ -2,7 +2,6 @@
 #include <RHI/RHIDLL.h>
 
 #include <RHI/Instance/BaseTypes.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <memory>
 
 class EZ_RHI_DLL Pipeline : public ezRefCounted

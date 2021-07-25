@@ -501,7 +501,7 @@ ezSharedPtr<View> VKDevice::CreateView(const ezSharedPtr<Resource>& resource, co
   return EZ_DEFAULT_NEW(VKView, *this, resource.Downcast<VKResource>(), view_desc);
 }
 
-ezSharedPtr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+ezSharedPtr<BindingSetLayout> VKDevice::CreateBindingSetLayout(const ezDynamicArray<BindKey>& descs)
 {
   return EZ_DEFAULT_NEW(VKBindingSetLayout, *this, descs);
 }
@@ -521,12 +521,12 @@ ezSharedPtr<Framebuffer> VKDevice::CreateFramebuffer(const FramebufferDesc& desc
   return EZ_DEFAULT_NEW(VKFramebuffer, *this, desc);
 }
 
-ezSharedPtr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection)
+ezSharedPtr<Shader> VKDevice::CreateShader(const ShaderDesc& desc, const ezDynamicArray<ezUInt8>& byteCode, const ezSharedPtr<ShaderReflection>& reflection)
 {
   return EZ_DEFAULT_NEW(ShaderBase, desc, byteCode, reflection, ShaderBlobType::kSPIRV);
 }
 
-ezSharedPtr<Program> VKDevice::CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders)
+ezSharedPtr<Program> VKDevice::CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders)
 {
   return EZ_DEFAULT_NEW(VKProgram, *this, shaders);
 }

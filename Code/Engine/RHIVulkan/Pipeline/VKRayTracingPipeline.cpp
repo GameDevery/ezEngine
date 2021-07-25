@@ -8,11 +8,14 @@
 #include <RHIVulkan/Pipeline/VKRayTracingPipeline.h>
 #include <RHIVulkan/Program/VKProgram.h>
 
+EZ_DEFINE_AS_POD_TYPE(vk::RayTracingShaderGroupCreateInfoKHR);
+
 VKRayTracingPipeline::VKRayTracingPipeline(VKDevice& device, const RayTracingPipelineDesc& desc)
   : VKPipeline(device, desc.program, desc.layout)
   , m_desc(desc)
 {
-  std::vector<vk::RayTracingShaderGroupCreateInfoKHR> groups(m_desc.groups.size());
+  ezDynamicArray<vk::RayTracingShaderGroupCreateInfoKHR> groups;
+  groups.SetCountUninitialized(m_desc.groups.GetCount());
 
   auto get = [&](ezUInt64 id) -> ezUInt32 {
     auto it = m_shader_ids.Find(id);
@@ -23,7 +26,7 @@ VKRayTracingPipeline::VKRayTracingPipeline(VKDevice& device, const RayTracingPip
     return it.Value();
   };
 
-  for (size_t i = 0; i < m_desc.groups.size(); ++i)
+  for (ezUInt32 i = 0; i < m_desc.groups.GetCount(); ++i)
   {
     decltype(auto) group = groups[i];
     group.generalShader = VK_SHADER_UNUSED_KHR;
@@ -50,10 +53,10 @@ VKRayTracingPipeline::VKRayTracingPipeline(VKDevice& device, const RayTracingPip
   }
 
   vk::RayTracingPipelineCreateInfoKHR ray_pipeline_info{};
-  ray_pipeline_info.stageCount = static_cast<ezUInt32>(m_shader_stage_create_info.size());
-  ray_pipeline_info.pStages = m_shader_stage_create_info.data();
-  ray_pipeline_info.groupCount = static_cast<ezUInt32>(groups.size());
-  ray_pipeline_info.pGroups = groups.data();
+  ray_pipeline_info.stageCount = m_shader_stage_create_info.GetCount();
+  ray_pipeline_info.pStages = m_shader_stage_create_info.GetData();
+  ray_pipeline_info.groupCount = groups.GetCount();
+  ray_pipeline_info.pGroups = groups.GetData();
   ray_pipeline_info.maxPipelineRayRecursionDepth = 1;
   ray_pipeline_info.layout = m_pipeline_layout;
 

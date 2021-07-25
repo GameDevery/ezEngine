@@ -4,7 +4,6 @@
 #include <RHI/BindingSet/BindingSet.h>
 #include <RHI/Framebuffer/Framebuffer.h>
 #include <RHI/Instance/BaseTypes.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Pipeline/Pipeline.h>
 #include <RHI/QueryHeap/QueryHeap.h>
 #include <RHI/RHIDLL.h>

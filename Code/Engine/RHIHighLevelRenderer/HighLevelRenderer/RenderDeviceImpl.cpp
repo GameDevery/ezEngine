@@ -43,9 +43,9 @@ ezSharedPtr<Resource> RenderDeviceImpl::GetBackBuffer(ezUInt32 buffer)
   return m_Swapchain->GetBackBuffer(buffer);
 }
 
-std::shared_ptr<RenderCommandList> RenderDeviceImpl::CreateRenderCommandList(CommandListType type)
+ezSharedPtr<RenderCommandList> RenderDeviceImpl::CreateRenderCommandList(CommandListType type)
 {
-  return std::make_shared<RenderCommandListImpl>(*m_device, *m_object_cache, CommandListType::kGraphics);
+  return EZ_DEFAULT_NEW(RenderCommandListImpl, *m_device, *m_object_cache, CommandListType::kGraphics);
 }
 
 ezSharedPtr<Resource> RenderDeviceImpl::CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels)
@@ -94,7 +94,7 @@ ezSharedPtr<Shader> RenderDeviceImpl::CreateShader(const ShaderDesc& desc, ezDyn
   return m_device->CreateShader(desc, byteCode, reflection);
 }
 
-ezSharedPtr<Program> RenderDeviceImpl::CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders)
+ezSharedPtr<Program> RenderDeviceImpl::CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders)
 {
   return m_device->CreateProgram(shaders);
 }
@@ -124,7 +124,7 @@ ezUInt32 RenderDeviceImpl::GetShadingRateImageTileSize() const
   return m_device->GetShadingRateImageTileSize();
 }
 
-void RenderDeviceImpl::ExecuteCommandLists(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists)
+void RenderDeviceImpl::ExecuteCommandLists(const std::vector<ezSharedPtr<RenderCommandList>>& command_lists)
 {
   for (auto& command_list : command_lists)
   {
@@ -139,15 +139,15 @@ const ezString& RenderDeviceImpl::GetGpuName() const
   return m_adapter->GetName();
 }
 
-void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists)
+void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<ezSharedPtr<RenderCommandList>>& command_lists)
 {
   std::vector<ezSharedPtr<CommandList>> rawCommandLists;
   size_t patch_cmds = 0;
   for (size_t c = 0; c < command_lists.size(); ++c)
   {
     std::vector<ResourceBarrierDesc> new_barriers;
-    decltype(auto) command_list_impl = command_lists[c]->As<RenderCommandListImpl>();
-    auto barriers = command_list_impl.GetLazyBarriers();
+    decltype(auto) command_list_impl = command_lists[c].Downcast<RenderCommandListImpl>();
+    auto barriers = command_list_impl->GetLazyBarriers();
     for (auto& barrier : barriers)
     {
       if (c == 0 && barrier.resource->AllowCommonStatePromotion(barrier.state_after))
@@ -186,7 +186,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
       ezSharedPtr<CommandList> tmp_cmd;
       if (c != 0 && kUseFakeClose)
       {
-        tmp_cmd = command_lists[c - 1]->As<RenderCommandListImpl>().GetCommandList();
+        tmp_cmd = command_lists[c - 1].Downcast<RenderCommandListImpl>()->GetCommandList();
       }
       else
       {
@@ -216,7 +216,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
       ++patch_cmds;
     }
 
-    auto& state_trackers = command_list_impl.GetResourceStateTrackers();
+    auto& state_trackers = command_list_impl->GetResourceStateTrackers();
     for (const auto& state_tracker_pair : state_trackers)
     {
       auto& resource = state_tracker_pair.first;
@@ -226,7 +226,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
       global_state_tracker.Merge(state_tracker);
     }
 
-    rawCommandLists.emplace_back(command_list_impl.GetCommandList());
+    rawCommandLists.emplace_back(command_list_impl->GetCommandList());
   }
   if (kUseFakeClose)
   {
@@ -295,7 +295,7 @@ ezUInt32 RenderDeviceImpl::GetFrameIndex() const
   return m_frame_index;
 }
 
-std::shared_ptr<RenderDevice> CreateRenderDevice(const RenderDeviceDesc& settings, ezWindowBase* window)
+ezSharedPtr<RenderDevice> CreateRenderDevice(const RenderDeviceDesc& settings, ezWindowBase* window)
 {
-  return std::make_shared<RenderDeviceImpl>(settings, window);
+  return EZ_DEFAULT_NEW(RenderDeviceImpl, settings, window);
 }

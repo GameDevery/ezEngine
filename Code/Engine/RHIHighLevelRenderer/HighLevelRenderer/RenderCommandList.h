@@ -1,10 +1,9 @@
 #pragma once
 #include <RHIHighLevelRenderer/RHIHighLevelRendererDLL.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Resource/Resource.h>
 #include <RHI/Instance/BaseTypes.h>
 
-class EZ_RHIHIGHLEVELRENDERER_DLL RenderCommandList : public QueryInterface
+class EZ_RHIHIGHLEVELRENDERER_DLL RenderCommandList : public ezRefCounted
 {
 public:
     virtual ~RenderCommandList() = default;

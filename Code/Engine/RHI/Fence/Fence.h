@@ -2,8 +2,6 @@
 #include <RHI/RHIDLL.h>
 
 #include <RHI/Instance/BaseTypes.h>
-#include <RHI/Instance/QueryInterface.h>
-#include <cstdint>
 
 class EZ_RHI_DLL Fence : public ezRefCounted
 {

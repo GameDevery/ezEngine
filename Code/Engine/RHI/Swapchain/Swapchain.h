@@ -2,7 +2,6 @@
 #include <RHI/RHIDLL.h>
 
 #include <RHI/Fence/Fence.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Resource/Resource.h>
 
 using Window = void*;

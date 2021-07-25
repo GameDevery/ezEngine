@@ -38,7 +38,7 @@ public:
   ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
   void DestroyView(View* pView) override {}
 
-  ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) override;
+  ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const ezDynamicArray<BindKey>& descs) override;
   void DestroyBindingSetLayout(BindingSetLayout* pBindingSetLayout) override {}
 
   ezSharedPtr<BindingSet> CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout) override;
@@ -50,10 +50,10 @@ public:
   ezSharedPtr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) override;
   void DestroyFramebuffer(Framebuffer* pFramebuffer) override {}
 
-  ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) override;
+  ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, const ezDynamicArray<ezUInt8>& byteCode, const ezSharedPtr<ShaderReflection>& reflection) override;
   void DestroyShader(Shader* pShader) override {}
 
-  ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) override;
+  ezSharedPtr<Program> CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders) override;
   void DestroyProgram(Program* pProgram) override {}
 
   ezSharedPtr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;

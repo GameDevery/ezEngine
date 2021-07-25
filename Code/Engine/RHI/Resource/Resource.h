@@ -1,12 +1,9 @@
 #pragma once
 #include <RHI/RHIDLL.h>
 
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Memory/Memory.h>
 #include <RHI/Resource/ResourceStateTracker.h>
 #include <RHI/View/View.h>
-#include <memory>
-#include <string>
 
 struct EZ_RHI_DLL MemoryRequirements
 {

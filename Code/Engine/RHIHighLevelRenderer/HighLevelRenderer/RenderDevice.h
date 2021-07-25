@@ -2,7 +2,6 @@
 #include <RHI/RHIDLL.h>
 #include <RHIHighLevelRenderer/RHIHighLevelRendererDLL.h>
 #include <RHIHighLevelRenderer/HighLevelRenderer/RenderCommandList.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Instance/BaseTypes.h>
 #include <RHI/Swapchain/Swapchain.h>
 #include <RHI/CommandList/CommandList.h>
@@ -19,11 +18,11 @@
 
 class ezWindowBase;
 
-class EZ_RHIHIGHLEVELRENDERER_DLL RenderDevice : public QueryInterface
+class EZ_RHIHIGHLEVELRENDERER_DLL RenderDevice : public ezRefCounted
 {
 public:
     virtual ~RenderDevice() = default;
-    virtual std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type = CommandListType::kGraphics) = 0;
+    virtual ezSharedPtr<RenderCommandList> CreateRenderCommandList(CommandListType type = CommandListType::kGraphics) = 0;
     virtual ezSharedPtr<Resource> CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth = 1, int mip_levels = 1) = 0;
     virtual ezSharedPtr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type = MemoryType::kDefault) = 0;
     virtual ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) = 0;
@@ -31,7 +30,7 @@ public:
     virtual ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) = 0;
     virtual ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) = 0;
     virtual ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) = 0;
-    virtual ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) = 0;
+    virtual ezSharedPtr<Program> CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders) = 0;
     virtual bool IsDxrSupported() const = 0;
     virtual bool IsRayQuerySupported() const = 0;
     virtual bool IsVariableRateShadingSupported() const = 0;
@@ -41,11 +40,11 @@ public:
     virtual ezRHIResourceFormat::Enum GetFormat() const = 0;
     virtual ezSharedPtr<Resource> GetBackBuffer(ezUInt32 buffer) = 0;
     virtual const ezString& GetGpuName() const = 0;
-    virtual void ExecuteCommandLists(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists) = 0;
+    virtual void ExecuteCommandLists(const std::vector<ezSharedPtr<RenderCommandList>>& command_lists) = 0;
     virtual void Present() = 0;
     virtual void Wait(ezUInt64 fence_value) = 0;
     virtual void WaitForIdle() = 0;
     virtual void Resize(ezUInt32 width, ezUInt32 height) = 0;
 };
 
-EZ_RHIHIGHLEVELRENDERER_DLL std::shared_ptr<RenderDevice> CreateRenderDevice(const RenderDeviceDesc& settings, ezWindowBase* window);
+EZ_RHIHIGHLEVELRENDERER_DLL ezSharedPtr<RenderDevice> CreateRenderDevice(const RenderDeviceDesc& settings, ezWindowBase* window);

@@ -22,7 +22,7 @@ public:
     RenderDeviceImpl(const RenderDeviceDesc& settings, ezWindowBase* window);
     ~RenderDeviceImpl();
 
-    std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type) override;
+    ezSharedPtr<RenderCommandList> CreateRenderCommandList(CommandListType type) override;
     ezSharedPtr<Resource> CreateTexture(ezUInt32 bind_flag, ezRHIResourceFormat::Enum format, ezUInt32 sample_count, int width, int height, int depth, int mip_levels) override;
     ezSharedPtr<Resource> CreateBuffer(ezUInt32 bind_flag, ezUInt32 buffer_size, MemoryType memory_type) override;
     ezSharedPtr<Resource> CreateSampler(const SamplerDesc& desc) override;
@@ -30,7 +30,7 @@ public:
     ezSharedPtr<Resource> CreateTopLevelAS(ezUInt32 instance_count, BuildAccelerationStructureFlags flags) override;
     ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& view_desc) override;
     ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) override;
-    ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) override;
+    ezSharedPtr<Program> CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders) override;
     bool IsDxrSupported() const override;
     bool IsRayQuerySupported() const override;
     bool IsVariableRateShadingSupported() const override;
@@ -40,13 +40,13 @@ public:
     ezRHIResourceFormat::Enum GetFormat() const override;
     ezSharedPtr<Resource> GetBackBuffer(ezUInt32 buffer) override;
     const ezString& GetGpuName() const override;
-    void ExecuteCommandLists(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists) override;
+    void ExecuteCommandLists(const std::vector<ezSharedPtr<RenderCommandList>>& command_lists) override;
     void Present() override;
     void Wait(ezUInt64 fence_value) override;
     void WaitForIdle() override;
     void Resize(ezUInt32 width, ezUInt32 height) override;
 
-    void ExecuteCommandListsImpl(const std::vector<std::shared_ptr<RenderCommandList>>& command_lists);
+    void ExecuteCommandListsImpl(const std::vector<ezSharedPtr<RenderCommandList>>& command_lists);
 
 private:
     void InsertPresentBarrier();

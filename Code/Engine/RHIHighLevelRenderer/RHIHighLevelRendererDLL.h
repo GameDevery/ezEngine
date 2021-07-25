@@ -62,7 +62,7 @@ struct EZ_RHIHIGHLEVELRENDERER_DLL RenderPassBeginDesc
   RenderPassBeginDepthStencilDesc depth_stencil;
 };
 
-class EZ_RHIHIGHLEVELRENDERER_DLL DeferredView
+class EZ_RHIHIGHLEVELRENDERER_DLL DeferredView : ezRefCounted
 {
 public:
   virtual ~DeferredView() = default;

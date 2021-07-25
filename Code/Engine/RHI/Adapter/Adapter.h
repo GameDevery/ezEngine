@@ -2,8 +2,6 @@
 #include <RHI/RHIDLL.h>
 
 #include <RHI/Device/Device.h>
-#include <RHI/Instance/QueryInterface.h>
-#include <memory>
 
 class EZ_RHI_DLL Adapter : public ezRefCounted
 {

@@ -47,8 +47,9 @@ private:
   ezSharedPtr<Resource> m_pConstantBuffer;
   ezSharedPtr<Resource> m_pIndexBuffer;
   ezSharedPtr<Resource> m_pVertexBuffer;
-  ezSharedPtr<Shader> m_pVertexShader;
-  ezSharedPtr<Shader> m_pPixelShader;
+  ezDynamicArray<ezSharedPtr<Shader>> m_Shaders;
+  //ezSharedPtr<Shader> m_pVertexShader;
+  //ezSharedPtr<Shader> m_pPixelShader;
   ezSharedPtr<BindingSetLayout> m_pLayout;
   ezSharedPtr<BindingSet> m_pBindingSet;
   ezUInt32 m_FrameIndex = 0;

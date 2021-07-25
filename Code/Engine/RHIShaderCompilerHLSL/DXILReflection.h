@@ -9,11 +9,11 @@ class DXILReflection : public ShaderReflection
 {
 public:
   DXILReflection(const void* data, size_t size);
-  const std::vector<EntryPoint>& GetEntryPoints() const override;
-  const std::vector<ResourceBindingDesc>& GetBindings() const override;
-  const std::vector<VariableLayout>& GetVariableLayouts() const override;
-  const std::vector<InputParameterDesc>& GetInputParameters() const override;
-  const std::vector<OutputParameterDesc>& GetOutputParameters() const override;
+  const ezDynamicArray<EntryPoint>& GetEntryPoints() const override;
+  const ezDynamicArray<ResourceBindingDesc>& GetBindings() const override;
+  const ezDynamicArray<VariableLayout>& GetVariableLayouts() const override;
+  const ezDynamicArray<InputParameterDesc>& GetInputParameters() const override;
+  const ezDynamicArray<OutputParameterDesc>& GetOutputParameters() const override;
   const ShaderFeatureInfo& GetShaderFeatureInfo() const override;
 
 private:
@@ -23,10 +23,10 @@ private:
   void ParseDebugInfo(dxc::DxcDllSupport& dxc_support, ComPtr<IDxcBlob> pdb);
 
   bool m_is_library = false;
-  std::vector<EntryPoint> m_entry_points;
-  std::vector<ResourceBindingDesc> m_bindings;
-  std::vector<VariableLayout> m_layouts;
-  std::vector<InputParameterDesc> m_input_parameters;
-  std::vector<OutputParameterDesc> m_output_parameters;
+  ezDynamicArray<EntryPoint> m_entry_points;
+  ezDynamicArray<ResourceBindingDesc> m_bindings;
+  ezDynamicArray<VariableLayout> m_layouts;
+  ezDynamicArray<InputParameterDesc> m_input_parameters;
+  ezDynamicArray<OutputParameterDesc> m_output_parameters;
   ShaderFeatureInfo m_shader_feature_info = {};
 };

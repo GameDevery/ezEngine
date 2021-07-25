@@ -3,16 +3,16 @@
 #include <RHIVulkan/Adapter/VKAdapter.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
-VKAdapter::VKAdapter(VKInstance& instance, const vk::PhysicalDevice& physical_device)
-  : m_instance(instance)
-  , m_physical_device(physical_device)
-  , m_name(physical_device.getProperties().deviceName.data())
+VKAdapter::VKAdapter(VKInstance& instance, const vk::PhysicalDevice& physicalDevice)
+  : m_Instance(instance)
+  , m_PhysicalDevice(physicalDevice)
+  , m_Name(physicalDevice.getProperties().deviceName.data())
 {
 }
 
 const ezString& VKAdapter::GetName() const
 {
-  return m_name;
+  return m_Name;
 }
 
 ezSharedPtr<Device> VKAdapter::CreateDevice()
@@ -22,10 +22,10 @@ ezSharedPtr<Device> VKAdapter::CreateDevice()
 
 VKInstance& VKAdapter::GetInstance()
 {
-  return m_instance;
+  return m_Instance;
 }
 
 vk::PhysicalDevice& VKAdapter::GetPhysicalDevice()
 {
-  return m_physical_device;
+  return m_PhysicalDevice;
 }

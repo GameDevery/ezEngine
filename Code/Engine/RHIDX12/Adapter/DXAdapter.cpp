@@ -5,17 +5,17 @@
 #include <directx/d3d12.h>
 
 DXAdapter::DXAdapter(DXInstance& instance, const ComPtr<IDXGIAdapter1>& adapter)
-    : m_instance(instance)
-    , m_adapter(adapter)
+    : m_Instance(instance)
+    , m_Adapter(adapter)
 {
     DXGI_ADAPTER_DESC desc = {};
     adapter->GetDesc(&desc);
-    m_name = ezStringUtf8(desc.Description);
+    m_Name = ezStringUtf8(desc.Description);
 }
 
 const ezString& DXAdapter::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 ezSharedPtr<Device> DXAdapter::CreateDevice()
@@ -25,10 +25,10 @@ ezSharedPtr<Device> DXAdapter::CreateDevice()
 
 DXInstance& DXAdapter::GetInstance()
 {
-    return m_instance;
+    return m_Instance;
 }
 
 ComPtr<IDXGIAdapter1> DXAdapter::GetAdapter()
 {
-    return m_adapter;
+    return m_Adapter;
 }

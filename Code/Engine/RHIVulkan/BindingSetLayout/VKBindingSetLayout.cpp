@@ -3,6 +3,9 @@
 #include <RHIVulkan/BindingSetLayout/VKBindingSetLayout.h>
 #include <RHIVulkan/Device/VKDevice.h>
 
+EZ_DEFINE_AS_POD_TYPE(vk::UniqueDescriptorSetLayout);
+EZ_DEFINE_AS_POD_TYPE(vk::DescriptorSetLayout);
+
 vk::DescriptorType GetDescriptorType(ViewType view_type)
 {
     switch (view_type)
@@ -55,20 +58,20 @@ vk::ShaderStageFlagBits ShaderType2Bit(ShaderType type)
     return {};
 }
 
-VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindKey>& descs)
+VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const ezDynamicArray<BindKey>& descs)
 {
-    ezMap<ezUInt32, std::vector<vk::DescriptorSetLayoutBinding>> bindings_by_set;
-    ezMap<ezUInt32, std::vector<vk::DescriptorBindingFlags>> bindings_flags_by_set;
+    ezMap<ezUInt32, ezDynamicArray<vk::DescriptorSetLayoutBinding>> bindings_by_set;
+    ezMap<ezUInt32, ezDynamicArray<vk::DescriptorBindingFlags>> bindings_flags_by_set;
 
     for (const auto& bind_key : descs)
     {
-        decltype(auto) binding = bindings_by_set[bind_key.space].emplace_back();
+        decltype(auto) binding = bindings_by_set[bind_key.space].ExpandAndGetRef();
         binding.binding = bind_key.slot;
         binding.descriptorType = GetDescriptorType(bind_key.view_type);
         binding.descriptorCount = bind_key.count;
         binding.stageFlags = ShaderType2Bit(bind_key.shader_type);
 
-        decltype(auto) binding_flag = bindings_flags_by_set[bind_key.space].emplace_back();
+        decltype(auto) binding_flag = bindings_flags_by_set[bind_key.space].ExpandAndGetRef();
         if (bind_key.count == ezMath::MaxValue<ezUInt32>())
         {
             binding.descriptorCount = max_bindless_heap_size;
@@ -81,19 +84,19 @@ VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindK
     for (const auto& set_desc : bindings_by_set)
     {
         vk::DescriptorSetLayoutCreateInfo layout_info = {};
-      layout_info.bindingCount = (ezUInt32)set_desc.Value().size();
-        layout_info.pBindings = set_desc.Value().data();
+      layout_info.bindingCount = set_desc.Value().GetCount();
+        layout_info.pBindings = set_desc.Value().GetData();
 
         vk::DescriptorSetLayoutBindingFlagsCreateInfo layout_flags_info = {};
-        layout_flags_info.bindingCount = (ezUInt32)bindings_flags_by_set[set_desc.Key()].size();
-        layout_flags_info.pBindingFlags = bindings_flags_by_set[set_desc.Key()].data();
+        layout_flags_info.bindingCount = bindings_flags_by_set[set_desc.Key()].GetCount();
+        layout_flags_info.pBindingFlags = bindings_flags_by_set[set_desc.Key()].GetData();
         layout_info.pNext = &layout_flags_info;
 
-        size_t set_num = set_desc.Key();
-        if (m_descriptor_set_layouts.size() <= set_num)
+        ezUInt32 set_num = set_desc.Key();
+        if (m_descriptor_set_layouts.GetCount() <= set_num)
         {
-            m_descriptor_set_layouts.resize(set_num + 1);
-            m_descriptor_count_by_set.resize(set_num + 1);
+            m_descriptor_set_layouts.SetCountUninitialized(set_num + 1);
+            m_descriptor_count_by_set.SetCount(set_num + 1);
         }
 
         decltype(auto) descriptor_set_layout = m_descriptor_set_layouts[set_num];
@@ -106,7 +109,7 @@ VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindK
         }
     }
 
-    std::vector<vk::DescriptorSetLayout> descriptor_set_layouts;
+    ezDynamicArray<vk::DescriptorSetLayout> descriptor_set_layouts;
     for (auto& descriptor_set_layout : m_descriptor_set_layouts)
     {
         if (!descriptor_set_layout)
@@ -115,12 +118,12 @@ VKBindingSetLayout::VKBindingSetLayout(VKDevice& device, const std::vector<BindK
             descriptor_set_layout = device.GetDevice().createDescriptorSetLayoutUnique(layout_info);
         }
 
-        descriptor_set_layouts.emplace_back(descriptor_set_layout.get());
+        descriptor_set_layouts.PushBack(descriptor_set_layout.get());
     }
 
     vk::PipelineLayoutCreateInfo pipeline_layout_info = {};
-    pipeline_layout_info.setLayoutCount = (ezUInt32)descriptor_set_layouts.size();
-    pipeline_layout_info.pSetLayouts = descriptor_set_layouts.data();
+    pipeline_layout_info.setLayoutCount = descriptor_set_layouts.GetCount();
+    pipeline_layout_info.pSetLayouts = descriptor_set_layouts.GetData();
 
     m_pipeline_layout = device.GetDevice().createPipelineLayoutUnique(pipeline_layout_info);
 }
@@ -130,12 +133,12 @@ const ezMap<ezUInt32, vk::DescriptorType>& VKBindingSetLayout::GetBindlessType()
     return m_bindless_type;
 }
 
-const std::vector<vk::UniqueDescriptorSetLayout>& VKBindingSetLayout::GetDescriptorSetLayouts() const
+const ezDynamicArray<vk::UniqueDescriptorSetLayout>& VKBindingSetLayout::GetDescriptorSetLayouts() const
 {
     return m_descriptor_set_layouts;
 }
 
-const std::vector<ezMap<vk::DescriptorType, size_t>>& VKBindingSetLayout::GetDescriptorCountBySet() const
+const ezDynamicArray<ezMap<vk::DescriptorType, ezUInt32>>& VKBindingSetLayout::GetDescriptorCountBySet() const
 {
     return m_descriptor_count_by_set;
 }

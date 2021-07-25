@@ -324,7 +324,7 @@ ezSharedPtr<View> DXDevice::CreateView(const ezSharedPtr<Resource>& resource, co
   return EZ_DEFAULT_NEW(DXView, *this, resource.Downcast<DXResource>(), view_desc);
 }
 
-ezSharedPtr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const std::vector<BindKey>& descs)
+ezSharedPtr<BindingSetLayout> DXDevice::CreateBindingSetLayout(const ezDynamicArray<BindKey>& descs)
 {
   return EZ_DEFAULT_NEW(DXBindingSetLayout, *this, descs);
 }
@@ -344,12 +344,12 @@ ezSharedPtr<Framebuffer> DXDevice::CreateFramebuffer(const FramebufferDesc& desc
   return EZ_DEFAULT_NEW(DXFramebuffer, desc);
 }
 
-ezSharedPtr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection)
+ezSharedPtr<Shader> DXDevice::CreateShader(const ShaderDesc& desc, const ezDynamicArray<ezUInt8>& byteCode, const ezSharedPtr<ShaderReflection>& reflection)
 {
   return EZ_DEFAULT_NEW(ShaderBase, desc, byteCode, reflection, ShaderBlobType::kDXIL);
 }
 
-ezSharedPtr<Program> DXDevice::CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders)
+ezSharedPtr<Program> DXDevice::CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders)
 {
   return EZ_DEFAULT_NEW(DXProgram, *this, shaders);
 }

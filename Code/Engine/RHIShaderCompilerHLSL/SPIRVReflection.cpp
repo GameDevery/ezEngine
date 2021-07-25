@@ -33,14 +33,14 @@ ShaderKind ConvertShaderKind(spv::ExecutionModel execution_model)
   return ShaderKind::kUnknown;
 }
 
-std::vector<InputParameterDesc> ParseInputParameters(const spirv_cross::Compiler& compiler)
+ezDynamicArray<InputParameterDesc> ParseInputParameters(const spirv_cross::Compiler& compiler)
 {
   ezString s;
   spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-  std::vector<InputParameterDesc> input_parameters;
+  ezDynamicArray<InputParameterDesc> input_parameters;
   for (const auto& resource : resources.stage_inputs)
   {
-    decltype(auto) input = input_parameters.emplace_back();
+    decltype(auto) input = input_parameters.ExpandAndGetRef();
     input.location = compiler.get_decoration(resource.id, spv::DecorationLocation);
     input.semantic_name = compiler.get_decoration_string(resource.id, spv::DecorationHlslSemanticGOOGLE).data();
     if (!input.semantic_name.IsEmpty() && input.semantic_name.EndsWith("0"))
@@ -109,13 +109,13 @@ std::vector<InputParameterDesc> ParseInputParameters(const spirv_cross::Compiler
   return input_parameters;
 }
 
-std::vector<OutputParameterDesc> ParseOutputParameters(const spirv_cross::Compiler& compiler)
+ezDynamicArray<OutputParameterDesc> ParseOutputParameters(const spirv_cross::Compiler& compiler)
 {
   spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-  std::vector<OutputParameterDesc> output_parameters;
+  ezDynamicArray<OutputParameterDesc> output_parameters;
   for (const auto& resource : resources.stage_outputs)
   {
-    decltype(auto) output = output_parameters.emplace_back();
+    decltype(auto) output = output_parameters.ExpandAndGetRef();
     output.slot = compiler.get_decoration(resource.id, spv::DecorationLocation);
   }
   return output_parameters;
@@ -354,7 +354,8 @@ VariableLayout GetBufferLayout(ViewType view_type, const spirv_cross::CompilerHL
   assert(type.basetype == spirv_cross::SPIRType::BaseType::Struct);
   for (ezUInt32 i = 0; i < (ezUInt32)type.member_types.size(); ++i)
   {
-    auto& member = layout.members.emplace_back(GetBufferMemberLayout(compiler, type.member_types[i]));
+    layout.members.PushBack(GetBufferMemberLayout(compiler, type.member_types[i]));
+    auto& member = layout.members.PeekBack();
     member.name = compiler.get_member_name(resource.base_type_id, i).data();
     member.offset = compiler.type_struct_member_offset(type, i);
     member.size = (ezUInt32)compiler.get_declared_struct_member_size(type, i);
@@ -362,14 +363,14 @@ VariableLayout GetBufferLayout(ViewType view_type, const spirv_cross::CompilerHL
   return layout;
 }
 
-void ParseBindings(const spirv_cross::CompilerHLSL& compiler, std::vector<ResourceBindingDesc>& bindings, std::vector<VariableLayout>& layouts)
+void ParseBindings(const spirv_cross::CompilerHLSL& compiler, ezDynamicArray<ResourceBindingDesc>& bindings, ezDynamicArray<VariableLayout>& layouts)
 {
   spirv_cross::ShaderResources resources = compiler.get_shader_resources();
   auto enumerate_resources = [&](const spirv_cross::SmallVector<spirv_cross::Resource>& resources) {
     for (const auto& resource : resources)
     {
-      bindings.emplace_back(GetBindingDesc(compiler, resource));
-      layouts.emplace_back(GetBufferLayout(bindings.back().type, compiler, resource));
+      bindings.PushBack(GetBindingDesc(compiler, resource));
+      layouts.PushBack(GetBufferLayout(bindings.PeekBack().type, compiler, resource));
     }
   };
   enumerate_resources(resources.uniform_buffers);
@@ -388,34 +389,34 @@ SPIRVReflection::SPIRVReflection(const void* data, size_t size)
   auto entry_points = compiler.get_entry_points_and_stages();
   for (const auto& entry_point : entry_points)
   {
-    m_entry_points.push_back({entry_point.name.c_str(), ConvertShaderKind(entry_point.execution_model)});
+    m_entry_points.PushBack({entry_point.name.c_str(), ConvertShaderKind(entry_point.execution_model)});
   }
   ParseBindings(compiler, m_bindings, m_layouts);
   m_input_parameters = ParseInputParameters(compiler);
   m_output_parameters = ParseOutputParameters(compiler);
 }
 
-const std::vector<EntryPoint>& SPIRVReflection::GetEntryPoints() const
+const ezDynamicArray<EntryPoint>& SPIRVReflection::GetEntryPoints() const
 {
   return m_entry_points;
 }
 
-const std::vector<ResourceBindingDesc>& SPIRVReflection::GetBindings() const
+const ezDynamicArray<ResourceBindingDesc>& SPIRVReflection::GetBindings() const
 {
   return m_bindings;
 }
 
-const std::vector<VariableLayout>& SPIRVReflection::GetVariableLayouts() const
+const ezDynamicArray<VariableLayout>& SPIRVReflection::GetVariableLayouts() const
 {
   return m_layouts;
 }
 
-const std::vector<InputParameterDesc>& SPIRVReflection::GetInputParameters() const
+const ezDynamicArray<InputParameterDesc>& SPIRVReflection::GetInputParameters() const
 {
   return m_input_parameters;
 }
 
-const std::vector<OutputParameterDesc>& SPIRVReflection::GetOutputParameters() const
+const ezDynamicArray<OutputParameterDesc>& SPIRVReflection::GetOutputParameters() const
 {
   return m_output_parameters;
 }

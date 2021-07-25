@@ -7,7 +7,6 @@
 #include <RHI/Fence/Fence.h>
 #include <RHI/Framebuffer/Framebuffer.h>
 #include <RHI/Instance/BaseTypes.h>
-#include <RHI/Instance/QueryInterface.h>
 #include <RHI/Memory/Memory.h>
 #include <RHI/Pipeline/Pipeline.h>
 #include <RHI/Program/Program.h>
@@ -52,7 +51,7 @@ public:
   virtual ezSharedPtr<View> CreateView(const ezSharedPtr<Resource>& resource, const ViewDesc& viewDesc) = 0;
   virtual void DestroyView(View* pView) = 0;
 
-  virtual ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const std::vector<BindKey>& descs) = 0;
+  virtual ezSharedPtr<BindingSetLayout> CreateBindingSetLayout(const ezDynamicArray<BindKey>& descs) = 0;
   virtual void DestroyBindingSetLayout(BindingSetLayout* pBindingSetLayout) = 0;
 
   virtual ezSharedPtr<BindingSet> CreateBindingSet(const ezSharedPtr<BindingSetLayout>& layout) = 0;
@@ -64,10 +63,10 @@ public:
   virtual ezSharedPtr<Framebuffer> CreateFramebuffer(const FramebufferDesc& desc) = 0;
   virtual void DestroyFramebuffer(Framebuffer* pFramebuffer) = 0;
 
-  virtual ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, ezDynamicArray<ezUInt8> byteCode, ezSharedPtr<ShaderReflection> reflection) = 0;
+  virtual ezSharedPtr<Shader> CreateShader(const ShaderDesc& desc, const ezDynamicArray<ezUInt8>& byteCode, const ezSharedPtr<ShaderReflection>& reflection) = 0;
   virtual void DestroyShader(Shader* pShader) = 0;
 
-  virtual ezSharedPtr<Program> CreateProgram(const std::vector<ezSharedPtr<Shader>>& shaders) = 0;
+  virtual ezSharedPtr<Program> CreateProgram(const ezDynamicArray<ezSharedPtr<Shader>>& shaders) = 0;
   virtual void DestroyProgram(Program* pProgram) = 0;
 
   virtual ezSharedPtr<Pipeline> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) = 0;

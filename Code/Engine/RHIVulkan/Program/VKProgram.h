@@ -10,5 +10,5 @@ class VKDevice;
 class VKProgram : public ProgramBase
 {
 public:
-  VKProgram(VKDevice& device, const std::vector<ezSharedPtr<Shader>>& shaders);
+  VKProgram(VKDevice& device, const ezDynamicArray<ezSharedPtr<Shader>>& shaders);
 };

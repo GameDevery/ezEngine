@@ -1,18 +1,24 @@
 #include <RHI/Program/ProgramBase.h>
 #include <deque>
 
-ProgramBase::ProgramBase(const std::vector<ezSharedPtr<Shader>>& shaders)
+ProgramBase::ProgramBase(const ezDynamicArray<ezSharedPtr<Shader>>& shaders)
     : m_shaders(shaders)
 {
     for (const auto& shader : m_shaders)
     {
         m_shaders_by_type[shader->GetType()] = shader;
         decltype(auto) bindings = shader->GetBindings();
-        m_bindings.insert(m_bindings.begin(), bindings.begin(), bindings.end());
+
+        // todo: add InsertRange to ezDynamicArray
+        ezDynamicArray tmp(m_bindings);
+        m_bindings = bindings;
+        m_bindings.PushBackRange(tmp);
+
+        //m_bindings.insert(m_bindings.begin(), bindings.begin(), bindings.end());
 
         decltype(auto) reflection = shader->GetReflection();
         decltype(auto) shader_entry_points = reflection->GetEntryPoints();
-        m_entry_points.insert(m_entry_points.end(), shader_entry_points.begin(), shader_entry_points.end());
+        m_entry_points.PushBackRange(shader_entry_points);
     }
 }
 
@@ -31,17 +37,17 @@ ezSharedPtr<Shader> ProgramBase::GetShader(ShaderType type) const
     return {};
 }
 
-const std::vector<ezSharedPtr<Shader>>& ProgramBase::GetShaders() const
+const ezDynamicArray<ezSharedPtr<Shader>>& ProgramBase::GetShaders() const
 {
     return m_shaders;
 }
 
-const std::vector<BindKey>& ProgramBase::GetBindings() const
+const ezDynamicArray<BindKey>& ProgramBase::GetBindings() const
 {
     return m_bindings;
 }
 
-const std::vector<EntryPoint>& ProgramBase::GetEntryPoints() const
+const ezDynamicArray<EntryPoint>& ProgramBase::GetEntryPoints() const
 {
     return m_entry_points;
 }

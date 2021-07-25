@@ -9,17 +9,17 @@
 class EZ_RHI_DLL ProgramBase : public Program
 {
 public:
-  ProgramBase(const std::vector<ezSharedPtr<Shader>>& shaders);
+  ProgramBase(const ezDynamicArray<ezSharedPtr<Shader>>& shaders);
 
   bool HasShader(ShaderType type) const override final;
   ezSharedPtr<Shader> GetShader(ShaderType type) const override final;
-  const std::vector<ezSharedPtr<Shader>>& GetShaders() const override final;
-  const std::vector<BindKey>& GetBindings() const override final;
-  const std::vector<EntryPoint>& GetEntryPoints() const override final;
+  const ezDynamicArray<ezSharedPtr<Shader>>& GetShaders() const override final;
+  const ezDynamicArray<BindKey>& GetBindings() const override final;
+  const ezDynamicArray<EntryPoint>& GetEntryPoints() const override final;
 
 protected:
   std::map<ShaderType, ezSharedPtr<Shader>> m_shaders_by_type;
-  std::vector<ezSharedPtr<Shader>> m_shaders;
-  std::vector<BindKey> m_bindings;
-  std::vector<EntryPoint> m_entry_points;
+  ezDynamicArray<ezSharedPtr<Shader>> m_shaders;
+  ezDynamicArray<BindKey> m_bindings;
+  ezDynamicArray<EntryPoint> m_entry_points;
 };

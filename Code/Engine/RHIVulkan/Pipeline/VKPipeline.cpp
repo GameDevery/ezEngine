@@ -4,6 +4,10 @@
 #include <RHIVulkan/Device/VKDevice.h>
 #include <RHIVulkan/BindingSetLayout/VKBindingSetLayout.h>
 
+
+EZ_DEFINE_AS_POD_TYPE(vk::PipelineShaderStageCreateInfo);
+EZ_DEFINE_AS_POD_TYPE(vk::UniqueShaderModule);
+
 vk::ShaderStageFlagBits ExecutionModel2Bit(ShaderKind kind)
 {
     switch (kind)
@@ -50,16 +54,16 @@ VKPipeline::VKPipeline(VKDevice& device, const ezSharedPtr<Program>& program, co
         vk::ShaderModuleCreateInfo shader_module_info = {};
         shader_module_info.codeSize = blob.GetCount();
         shader_module_info.pCode = (ezUInt32*)blob.GetData();
-        m_shader_modules.emplace_back(m_device.GetDevice().createShaderModuleUnique(shader_module_info));
+        m_shader_modules.PushBack(m_device.GetDevice().createShaderModuleUnique(shader_module_info));
 
         decltype(auto) reflection = shader->GetReflection();
         decltype(auto) entry_points = reflection->GetEntryPoints();
         for (const auto& entry_point : entry_points)
         {
-          m_shader_ids[shader->GetId(entry_point.name)] = (ezUInt32)m_shader_stage_create_info.size();
-            decltype(auto) shader_stage_create_info = m_shader_stage_create_info.emplace_back();
+          m_shader_ids[shader->GetId(entry_point.name)] = m_shader_stage_create_info.GetCount();
+            decltype(auto) shader_stage_create_info = m_shader_stage_create_info.ExpandAndGetRef();
             shader_stage_create_info.stage = ExecutionModel2Bit(entry_point.kind);
-            shader_stage_create_info.module = m_shader_modules.back().get();
+            shader_stage_create_info.module = m_shader_modules.PeekBack().get();
             decltype(auto) name = entry_point_names.emplace_back(entry_point.name);
             shader_stage_create_info.pName = name.GetData();
         }

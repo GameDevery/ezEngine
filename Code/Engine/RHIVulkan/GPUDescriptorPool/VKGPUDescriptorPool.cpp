@@ -8,7 +8,7 @@ VKGPUDescriptorPool::VKGPUDescriptorPool(VKDevice& device)
 {
 }
 
-vk::UniqueDescriptorPool VKGPUDescriptorPool::CreateDescriptorPool(const ezMap<vk::DescriptorType, size_t>& count)
+vk::UniqueDescriptorPool VKGPUDescriptorPool::CreateDescriptorPool(const ezMap<vk::DescriptorType, ezUInt32>& count)
 {
     std::vector<vk::DescriptorPoolSize> pool_sizes;
     for (auto & x : count)
@@ -37,7 +37,7 @@ vk::UniqueDescriptorPool VKGPUDescriptorPool::CreateDescriptorPool(const ezMap<v
     return m_device.GetDevice().createDescriptorPoolUnique(pool_info);
 }
 
-DescriptorSetPool VKGPUDescriptorPool::AllocateDescriptorSet(const vk::DescriptorSetLayout& set_layout, const ezMap<vk::DescriptorType, size_t>& count)
+DescriptorSetPool VKGPUDescriptorPool::AllocateDescriptorSet(const vk::DescriptorSetLayout& set_layout, const ezMap<vk::DescriptorType, ezUInt32>& count)
 {
     DescriptorSetPool res = {};
     res.pool = CreateDescriptorPool(count);

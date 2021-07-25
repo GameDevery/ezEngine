@@ -47,8 +47,8 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
     }
   }
 
-  size_t hit_group_count = 0;
-  for (size_t i = 0; i < m_desc.groups.size(); ++i)
+  ezUInt32 hit_group_count = 0;
+  for (ezUInt32 i = 0; i < m_desc.groups.GetCount(); ++i)
   {
     if (m_desc.groups[i].type == RayTracingShaderGroupType::kGeneral)
     {
@@ -89,7 +89,7 @@ DXRayTracingPipeline::DXRayTracingPipeline(DXDevice& device, const RayTracingPip
 
   ezUInt32 max_payload_size = 0;
   ezUInt32 max_attribute_size = 0;
-  for (size_t i = 0; i < entryPoints.size(); ++i)
+  for (ezUInt32 i = 0; i < entryPoints.GetCount(); ++i)
   {
     max_payload_size = ezMath::Max(max_payload_size, entryPoints[i].payload_size);
     max_attribute_size = ezMath::Max(max_payload_size, entryPoints[i].attribute_size);

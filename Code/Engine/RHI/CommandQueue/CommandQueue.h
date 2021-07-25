@@ -3,7 +3,6 @@
 
 #include <RHI/CommandList/CommandList.h>
 #include <RHI/Fence/Fence.h>
-#include <RHI/Instance/QueryInterface.h>
 
 class EZ_RHI_DLL CommandQueue : public ezRefCounted
 {

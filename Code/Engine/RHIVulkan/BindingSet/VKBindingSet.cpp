@@ -13,7 +13,7 @@ VKBindingSet::VKBindingSet(VKDevice& device, const ezSharedPtr<VKBindingSetLayou
   decltype(auto) bindless_type = m_Layout->GetBindlessType();
   decltype(auto) descriptor_set_layouts = m_Layout->GetDescriptorSetLayouts();
   decltype(auto) descriptor_count_by_set = m_Layout->GetDescriptorCountBySet();
-  for (ezUInt32 i = 0; i < (ezUInt32)descriptor_set_layouts.size(); ++i)
+  for (ezUInt32 i = 0; i < descriptor_set_layouts.GetCount(); ++i)
   {
     if (bindless_type.Contains(i))
     {

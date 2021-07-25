@@ -413,7 +413,7 @@ struct GraphicsPipelineDesc
 {
   ezSharedPtr<Program> program;
   ezSharedPtr<BindingSetLayout> layout;
-  std::vector<InputLayoutDesc> input;
+  ezDynamicArray<InputLayoutDesc> input;
   ezSharedPtr<RenderPass> render_pass;
   DepthStencilDesc depth_stencil_desc;
   BlendDesc blend_desc;
@@ -461,7 +461,7 @@ struct RayTracingPipelineDesc
 {
   ezSharedPtr<Program> program;
   ezSharedPtr<BindingSetLayout> layout;
-  std::vector<RayTracingShaderGroup> groups;
+  ezDynamicArray<RayTracingShaderGroup> groups;
 
   auto MakeTie() const
   {

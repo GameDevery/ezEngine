@@ -9,17 +9,17 @@ class VKBindingSetLayout
   : public BindingSetLayout
 {
 public:
-  VKBindingSetLayout(VKDevice& device, const std::vector<BindKey>& descs);
+  VKBindingSetLayout(VKDevice& device, const ezDynamicArray<BindKey>& descs);
 
   const ezMap<ezUInt32, vk::DescriptorType>& GetBindlessType() const;
-  const std::vector<vk::UniqueDescriptorSetLayout>& GetDescriptorSetLayouts() const;
-  const std::vector<ezMap<vk::DescriptorType, size_t>>& GetDescriptorCountBySet() const;
+  const ezDynamicArray<vk::UniqueDescriptorSetLayout>& GetDescriptorSetLayouts() const;
+  const ezDynamicArray<ezMap<vk::DescriptorType, ezUInt32>>& GetDescriptorCountBySet() const;
   vk::PipelineLayout GetPipelineLayout() const;
 
 private:
   ezMap<ezUInt32, vk::DescriptorType> m_bindless_type;
-  std::vector<vk::UniqueDescriptorSetLayout> m_descriptor_set_layouts;
-  std::vector<ezMap<vk::DescriptorType, size_t>> m_descriptor_count_by_set;
+  ezDynamicArray<vk::UniqueDescriptorSetLayout> m_descriptor_set_layouts;
+  ezDynamicArray<ezMap<vk::DescriptorType, ezUInt32>> m_descriptor_count_by_set;
   vk::UniquePipelineLayout m_pipeline_layout;
 };
 

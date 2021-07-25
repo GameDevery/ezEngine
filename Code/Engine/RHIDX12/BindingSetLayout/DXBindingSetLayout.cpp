@@ -73,7 +73,7 @@ D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType(ViewType view_type)
   }
 }
 
-DXBindingSetLayout::DXBindingSetLayout(DXDevice& device, const std::vector<BindKey>& descs)
+DXBindingSetLayout::DXBindingSetLayout(DXDevice& device, const ezDynamicArray<BindKey>& descs)
   : m_device(device)
 {
   std::vector<D3D12_ROOT_PARAMETER> root_parameters;

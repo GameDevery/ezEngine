@@ -2,8 +2,6 @@
 #include <RHI/RHIDLL.h>
 
 #include <RHI/Instance/BaseTypes.h>
-#include <RHI/Instance/QueryInterface.h>
-#include <memory>
 
 class Resource;
 

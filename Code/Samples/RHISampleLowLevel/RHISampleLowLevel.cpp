@@ -154,12 +154,14 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
     EZ_REPORT_FAILURE("Project directory could not be resolved.");
   }
 
+  ezDynamicArray<ezSharedPtr<Shader>> shaders;
+
   ezStringBuilder vsShaderPath(projectDirAbsolutePath, "/shaders/Triangle/VertexShader.hlsl");
   vsShaderPath.MakeCleanPath();
   ShaderDesc vsDesc{vsShaderPath.GetData(), "main", ShaderType::kVertex, "6_0"};
   auto vsBlob = Compile(vsDesc, shaderBlobType);
   auto vsReflection = CreateShaderReflection(shaderBlobType, vsBlob.GetData(), vsBlob.GetCount());
-  m_pVertexShader = m_pDevice->CreateShader(vsDesc, vsBlob, vsReflection);
+  auto vertexShader = m_pDevice->CreateShader(vsDesc, vsBlob, vsReflection);
 
 
   ezStringBuilder psShaderPath(projectDirAbsolutePath, "/shaders/Triangle/PixelShader.hlsl");
@@ -167,17 +169,23 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   ShaderDesc psDesc{psShaderPath.GetData(), "main", ShaderType::kPixel, "6_0"};
   auto psBlob = Compile(psDesc, shaderBlobType);
   auto psReflection = CreateShaderReflection(shaderBlobType, psBlob.GetData(), psBlob.GetCount());
-  m_pPixelShader = m_pDevice->CreateShader(psDesc, psBlob, psReflection);
+  auto pixelShader = m_pDevice->CreateShader(psDesc, psBlob, psReflection);
 
-  m_pProgram = m_pDevice->CreateProgram({m_pVertexShader, m_pPixelShader});
+  shaders.PushBack(vertexShader);
+  shaders.PushBack(pixelShader);
+
+  m_pProgram = m_pDevice->CreateProgram(shaders);
 
   ViewDesc constantBufferViewDesc = {};
   constantBufferViewDesc.view_type = ViewType::kConstantBuffer;
   constantBufferViewDesc.dimension = ViewDimension::kBuffer;
   m_pConstantBufferView = m_pDevice->CreateView(m_pConstantBuffer, constantBufferViewDesc);
 
-  BindKey settingsKey = {ShaderType::kPixel, ViewType::kConstantBuffer, 0, 0, 1};
-  m_pLayout = m_pDevice->CreateBindingSetLayout({settingsKey});
+  ezDynamicArray<BindKey> bindKeys;
+  BindKey& settingsKey = bindKeys.ExpandAndGetRef();
+  settingsKey = {ShaderType::kPixel, ViewType::kConstantBuffer, 0, 0, 1};
+
+  m_pLayout = m_pDevice->CreateBindingSetLayout(bindKeys);
   m_pBindingSet = m_pDevice->CreateBindingSet(m_pLayout);
   m_pBindingSet->WriteBindings({{settingsKey, m_pConstantBufferView}});
 
@@ -186,11 +194,13 @@ void ezRHISampleApp::AfterCoreSystemsStartup()
   };
   m_pRenderPass = m_pDevice->CreateRenderPass(renderPassDesc);
 
+  ezDynamicArray<InputLayoutDesc> inputs;
+  inputs.PushBack({0, "POSITION", ezRHIResourceFormat::R32G32B32_FLOAT, sizeof(vertexData.front())});
 
   GraphicsPipelineDesc pipelineDesc = {
     m_pProgram,
     m_pLayout,
-    {{0, "POSITION", ezRHIResourceFormat::R32G32B32_FLOAT, sizeof(vertexData.front())}},
+    inputs,
     m_pRenderPass};
   m_pPipeline = m_pDevice->CreateGraphicsPipeline(pipelineDesc);
 

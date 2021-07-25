@@ -25,7 +25,7 @@ class DXBindingSetLayout
   : public BindingSetLayout
 {
 public:
-  DXBindingSetLayout(DXDevice& device, const std::vector<BindKey>& descs);
+  DXBindingSetLayout(DXDevice& device, const ezDynamicArray<BindKey>& descs);
 
   const ezMap<D3D12_DESCRIPTOR_HEAP_TYPE, ezUInt32>& GetHeapDescs() const;
   const ezMap<BindKey, BindingLayout>& GetLayout() const;

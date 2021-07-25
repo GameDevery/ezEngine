@@ -16,7 +16,7 @@ public:
     ComPtr<IDXGIAdapter1> GetAdapter();
 
 private:
-    DXInstance& m_instance;
-    ComPtr<IDXGIAdapter1> m_adapter;
-    ezString m_name;
+    DXInstance& m_Instance;
+    ComPtr<IDXGIAdapter1> m_Adapter;
+    ezString m_Name;
 };
