@@ -3,6 +3,7 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Math/Vec3.h>
 #include <Foundation/Containers/DynamicArray.h>
+#include <Foundation/Algorithm/HashableStruct.h>
 
 // Configure the DLL Import/Export Define
 #if EZ_ENABLED(EZ_COMPILE_ENGINE_AS_DLL)
@@ -15,4 +16,8 @@
 #  define EZ_NAVIGATIONPLUGIN_DLL
 #endif
 
-class ezStaticColliderComponent;
+class EZ_NAVIGATIONPLUGIN_DLL ezStaticColliderComponent
+{
+public:
+  ezUInt32 GetId() const { return 0u; }
+};

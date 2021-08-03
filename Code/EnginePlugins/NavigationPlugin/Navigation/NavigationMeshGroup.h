@@ -5,7 +5,7 @@
 #include <Foundation/Types/Uuid.h>
 #include <Foundation/Strings/String.h>
 
-struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshGroup
+struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshGroup : public ezHashableStruct<ezNavigationMeshGroup>
 {
   ezUuid Id;
   ezString Name;

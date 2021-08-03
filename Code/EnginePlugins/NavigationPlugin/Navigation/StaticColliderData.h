@@ -7,11 +7,11 @@
 //\brief Data associated with static colliders for incremental building of navigation meshes
 struct EZ_NAVIGATIONPLUGIN_DLL ezStaticColliderData
 {
-  // todo : StaticColliderComponent Component
-  int ParameterHash = 0;
+  ezStaticColliderComponent Component; // todo: use real physx collider
+  ezInt32 ParameterHash = 0;
   bool Processed = false;
-  ezNavigationMeshInputBuilder& InputBuilder;
-  ezNavigationMeshCachedObject& Previous;
+  ezNavigationMeshInputBuilder* InputBuilder;
+  ezNavigationMeshCachedObject* Previous;
 
   // Planes are an exceptions to normal geometry since their size depends on the size of the bounding boxes in the scene,
   // however we don't want to rebuild the whole scene, unless the actual shape of the plane changes

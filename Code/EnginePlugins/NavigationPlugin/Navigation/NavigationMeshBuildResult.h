@@ -18,6 +18,6 @@ struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshLayerUpdateInfo
 struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshBuildResult
 {
   bool Success = false;
-  ezNavigationMesh* pNavigationMesh;
+  ezNavigationMesh pNavigationMesh;
   ezDynamicArray<ezNavigationMeshLayerUpdateInfo> UpdatedLayers;
 };

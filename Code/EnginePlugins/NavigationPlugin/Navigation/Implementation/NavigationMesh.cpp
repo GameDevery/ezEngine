@@ -164,3 +164,13 @@ void ezNavigationMesh::Raycast(const ezNavigation::RaycastQuery& query, ezNaviga
   result->Hit = true;
   dtVlerp(&result->Position.x, &query.Source.x, &query.Target.x, t);
 }
+
+ezResult ezNavigationMesh::Serialize(ezStreamWriter& Writer) const
+{
+  return EZ_SUCCESS;
+}
+
+ezResult ezNavigationMesh::Deserialize(ezStreamReader& Reader)
+{
+  return EZ_SUCCESS;
+}

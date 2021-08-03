@@ -5,15 +5,16 @@
 #include <NavigationPlugin/Navigation/NavigationMeshBuildResult.h>
 #include <NavigationPlugin/Navigation/NavigationMeshTile.h>
 #include <Foundation/Containers/HashSet.h>
+#include <Foundation/Threading/Mutex.h>
 
-class ezNavicationMesh;
+class ezNavigationMesh;
 
 /// Incremental navigation mesh builder.
 /// Builds the navigation mesh in individual tiles
 class EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshBuilder
 {
 public:
-  ezNavigationMeshBuilder(ezNavicationMesh* pOldNavigationMesh);
+  ezNavigationMeshBuilder(ezNavigationMesh* pOldNavigationMesh);
 
   void Add(const ezStaticColliderData& colliderData);
   void Remove(const ezStaticColliderData& colliderData);
@@ -41,7 +42,8 @@ public:
   ezNavigationMeshInputBuilder BuildPlaneGeometry(const ezPlane& plane, const ezBoundingBox& boundingBox);
 
 private:
-  ezNavicationMesh* pOldNavigationMesh;
-  ezDynamicArray<ezStaticColliderData> colliders;
-  ezHashSet<ezUuid> registeredGuids;
+  ezNavigationMesh* m_pOldNavigationMesh;
+  ezMutex m_CollidersMutex;
+  ezDynamicArray<ezStaticColliderData> m_Colliders;
+  ezHashSet<ezUInt32> m_RegisteredIds;
 };

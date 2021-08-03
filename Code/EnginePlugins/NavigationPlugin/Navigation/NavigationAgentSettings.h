@@ -4,7 +4,7 @@
 #include <Foundation/Types/Uuid.h>
 #include <NavigationPlugin/NavigationPluginDLL.h>
 
-struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationAgentSettings
+struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationAgentSettings : public ezHashableStruct<ezNavigationAgentSettings>
 {
   /// Height of the actor
   /// The height of the entities in this group. Entities can't enter areas with ceilings lower than this value.
