@@ -51,7 +51,7 @@ void ezNavigationBuilder::Cleanup()
   }
 }
 
-ezNavigation::GeneratedData* ezNavigationBuilder::BuildNavmesh(ezVec3* vertices, int numVertices, int* indices, int numIndices)
+ezNavigation::GeneratedData* ezNavigationBuilder::BuildNavmesh(const ezVec3*& vertices, int numVertices, const int*& indices, int numIndices)
 {
   ezNavigation::GeneratedData* ret = &m_result;
   ret->m_Success = false;

@@ -10,7 +10,7 @@ public:
   ezNavigationBuilder();
   ~ezNavigationBuilder();
   void Cleanup();
-  ezNavigation::GeneratedData* BuildNavmesh(ezVec3* vertices, int numVertices, int* indices, int numIndices);
+  ezNavigation::GeneratedData* BuildNavmesh(const ezVec3*& vertices, int numVertices, const int*& indices, int numIndices);
   void SetSettings(const ezNavigation::BuildSettings& buildSettings);
 
 private:

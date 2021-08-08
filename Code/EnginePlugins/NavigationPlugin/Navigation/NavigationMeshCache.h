@@ -13,7 +13,7 @@ struct EZ_NAVIGATIONPLUGIN_DLL ezNavigationMeshCache
   ezDynamicArray<ezNavigationMeshCachedObject> Objects;
 
   // The bounding boxes used for build
-  ezDynamicArray<ezBoundingBoxd> BoundingBoxes;
+  ezDynamicArray<ezBoundingBox> BoundingBoxes;
 
   // Hash for the building settings used
   ezInt32 SettingsHash = 0;

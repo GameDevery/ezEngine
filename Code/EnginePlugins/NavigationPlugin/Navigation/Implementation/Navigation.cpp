@@ -19,7 +19,7 @@ void ezNavigation::SetSettings(ezNavigationBuilder* nav, BuildSettings* buildSet
   nav->SetSettings(*buildSettings);
 }
 
-ezNavigation::GeneratedData* ezNavigation::BuildNavmesh(ezNavigationBuilder* nav, ezVec3* vertices, int numVertices, int* indices, int numIndices)
+ezNavigation::GeneratedData* ezNavigation::BuildNavmesh(ezNavigationBuilder* nav, const ezVec3* vertices, int numVertices, const int* indices, int numIndices)
 {
   return nav->BuildNavmesh(vertices, numVertices, indices, numIndices);
 }

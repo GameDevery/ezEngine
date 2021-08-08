@@ -141,7 +141,7 @@ public:
 
   static void SetSettings(ezNavigationBuilder* nav, BuildSettings* buildSettings);
 
-  static GeneratedData* BuildNavmesh(ezNavigationBuilder* nav, ezVec3* vertices, int numVertices, int* indices, int numIndices);
+  static GeneratedData* BuildNavmesh(ezNavigationBuilder* nav, const ezVec3* vertices, int numVertices, const int* indices, int numIndices);
 
   // Navmesh Query
   static void* CreateNavmesh(float cellTileSize);
