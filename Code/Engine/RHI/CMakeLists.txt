@@ -1,4 +1,4 @@
-#a1c1499fd24b3bc47e3b28a5e7b3f05ee890cce5
+#08263b69a187b407444cbf39764f3832acf0c41c
 
 ez_cmake_init()
 
@@ -16,4 +16,10 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   Foundation
+  glslang
 )
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC VK_NO_PROTOTYPES)
+target_compile_definitions(${PROJECT_NAME} PUBLIC VK_USE_PLATFORM_WIN32_KHR)
+
+ez_link_target_vulkan(${PROJECT_NAME})
